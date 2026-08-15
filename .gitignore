@@ -12,3 +12,5 @@ __pycache__/
 
 # Working standard, not repo content
 AI-GUARDRAILS.md
+sim/net/*.net.xml
+sim/demand/

@@ -5,10 +5,13 @@ Schema (long): intersection str, leg int, direction {in,out}, metric
 x 3 metrics = 231 rows. Tinkune is three sub-intersections (South/West/
 North); "Jadhibuti" keeps the source spelling.
 
-ponytail: only Table 4.1 (daily leg summaries) is text in the PDF; the
-15-min classified turning-movement data exists solely as embedded images
-(spec sheets A4-2..11, flow diagrams, pie/line charts). Upgrade path:
-OCR/camelot pass over those pages.
+ponytail: only Table 4.1 (daily leg summaries) is text in the PDF. OCR
+recovery attempted 2026-08-15 (300dpi pdftoppm + tesseract, all of App 4
+pp.32-51): A4-2..11 are the survey Terms of Reference (no data), Figure
+4.2 diagrams hold daily totals only, and the hourly volumes exist solely
+as unlabeled Figure 4.4 line charts — no 15-min/hourly numbers are
+printed anywhere. Dead end; ±15% daily stays the M3 criterion (spec A7).
+See research/07-phase0-findings.md verification log.
 """
 
 import re

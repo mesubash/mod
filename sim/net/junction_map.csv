@@ -1,0 +1,88 @@
+intersection,leg,edge_id,direction
+Koteshwor,1,193289327#0,in
+Koteshwor,1,193289326#0,out
+Koteshwor,2,226834863#2,in
+Koteshwor,2,1132407062#0,out
+Koteshwor,3,670112945,in
+Koteshwor,3,1126627065#8,in
+Koteshwor,3,416294069,out
+Koteshwor,3,1090811371,out
+Koteshwor,3,1420149762,out
+Tinkune South,1,224131948#2,in
+Tinkune South,1,-224131948#2,out
+Tinkune South,2,591357319,in
+Tinkune South,2,591355894#2,out
+Tinkune South,2,670315380#0,out
+Tinkune South,3,181048719#5,in
+Tinkune South,3,-181048719#6,out
+Tinkune South,4,591355894#0,in
+Tinkune South,4,120032858#2,out
+Tinkune West,1,170533897#4,in
+Tinkune West,1,1091006173#0,out
+Tinkune West,2,1091006179,in
+Tinkune West,2,591355894#0,out
+Tinkune West,3,231880681#1,in
+Tinkune West,3,170533898#0,out
+Tinkune North,1,257752685,in
+Tinkune North,1,-257752685,out
+Tinkune North,2,-224131948#0,in
+Tinkune North,2,224131948#0,out
+Tinkune North,3,591357316#2,in
+Tinkune North,3,170533897#0,out
+New Baneshwor,1,1465223930#1,in
+New Baneshwor,1,215506637#0,out
+New Baneshwor,2,232095625#3,in
+New Baneshwor,2,435253159#9,in
+New Baneshwor,2,215506638#0,out
+New Baneshwor,2,1196283024#1,out
+New Baneshwor,3,182984267#10,in
+New Baneshwor,3,-182984267#11,out
+New Baneshwor,4,231880680#0,in
+New Baneshwor,4,709760710#6,in
+New Baneshwor,4,221323019#0,out
+New Baneshwor,4,435253159#12,out
+Maitighar,1,171203196#0,in
+Maitighar,1,173044198#0,out
+Maitighar,2,-28559206#1,in
+Maitighar,2,28559206#0,out
+Maitighar,3,232095613#0,in
+Maitighar,3,500036285#6,in
+Maitighar,3,231880678#0,out
+Maitighar,3,761154063#0,out
+Maitighar,4,344320085#0,in
+Maitighar,4,172008695#1,out
+Maitighar,5,198993948#0,out
+Thapathali,1,1467515164#6,in
+Thapathali,1,351018906#0,out
+Thapathali,2,-705044617#0,in
+Thapathali,2,705044617#0,out
+Thapathali,3,52916461,in
+Thapathali,3,351018901,out
+Thapathali,4,231885715#4,in
+Thapathali,4,351018908#0-AddedOnRampEdge,out
+Tripureshwor,1,422272357#2,in
+Tripureshwor,1,422263674#1,out
+Tripureshwor,2,300634296#3,in
+Tripureshwor,2,-300634296#4,out
+Tripureshwor,3,351018908#2,in
+Tripureshwor,3,231885715#0,out
+Tripureshwor,4,1198639191,in
+Tripureshwor,4,-1198639191,out
+Kalimati,1,-136619565#5,in
+Kalimati,1,136619565#5,out
+Kalimati,2,-1354913117#0,in
+Kalimati,2,1354913117#0,out
+Kalimati,3,338949915#8,in
+Kalimati,3,-338949915#8,out
+Shahid Gate,1,696986540,out
+Shahid Gate,2,171599263#0,in
+Shahid Gate,3,422271067,in
+Shahid Gate,3,422272357#0,out
+Shahid Gate,4,-24683734#0,in
+Shahid Gate,4,24683734#0,out
+Jadhibuti,1,-232104797#2,in
+Jadhibuti,1,232104797#2,out
+Jadhibuti,2,232096889#1,in
+Jadhibuti,2,229063563#1,out
+Jadhibuti,3,231882049#0,in
+Jadhibuti,3,226834863#0,out
