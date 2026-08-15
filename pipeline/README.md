@@ -81,7 +81,7 @@ Inputs: `data/processed/od_2011.parquet`, `data/processed/growth_factors.csv`,
 `sim/net/corridor-filtered.net.xml`, `sim/net/junction_map.csv`,
 `data/raw/corridor.osm`.
 
-Builds the baseline corridor demand (spec §4-§5) in four steps:
+Builds the baseline corridor demand (spec §4-§5) in five steps:
 
 1. **Growth (A3 decision):** the 2011 vehicle OD is scaled by a single
    corridor-wide factor 1.9345 = aadt_pcu 75,453/39,004 from DoR SSRN
@@ -91,20 +91,44 @@ Builds the baseline corridor demand (spec §4-§5) in four steps:
    off the axis. Adjacent Ring Road stations bracket it for M3 sensitivity:
    65 Sinamangal 1.54x, 60 RR-Manohara 1.12x.
 2. **Zone placement:** the eight corridor zones (spec §1) get hand-placed
-   centroids on the OSM extract; the 42 external zones collapse to one gate
-   per municipality group (code hundreds digit) on that group's approach
-   artery, oriented so origins head into and destinations out of the
-   corridor (ponytail notes in module: per-zone placement waits on the
-   georeferenced zone map, A2 resolution). lon/lat -> net XY uses an affine
-   fit on OSM-node/net-node pairs (max residual 1.3 m; asserted < 5 m),
-   avoiding a pyproj dependency.
-3. **Cordon sub-OD (spec §2, pragmatic):** one probe trip per distinct
-   origin/destination edge combo is routed with duarouter; a zone pair is
-   corridor-relevant iff its probe path crosses one of the 87 counted
-   cordon edges in `junction_map.csv`. Kept: 5,336/10,000 OD cells,
-   445,601 veh/day grown. Same-gate external pairs and intra-zonal trips
-   drop out automatically (no cordon crossing).
-4. **Time slicing (A1 decision):** hourly shares of daily trips
+   centroids on the OSM extract; the 42 external zones share one gate area
+   per municipality group (code hundreds digit) anchored on that group's
+   approach artery (ponytail notes in module: per-zone placement waits on
+   the georeferenced zone map, A2 resolution). lon/lat -> net XY uses an
+   affine fit on OSM-node/net-node pairs (max residual 1.3 m; asserted
+   < 5 m), avoiding a pyproj dependency.
+3. **Spawn edges (`zones.taz.xml`):** demand injects over many edges per
+   zone, not one. The first baseline run injected each zone through a
+   single edge and starved: 21,288 of 234,760 vehicles inserted over the
+   6h window, 213,472 still waiting outside the net (the top origin edge
+   was assigned ~58,000 trips/6h, about 5x its lane capacity). Now each
+   corridor zone spawns on its minor-road mesh (residential, living
+   street, unclassified, tertiary, secondary; >= 25 m so a bus fits)
+   within 600 m of the centroid — 137-537 edges per zone; primary/trunk
+   are excluded so through demand does not materialize on the study axis.
+   Each external group spawns on every arterial crossing the OSM extract
+   bbox, assigned to the nearest gate point (inbound as source, outbound
+   as sink; 47 crossing arterials in the net), plus arterials within
+   600 m of the gate point (covers groups 1xx/2xx/3xx that lie partly
+   inside the bbox) — 48-88 edges per group. Edge weight = lane count x
+   priority. Trips carry `fromTaz`/`toTaz` plus concrete `from`/`to`
+   edges drawn per-trip from those weights (seeded RNG; duarouter's own
+   TAZ resolution picks the single cheapest edge pair, which would
+   re-concentrate demand, so the draw happens at emission — od2trips
+   semantics). A one-hour smoke run of the rebuilt routes (06:00-07:00,
+   SUMO 1.27.1) inserted 10,856 of 11,939 loaded vehicles, 624 waiting,
+   mean depart delay 1.22 s, 863 teleports — insertion keeps pace with
+   departures where the starved build left 213,472 waiting over 6h.
+4. **Cordon sub-OD (spec §2, pragmatic):** one probe trip per distinct
+   origin/destination edge combo (single representative edges per zone,
+   oriented toward/away from the corridor center) is routed with
+   duarouter; a zone pair is corridor-relevant iff its probe path crosses
+   one of the 87 counted cordon edges in `junction_map.csv`. Kept:
+   5,336/10,000 OD cells, 445,601 veh/day grown. Same-gate external pairs
+   and intra-zonal trips drop out automatically (no cordon crossing).
+   This step is unchanged by the TAZ injection, so `corridor_od.parquet`
+   is byte-identical to the single-edge build.
+5. **Time slicing (A1 decision):** hourly shares of daily trips
    06:00-12:00 = 3/6/9/20/9/6%. Sourced anchors [vol02 p.6-7, p.6-14]:
    09:00-10:00 carries 20% of daily trips, each adjacent hour under half
    the peak (9% < 10%); the 6/3% taper is the assumed part. Departures
@@ -120,18 +144,21 @@ Outputs:
 
 - `data/processed/corridor_od.parquet` — 5,336 rows: `origin_zone`,
   `dest_zone`, `mode`, `trips_2011` (seed), `trips` (grown daily float).
+- `sim/demand/zones.taz.xml` — 16 TAZ (8 corridor zones, 8 gate groups;
+  g4/g8 share the Arniko gate), 3,284 weighted source and 3,285 sink
+  entries.
 - `sim/demand/baseline.trips.xml` — 234,760 trips 06:00-12:00 (08:00-11:00:
   motorcycle 105,589, car 35,633, bus 17,191, truck 10,629), provenance in
   the file header.
 - `sim/demand/baseline.rou.xml` (+ `.rou.alt.xml` for a later duaIterate) —
-  duarouter 1.27.1 output, all 234,760 trips routed, zero failures; the
-  exact call is recorded in the file's own configuration header.
+  duarouter 1.27.1 output, 232,986/234,760 trips routed (1,774 dropped by
+  `--ignore-errors`: sampled minor-road edge pairs with no connecting
+  path); 3,107 distinct origin edges, max per-edge share 0.82%. The exact
+  call is recorded in the file's own configuration header.
 
 Run: `uv run python -m pipeline.cordon` (~5 min, most of it duarouter).
 
-Ceilings: group gates funnel each external group through one arterial edge
-(insertion backlog risk at the Arniko east gate — split gates at M3 if
-insertion delay shows up); the bbox clips Ring Road north at Chabahil, so
+Ceilings: the bbox clips Ring Road north at Chabahil, so
 east<->north through trips all route via the corridor; single growth factor
 holds the 2011 mode split (62% motorcycle vs the ~70% 2019 anchor, spec §6
 sanity check at M3 calibration).

@@ -5,19 +5,21 @@ SUMO trips and duarouter routes.
 Inputs: data/processed/od_2011.parquet, data/processed/growth_factors.csv,
 sim/net/corridor-filtered.net.xml, sim/net/junction_map.csv,
 data/raw/corridor.osm.
-Outputs: data/processed/corridor_od.parquet, sim/demand/baseline.trips.xml,
-sim/demand/baseline.rou.xml.
+Outputs: data/processed/corridor_od.parquet, sim/demand/zones.taz.xml,
+sim/demand/baseline.trips.xml, sim/demand/baseline.rou.xml.
 
 Run: uv run python -m pipeline.cordon
 """
 
 import csv
 import math
+import random
 import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 from collections import Counter
+from itertools import accumulate
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +33,7 @@ OSM = REPO / "data/raw/corridor.osm"
 JUNCTION_MAP = REPO / "sim/net/junction_map.csv"
 OUT_OD = REPO / "data/processed/corridor_od.parquet"
 DEMAND = REPO / "sim/demand"
+TAZ_FILE = DEMAND / "zones.taz.xml"
 DUAROUTER = REPO / ".venv/bin/duarouter"
 
 # A3: growth from DoR SSRN station 64 (Manohara Bridge, road link H0303), the
@@ -75,8 +78,8 @@ ZONE_POINTS = {
     301: (85.313, 27.686),   # Lalitpur across Bagmati (Kupondole/Sanepa)
     502: (85.358, 27.6715),  # Thimi side of Jadibuti (Lokanthali)
 }
-# External zones collapse to one gate per municipality group (spec §1 hundreds
-# digit), on the group's main approach artery inside the net bbox.
+# External zones share one gate area per municipality group (spec §1 hundreds
+# digit), anchored on the group's main approach artery inside the net bbox.
 # ponytail: per-zone placement needs the georeferenced zone map; until then the
 # group gates are the cordon generation/attraction nodes (spec §2).
 GROUP_POINTS = {
@@ -91,6 +94,21 @@ GROUP_POINTS = {
 }
 CENTER = (85.335, 27.688)  # New Baneshwor; anchors inbound/outbound edge choice
 MAJOR = ("motorway", "trunk", "primary", "secondary", "tertiary")
+
+# TAZ demand injection. One edge per zone starved insertion (21,288/234,760
+# vehicles entered the 6h baseline run; top edge was assigned ~5x its lane
+# capacity), so each zone spawns over many weighted edges instead. Corridor
+# zones use the minor-road mesh around their centroid — the primary/trunk axis
+# itself is excluded so through demand doesn't materialize mid-corridor.
+# External gates use every arterial crossing the OSM extract bbox
+# (sim/net/README.md: 27.655-27.715/85.275-85.375; Overpass keeps complete
+# ways, so crossing stubs overhang it) plus arterials around the gate point,
+# which also covers groups lying partly inside the bbox (1xx, 2xx, 3xx).
+MINOR = ("highway.residential", "highway.living_street", "highway.unclassified",
+         "highway.tertiary", "highway.secondary")
+OSM_BBOX = (85.275, 27.655, 85.375, 27.715)
+TAZ_RADIUS = 600
+MIN_EDGE_LEN = 25  # fits the 24.7 m bus/truck at insertion
 
 
 def lonlat_to_xy(net):
@@ -114,7 +132,7 @@ def lonlat_to_xy(net):
 def pick_edges(net, x, y, cx, cy, major):
     """(origin edge, destination edge) nearest (x, y): origin heads toward the
     corridor center, destination away, so one-way boundary stubs don't
-    dead-end routes. Gates (major=True) stick to arterial road types."""
+    dead-end routes. Probe representatives for the cordon filter only."""
     cands = []
     for e, d in net.getNeighboringEdges(x, y, 500):
         if not e.allows("passenger"):
@@ -130,8 +148,7 @@ def pick_edges(net, x, y, cx, cy, major):
     return src, dst
 
 
-def zone_edges(net, zones):
-    to_xy = lonlat_to_xy(net)
+def zone_edges(net, zones, to_xy):
     cx, cy = to_xy(*CENTER)
     memo = {}
     out = {}
@@ -144,12 +161,89 @@ def zone_edges(net, zones):
     return out
 
 
-def run_duarouter(trips, out):
-    subprocess.run(
-        [str(DUAROUTER), "-n", str(NET), "-r", str(trips), "-o", str(out),
-         "--ignore-errors", "--no-warnings", "--no-step-log",
-         "--routing-threads", "8"],
-        check=True, capture_output=True, text=True)
+def taz_id(zone):
+    return str(zone) if zone in ZONE_POINTS else f"g{zone // 100}"
+
+
+def area_edges(net, x, y, minor):
+    out = []
+    for e, _ in net.getNeighboringEdges(x, y, TAZ_RADIUS):
+        if not e.allows("passenger") or e.getLength() < MIN_EDGE_LEN:
+            continue
+        if minor and e.getType() in MINOR:
+            out.append(e)
+        elif not minor and any(t in e.getType() for t in MAJOR):
+            out.append(e)
+    return out
+
+
+def build_taz(net, to_xy):
+    """Write TAZ_FILE and return {taz_id: (sources, sinks)}, each a
+    ([edge_id], [cumulative weight]) pair for sampling. Weight = lane count x
+    edge priority (insertion capacity x road class)."""
+    weight = lambda e: len(e.getLanes()) * e.getPriority()
+    x0, y0 = to_xy(OSM_BBOX[0], OSM_BBOX[1])
+    x1, y1 = to_xy(OSM_BBOX[2], OSM_BBOX[3])
+    inside = lambda x, y: x0 <= x <= x1 and y0 <= y <= y1
+    gate_pts = {}
+    for g, p in GROUP_POINTS.items():
+        gate_pts.setdefault(to_xy(*p), []).append(g)
+
+    cross_src, cross_snk = {}, {}
+    for e in net.getEdges():
+        if (not e.allows("passenger") or e.getLength() < MIN_EDGE_LEN
+                or not any(t in e.getType() for t in MAJOR)):
+            continue
+        fin = inside(*e.getFromNode().getCoord())
+        tin = inside(*e.getToNode().getCoord())
+        if fin == tin:
+            continue
+        nx, ny = (e.getToNode() if fin else e.getFromNode()).getCoord()
+        pt = min(gate_pts, key=lambda p: (p[0] - nx) ** 2 + (p[1] - ny) ** 2)
+        (cross_src if tin else cross_snk).setdefault(pt, []).append(e)
+
+    taz = {}
+    for z, p in ZONE_POINTS.items():
+        edges = area_edges(net, *to_xy(*p), True)
+        assert len(edges) >= 24, f"zone {z}: {len(edges)} spawn edges"
+        taz[str(z)] = (edges, edges)
+    for pt, groups in gate_pts.items():
+        area = area_edges(net, *pt, False)
+        src = list({e.getID(): e for e in area + cross_src.get(pt, [])}.values())
+        snk = list({e.getID(): e for e in area + cross_snk.get(pt, [])}.values())
+        assert len(src) >= 12 and len(snk) >= 12, f"groups {groups}: thin gate"
+        for g in groups:
+            taz[f"g{g}"] = (src, snk)
+
+    with open(TAZ_FILE, "w") as f:
+        f.write("<!-- zone/gate spawn edges, generated by pipeline/cordon.py;"
+                " weight = lanes x priority. See pipeline/README.md. -->\n")
+        f.write("<additional>\n")
+        for tid, (src, snk) in sorted(taz.items()):
+            f.write(f'    <taz id="{tid}">\n')
+            for e in src:
+                f.write(f'        <tazSource id="{e.getID()}"'
+                        f' weight="{weight(e)}"/>\n')
+            for e in snk:
+                f.write(f'        <tazSink id="{e.getID()}"'
+                        f' weight="{weight(e)}"/>\n')
+            f.write("    </taz>\n")
+        f.write("</additional>\n")
+
+    return {tid: (([e.getID() for e in src],
+                   list(accumulate(weight(e) for e in src))),
+                  ([e.getID() for e in snk],
+                   list(accumulate(weight(e) for e in snk))))
+            for tid, (src, snk) in taz.items()}
+
+
+def run_duarouter(trips, out, taz=None):
+    cmd = [str(DUAROUTER), "-n", str(NET), "-r", str(trips), "-o", str(out),
+           "--ignore-errors", "--no-warnings", "--no-step-log",
+           "--routing-threads", "8"]
+    if taz:
+        cmd += ["--additional-files", str(taz)]
+    subprocess.run(cmd, check=True, capture_output=True, text=True)
 
 
 def probe_keep(zedge, cordon, tmp):
@@ -193,7 +287,9 @@ def trips_header(factor):
         "     od_2011.parquet (JICA 2012 vol04 vehicle OD) x growth"
         f" {factor:.4f} (DoR station {GROWTH_STATION}, A3),",
         "     cordon-filtered per sim/net/junction_map.csv, A1 departure"
-        " profile 06:00-12:00. See pipeline/README.md. -->",
+        " profile 06:00-12:00,",
+        "     edges drawn per zones.taz.xml weights."
+        " See pipeline/README.md. -->",
         "<routes>",
     ]
     for mode, a in VTYPES.items():
@@ -210,8 +306,9 @@ def main():
     factor = gf["aadt_pcu_end"] / gf["aadt_pcu_start"]
 
     net = sumolib.net.readNet(str(NET))
+    to_xy = lonlat_to_xy(net)
     zones = sorted(set(od["origin_zone"]) | set(od["dest_zone"]))
-    zedge = zone_edges(net, zones)
+    zedge = zone_edges(net, zones, to_xy)
     with open(JUNCTION_MAP) as f:
         cordon = {row["edge_id"] for row in csv.DictReader(f)}
     with tempfile.TemporaryDirectory() as td:
@@ -225,10 +322,14 @@ def main():
     cod.to_parquet(OUT_OD, index=False)
 
     DEMAND.mkdir(exist_ok=True)
+    taz = build_taz(net, to_xy)
+    rng = random.Random(20260815)  # fixed seed: reproducible edge draws
     entries = []
     window, analysis = Counter(), Counter()
     for r in cod.itertuples():
-        src, dst = zedge[r.origin_zone][0], zedge[r.dest_zone][1]
+        ftz, ttz = taz_id(r.origin_zone), taz_id(r.dest_zone)
+        src_ids, src_cw = taz[ftz][0]
+        snk_ids, snk_cw = taz[ttz][1]
         for b, n in enumerate(slice_bins(r.trips)):
             t0 = 6 * 3600 + b * 900
             for i in range(n):
@@ -236,10 +337,13 @@ def main():
                 window[r.mode] += 1
                 if ANALYSIS[0] <= dep < ANALYSIS[1]:
                     analysis[r.mode] += 1
+                src = rng.choices(src_ids, cum_weights=src_cw)[0]
+                dst = rng.choices(snk_ids, cum_weights=snk_cw)[0]
                 entries.append((dep, (
                     f'<trip id="{r.mode}.{r.origin_zone}.{r.dest_zone}.{b}.{i}"'
                     f' type="{r.mode}" depart="{dep:.2f}" from="{src}"'
-                    f' to="{dst}" departLane="best"/>')))
+                    f' to="{dst}" fromTaz="{ftz}" toTaz="{ttz}"'
+                    f' departLane="best"/>')))
     entries.sort()
     trips_path = DEMAND / "baseline.trips.xml"
     with open(trips_path, "w") as f:
@@ -249,9 +353,14 @@ def main():
         f.write("</routes>\n")
 
     rou_path = DEMAND / "baseline.rou.xml"
-    run_duarouter(trips_path, rou_path)
+    run_duarouter(trips_path, rou_path, taz=TAZ_FILE)
+    origins = Counter()
     with open(rou_path) as f:
-        routed = sum(line.count("<vehicle ") for line in f)
+        for line in f:
+            if m := re.search(r'<route edges="([^" ]+)', line):
+                origins[m[1]] += 1
+    routed = sum(origins.values())
+    top_edge, top_n = origins.most_common(1)[0]
 
     print(f"growth factor (station {GROWTH_STATION}): {factor:.4f}")
     print(f"OD cells kept: {len(cod)}/{len(od)}"
@@ -259,6 +368,8 @@ def main():
     print("trips 06:00-12:00:", dict(sorted(window.items())))
     print("trips 08:00-11:00:", dict(sorted(analysis.items())))
     print(f"routed: {routed}/{len(entries)}")
+    print(f"origin edges: {len(origins)} distinct;"
+          f" max share {top_n / routed:.2%} ({top_edge}, {top_n} trips)")
 
 
 if __name__ == "__main__":
