@@ -3,3 +3,12 @@
 # Third-party documents: not redistributed via git (copyright + 150MB).
 # Every file is indexed with its source URL in research/library/README.md.
 research/library/*.pdf
+
+# Phase A pipeline outputs (rebuildable)
+data/processed/
+results/
+.venv/
+__pycache__/
+
+# Working standard, not repo content
+AI-GUARDRAILS.md

@@ -89,7 +89,7 @@ git; code, configs, specs, and small CSVs go in.
 
 | Milestone | Deliverable | Exit criterion |
 | --- | --- | --- |
-| M1 | `od_2011.parquet`, `growth_factors.csv`, `counts_2019.parquet` | pytest: matrix totals match printed totals; growth factors pass per-station sanity filter |
+| M1 | `od_2011.parquet`, `growth_factors.csv`, `counts_2019.parquet` | **DONE 2026-08-15** — 14/14 tests; OD totals validated against printed totals (one documented source discrepancy: person table's unprinted external row, 3,636 trips); 29 stations' growth factors with per-station flag counts. See `pipeline/README.md`. |
 | M2 | `specs/model-spec.md` + config schema | reviewed against paper §5; every symbol (p_t, Δt, m, GEH tol) defined once |
 | M3 | audited `.net.xml` + validated baseline | GEH < 5 on calibrated turning movements vs 2019 counts; documented queue-pattern match |
 | M4 | results parquet + figures for surface, S0–S3, robustness | every run reproducible from YAML + seed; compliance-threshold curves produced |
@@ -174,6 +174,7 @@ no database in Phase A. Each returns only when a concrete need appears;
 | --- | --- |
 | OD extraction messier than the verified sample pages | fall back to page-targeted manual entry for bad zones; QA totals catch errors |
 | OSM corridor attributes wrong | manual audit pass is already a milestone step (M3); 2019 signal data as cross-check |
+| **2019 15-min turning-movement tables are raster images, not text** (found in M1: only Table 4.1 daily leg PCU summaries extract; spec sheets A4-2..11 are jpx images) | M3 calibration ground truth is the daily-leg tier unless upgraded; upgrade path: OCR/camelot pass over A4 pages — decide at M3 start whether GEH-on-turning-movements requires it |
 | SUMO exogenous-shift design too coarse | upgrade path: MATSim coupling (library `pivot-matsim-sumo-coupling.pdf`) |
 | Transferred behavioral params wrong | RQ4 sensitivity halving; upgrade: M5 local SP survey |
 | Gate passes but no anchor institution signs on | product concept requires exactly one willing anchor — recruit during Phase A, not after |
