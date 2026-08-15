@@ -21,6 +21,40 @@ components: 27,969 edges, 11,355 nodes, traffic lights unchanged. All 87
 edges in junction_map.csv are present. This is the net M3 uses; the full
 net is kept as the source it was derived from.
 
+## corridor-calibrated.net.xml
+
+Derived from corridor-filtered.net.xml by patching junction control at the
+police-metered study junctions (assumption A10 in specs/model-spec.md §9):
+
+    netconvert -s sim/net/corridor-filtered.net.xml -n sim/net/tls-patch.nod.xml \
+      -o sim/net/corridor-calibrated.net.xml
+
+tls-patch.nod.xml converts these priority nodes to actuated traffic lights
+(netconvert default actuated programs; nodes sharing a `tl` id form one
+joint controller):
+
+- Thapathali: cluster_13459728246_... (single 4-leg cluster node)
+- Kalimati: 3 sub-nodes of the divided-carriageway T joined as `Kalimati`
+- Shahid Gate: the gyratory's 4 merge nodes joined as `ShahidGate`
+  (absorbs the pre-existing lone TLS 31152551; the 2 diverge nodes are
+  uncontrolled — single inflow, nothing to meter)
+- Maitighar: the 2 unsignalized island entry merges (10901289775,
+  1950468417); the area's 2 existing TLS clusters are untouched
+- Tinkune: the 3 triangle corners (= count sub-sites South/West/North),
+  separate controllers since they are ~300 m apart
+- New Baneshwor: the 4 corner TLS (pairwise 8-26 m) joined as
+  `NewBaneshwor`
+
+Result: 40 TLS (was 36: 5 absorbed into joints, 9 new actuated programs,
+31 pre-existing static programs unchanged). Edge/node counts unchanged
+(27,969 / 11,355); all 87 junction_map.csv edges present. Koteshwor and
+Jadhibuti are left alone (grade-separated in current OSM, see caveats
+below); Tripureshwor's cluster was already a TLS.
+
+Downstream: any sumocfg for calibration/stress/scenario runs must set
+net-file to corridor-calibrated.net.xml (baseline.sumocfg still points at
+corridor-filtered.net.xml and documents the gridlocked baseline as run).
+
 ## junction_map.csv
 
 Maps every 2019 count leg-direction to net edges. Columns: intersection,

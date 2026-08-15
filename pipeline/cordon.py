@@ -56,9 +56,16 @@ ANALYSIS = (8 * 3600, 11 * 3600)  # spec §4 analysis window 08:00-11:00
 # per-vClass defaults.
 # ponytail: 24.7 m bus/truck is queue-space bookkeeping, not geometry — swap
 # for real dims + sublane model at M3 if junction dynamics misbehave.
+# Sublane laterals (A11, active only with --lateral-resolution, see
+# sim/stress-options.txt): motorcycle minGapLat 0.3 m = mid of the TU thesis
+# calibrated "Minimum Lateral Distance (Standing) at 0 km/h" range 0.2-0.41 m
+# (Table 4-25); latAlignment compact = filter forward through queue gaps.
+# Other classes keep SUMO defaults: minGapLat 0.6 sits inside the thesis
+# driving-range calibration 0.6-0.9 m; maxSpeedLat/lcSublane defaults (1.0).
 CAR_SPACE = 4.3 + 2.5
 VTYPES = {
-    "motorcycle": {"vClass": "motorcycle", "length": 1.84, "minGap": 0.2},
+    "motorcycle": {"vClass": "motorcycle", "length": 1.84, "minGap": 0.2,
+                   "latAlignment": "compact", "minGapLat": 0.3},
     "car": {"vClass": "passenger", "length": 4.3, "minGap": 2.5},
     "bus": {"vClass": "bus", "length": 24.7, "minGap": 2.5},
     "truck": {"vClass": "truck", "length": 24.7, "minGap": 2.5},

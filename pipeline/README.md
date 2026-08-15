@@ -139,6 +139,10 @@ Vehicle types are PCU-consistent (spec §3): length+minGap = PCU x car space
 (4.3+2.5 m), i.e. motorcycle 1.84+0.2 (0.3 PCU), bus/truck 24.7+2.5
 (4.0 PCU, A4); other parameters are SUMO per-vClass defaults (module
 ponytail note: bus/truck length is queue-space bookkeeping, not geometry).
+Motorcycles additionally carry sublane laterals (A11): latAlignment
+compact, minGapLat 0.3 m (TU thesis Table 4-25 calibrated standing
+lateral distance 0.2-0.41 m); inert unless sumo runs with
+--lateral-resolution (sim/stress-options.txt).
 
 Outputs:
 

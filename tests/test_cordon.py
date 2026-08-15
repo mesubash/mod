@@ -29,6 +29,16 @@ def test_vtype_space_matches_pcu():
         assert a["length"] + a["minGap"] == pytest.approx(PCU[mode] * CAR_SPACE)
 
 
+def test_vtype_motorcycle_sublane_params():
+    # A11: filtering behavior; minGapLat inside the thesis calibrated
+    # standing range 0.2-0.41 m (Table 4-25)
+    m = VTYPES["motorcycle"]
+    assert m["latAlignment"] == "compact"
+    assert 0.2 <= m["minGapLat"] <= 0.41
+    # only motorcycle overrides laterals; others ride SUMO defaults
+    assert all("minGapLat" not in VTYPES[k] for k in ("car", "bus", "truck"))
+
+
 def test_slice_conserves_total():
     for daily in (0, 1, 2, 37, 1234.56):
         bins = slice_bins(daily)

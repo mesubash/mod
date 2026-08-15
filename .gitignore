@@ -16,3 +16,4 @@ sim/net/*.net.xml
 sim/demand/
 UI-GUARDRAILS.md
 UI-PROMPT.md
+COORDINATION.md

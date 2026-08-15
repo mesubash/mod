@@ -1,0 +1,24 @@
+# Recommended sumo options for the stress run (do not run from here; the
+# designated agent runs it). Net: sim/net/corridor-calibrated.net.xml —
+# the run's sumocfg must reference this net, not corridor-filtered.net.xml.
+
+--time-to-teleport 600
+# 2x the 300 s default: saturated approaches behind actuated metering need
+# several ~90 s cycles to advance, so 300 s would teleport real queues and
+# mask congestion; unbounded (-1) would let one residual geometric deadlock
+# at an unsignalized minor junction freeze the network for the whole run.
+# Teleport count stays the deadlock diagnostic: after the TLS proxy it
+# should collapse from the baseline's 102,230.
+
+--ignore-junction-blocker 60
+# After 60 s waiting, vehicles pass a vehicle stuck inside the junction.
+# Breaks the circular-blocking cycles behind the baseline's 66,740 jam
+# teleports at the thousands of remaining minor priority junctions, and
+# approximates observed Kathmandu behavior (the ~70% motorcycle fleet
+# filters around blockers rather than waiting indefinitely).
+
+--lateral-resolution 0.8
+# Enables the sublane model; without it the motorcycle laterals in the
+# route vTypes (latAlignment compact, minGapLat 0.3 — A11, pipeline/cordon.py)
+# are inert and each 0.3-PCU motorcycle holds a full lane slot. 0.8 m is the
+# A11 primary value; 0.4/1.6 are the sensitivity bracket.

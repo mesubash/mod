@@ -1,0 +1,33 @@
+<!-- Junction-control proxy (assumption A10, specs/model-spec.md §9):
+     police-metered study junctions become actuated signals. Nodes sharing a
+     tl id form one joint controller (sub-nodes of one physical junction).
+     Applied to corridor-filtered.net.xml via netconvert; command in README.md. -->
+<nodes>
+    <!-- Thapathali (4-leg cluster) -->
+    <node id="cluster_13459728246_13459728254_13459728267_13459728268_#1more" type="traffic_light" tlType="actuated"/>
+    <!-- Kalimati: one T-junction split into 3 sub-nodes by divided carriageways -->
+    <node id="cluster_1906513585_2129447227" type="traffic_light" tlType="actuated" tl="Kalimati"/>
+    <node id="cluster_10938937765_4330958605" type="traffic_light" tlType="actuated" tl="Kalimati"/>
+    <node id="1906513584" type="traffic_light" tlType="actuated" tl="Kalimati"/>
+    <!-- Shahid Gate gyratory: the 4 merge nodes (diverge nodes 1968450265,
+         1278041236 have single inflows, nothing to control); absorbs the
+         existing lone TLS 31152551 into the joint controller -->
+    <node id="6540538696" type="traffic_light" tlType="actuated" tl="ShahidGate"/>
+    <node id="31152551" type="traffic_light" tlType="actuated" tl="ShahidGate"/>
+    <node id="6540538699" type="traffic_light" tlType="actuated" tl="ShahidGate"/>
+    <node id="1490263257" type="traffic_light" tlType="actuated" tl="ShahidGate"/>
+    <!-- Maitighar island: the two unsignalized entry merges (legs 1-3 already
+         pass existing TLS clusters, which are left untouched) -->
+    <node id="10901289775" type="traffic_light" tlType="actuated"/>
+    <node id="1950468417" type="traffic_light" tlType="actuated"/>
+    <!-- Tinkune one-way triangle corners = count sub-sites South/West/North;
+         ~300 m apart, so separate controllers -->
+    <node id="cluster_2038006737_5645760469" type="traffic_light" tlType="actuated"/>
+    <node id="cluster_317530944_5645771107" type="traffic_light" tlType="actuated"/>
+    <node id="31230922" type="traffic_light" tlType="actuated"/>
+    <!-- New Baneshwor: 4 corner TLS (pairwise 8-26 m) joined into one controller -->
+    <node id="5289759124" type="traffic_light" tlType="actuated" tl="NewBaneshwor"/>
+    <node id="313735983" type="traffic_light" tlType="actuated" tl="NewBaneshwor"/>
+    <node id="4914887960" type="traffic_light" tlType="actuated" tl="NewBaneshwor"/>
+    <node id="6671608045" type="traffic_light" tlType="actuated" tl="NewBaneshwor"/>
+</nodes>
