@@ -27,6 +27,10 @@ revision based on what the research finds. See the project
 | [04-open-questions.md](04-open-questions.md) | What we don't know — gating questions, validation questions, methodological unknowns |
 | [05-research-plan.md](05-research-plan.md) | Proposed research sequence, corridor selection criteria, experimental design options, explicit scope boundaries |
 | [06-sources.md](06-sources.md) | Annotated bibliography with verification status |
+| [07-phase0-findings.md](07-phase0-findings.md) | Phase 0 gating-check results (2026-08-14): G1 data PASS, G2 gap PASS-conditional, G3 lever FAIL; verification log; pivot evidence |
+| [08-option-space.md](08-option-space.md) | Exhaustive enumeration of viable research directions with evidence basis and recommended composition |
+| [paper/mod-feasibility-study.md](paper/mod-feasibility-study.md) | **The central deliverable** — full research-paper-format feasibility study with numbered citations |
+| [library/](library/) | Downloaded primary documents & papers (37 files) + link-only index — see its README |
 | `archive/` | Raw material this workspace was distilled from (chat transcript, original brief, audit) |
 
 ## Epistemic legend
@@ -57,8 +61,14 @@ must pass before the direction is locked** (see [04-open-questions.md](04-open-q
 
 ## Open decisions
 
-1. **Problem direction** — Candidate A (demand-aware route recommendation) is the provisional leader; gated on checks G1–G3.
-2. **Intervention lever** — route redistribution assumed, not proven highest-leverage.
+1. **Problem direction** — Candidate A as originally scoped (spatial route
+   redistribution inside Ring Road) **failed gating check G3**
+   ([07-phase0-findings.md](07-phase0-findings.md)): no spare alternative
+   capacity; intersections bind; mode shift is the real slack. Pivot
+   decision open: temporal + mode-shift demand distribution (evidence-favored) /
+   outside-Ring-Road geography / intersection-level problem.
+2. **Intervention lever** — route redistribution falsified as first lever for
+   the saturated core; departure-time and mode-shift levers now lead.
 3. **Study corridor / network boundary** — 3 candidates to be identified, then one selected.
 4. **Data strategy** — JICA 2012 OD data vs. OSM + synthetic demand vs. small primary collection.
 5. **Simulation platform** — SUMO (+ SB-DSO extension) is a candidate, not a decision.

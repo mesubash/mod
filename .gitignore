@@ -1,1 +1,5 @@
 .DS_Store
+
+# Third-party documents: not redistributed via git (copyright + 150MB).
+# Every file is indexed with its source URL in research/library/README.md.
+research/library/*.pdf

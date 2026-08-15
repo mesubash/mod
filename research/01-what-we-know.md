@@ -21,10 +21,14 @@ Everything here was verified in the 2026-08-14 audit unless marked
 
 ## 2. Planning history: plans exist; implementation fails
 
-- **Reported:** The *Kathmandu Valley Urban Transport System Master Plan*
-  (JICA / Ministry of Physical Infrastructure and Transport) was unveiled
-  ~August 6, 2026, horizon 2050: 22 infrastructure projects + 13 "transport
-  improvement programmes," ~NPR 188 billion. Contents include elevated
+- **Reported (corrected by Phase 0, see
+  [07-phase0-findings.md](07-phase0-findings.md)):** The *Kathmandu Valley
+  Urban Transport System Master Plan* (JICA / Ministry of Infrastructure
+  Development, renamed from MoPIT ~May 2026) was unveiled ~August 6, 2026 as
+  a **draft final report at a stakeholder seminar — not yet Cabinet-approved,
+  full document not publicly released**. Horizon 2050: 22 infrastructure
+  projects + 13 "transport improvement programmes," ~NPR 188 billion
+  (road-infrastructure portion; ~NPR 600bn incl. mass transit). Contents include elevated
   highways (Chabahil–Bagmati, Tripureshwor–Maitighar, Bishnumati corridor),
   underpasses/tunnels, Ring Road widening, upgrades to 107 intersections
   (23 by 2032, phased through 2040) including intelligent signals, and a

@@ -12,7 +12,7 @@ through press coverage; primary document not yet read.
 | --- | --- | --- | --- |
 | R1 | Bajracharya & Nakarmi (2021), *Public Transportation Energy Planning by Network Analysis — Kathmandu Valley*, JACEM. <https://nepjol.info/index.php/JACEM/article/view/38273> | 163 PT routes studied; vehicle allocation optimized (Excel Solver); ~41% fleet reduction possible on modeled routes. Static, one-off. | Verified |
 | R2 | JICA (2012), *Data Collection Survey on Traffic Improvement in Kathmandu Valley*. <https://openjicareport.jica.go.jp/pdf/12082459_01.pdf> | 18,100-household survey; chronic congestion, weak PT, disorderly urbanization; road+PT+land-use must integrate. Underlying OD data is the G1 target. | Verified |
-| R3 | JICA / MoPIT (2014), *Data Collection Survey on Urban Transport in Kathmandu Valley*. <https://openjicareport.jica.go.jp/pdf/12345484_01.pdf> | The 8/16/42 three-tier route-rationalization proposal (66 routes) — with A2, proof of the implementation gap. | Verified |
+| R3 | JICA / MoPIT (**July 2019** — dating corrected in Phase 0; audit had said 2014), *Data Collection Survey on Urban Transport in Kathmandu Valley*, Final Report. <https://openjicareport.jica.go.jp/pdf/12345484_01.pdf> | Documents the route-rationalization context; contains 2019 15-hour classified counts at 9 corridor intersections (Vol 2). The 8/16/42 hierarchy itself originates in ADB KSUTP (2014) — see A2. | Verified (local PDF) |
 | R4 | UNESCAP (2022), *A Comprehensive Public Transport and Mass Transit Plan for Kathmandu Valley*. <https://repository.unescap.org/handle/20.500.12870/6300> | Reviews decades of plans; PT still inadequate; corridor and mode recommendations. | Verified |
 | R7 | Queue-jump lane study, Narayan Gopal intersection, IJET. <https://www.nepjol.info/index.php/injet/article/view/72572> | Bus-priority studied at corridor level; not implemented at scale. | Verified |
 | R8 | Bus priority / BRT feasibility, IJET-ID. <https://nepjol.info/index.php/injetindev/article/view/82492> | BRT feasibility incl. governance obstacles. | Verified |
@@ -37,6 +37,19 @@ through press coverage; primary document not yet read.
 | A3 | Google Research / *Nature Cities* (Jul 2026), routing-app congestion interventions. <https://www.nature.com/articles/s44284-026-00443-x> ; <https://research.google/blog/the-power-of-collaboration-how-we-can-reduce-traffic-congestion/> | First large-scale real-world validation of system-aware rerouting; small trip share off ~100 segments, 10 US cities, measurable citywide gains. Frames system-optimal routing as commercially absent. | Verified |
 | A6 | Mehrabani et al. (2022), *Simulation-Based Dynamic System Optimal Traffic Assignment for SUMO* (SB-DSO). <https://doi.org/10.52825/scp.v3i.119> | Candidate simulation method once problem is locked. | Verified |
 | — | Wardrop (1952); Braess (1968) | User equilibrium vs. system optimum; paradox of added capacity. Theoretical foundation — settled theory, open empirics. | Canonical |
+
+## Phase 0 additions (2026-08-14)
+
+Phase 0 field research added ~37 downloaded documents (JICA 2012 six-volume
+survey incl. the full 50×50 OD matrix, JICA 2017 & 2019 reports, the signed
+2023 Record of Discussions, DoR AADT scrape, 19 corridor/intersection
+evidence papers) plus link-only sources and a watchlist. Indexed with
+per-file annotations and source URLs in **[library/README.md](library/README.md)**
+— not duplicated here. Findings synthesized in
+[07-phase0-findings.md](07-phase0-findings.md).
+
+★ Open dating question: report 12345484 (R3 above, labeled 2014) vs the
+2019 survey — see the dating note in the library README.
 
 ## Notes
 
