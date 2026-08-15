@@ -30,6 +30,7 @@ revision based on what the research finds. See the project
 | [07-phase0-findings.md](07-phase0-findings.md) | Phase 0 gating-check results (2026-08-14): G1 data PASS, G2 gap PASS-conditional, G3 lever FAIL; verification log; pivot evidence |
 | [08-option-space.md](08-option-space.md) | Exhaustive enumeration of viable research directions with evidence basis and recommended composition |
 | [paper/mod-feasibility-study.md](paper/mod-feasibility-study.md) | **The central deliverable** — full research-paper-format feasibility study with numbered citations |
+| [09-system-design.md](09-system-design.md) | Build plan: Phase A simulation stack (M1–M4), the go/no-go gate, conditional Phase B traveler-product stack |
 | [library/](library/) | Downloaded primary documents & papers (37 files) + link-only index — see its README |
 | `archive/` | Raw material this workspace was distilled from (chat transcript, original brief, audit) |
 
