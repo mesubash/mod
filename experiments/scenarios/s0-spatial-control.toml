@@ -1,0 +1,10 @@
+# S0 spatial-rerouting control (spec §8, expected fail). Marker config only:
+# demand is unchanged (transform "none") and the S0 mechanics — how drivers
+# are diverted spatially at unchanged departure times — are decided at run
+# time, not here. run.py refuses a full run while reroute_control is set;
+# --dry-run writes the (identical) trips file for the provenance chain.
+name = "s0-spatial-control"
+transforms = "none"
+reroute_control = true
+seeds = [101, 202, 303]
+notes = "control, demand unchanged, spatial rerouting only, mechanics TBD at run time"

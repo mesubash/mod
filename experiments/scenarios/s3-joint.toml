@@ -1,0 +1,15 @@
+# S3 = S2 + m (spec §8): retime grid x motorcycle->bus mode shift,
+# 6 x 2 x 4 points x 3 seeds = 144 runs. m = 0.0 slices duplicate S2 and
+# the p_t = 0.0, m = 0.0 cell duplicates baseline — kept for a complete
+# surface. b_cap is omitted (= uncapped): B_cap is A5, has no sourced
+# value, and per spec §8 is swept in the robustness runs, not fixed here.
+name = "s3-joint"
+seeds = [101, 202, 303]
+notes = "S2 grid x mode shift via occupancy bridge 1.1 to 15, b_cap uncapped (A5)"
+
+[transforms.retime]
+p_t = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25]
+dt_minutes = [-15, -30]
+
+[transforms.mode_shift]
+m = [0.0, 0.05, 0.10, 0.15]

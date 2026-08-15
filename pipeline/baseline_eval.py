@@ -92,45 +92,17 @@ def queue_series(path, lanes_by_int):
     return series
 
 
-def main():
-    import pandas as pd
+def s7_metrics(results_dir, prefix="baseline_"):
+    """Spec §7 metrics from one run's outputs: {prefix}edgedata_{vtype}.xml,
+    {prefix}edgedata_net.xml, {prefix}queues.xml in results_dir. Shared by the
+    baseline evaluation and experiments/run.py scenario runs."""
     import sumolib
 
     jmap = list(csv.DictReader(open(ROOT / "sim/net/junction_map.csv")))
     counts = edge_counts(
-        {vt: RESULTS / f"baseline_edgedata_{vt}.xml" for vt in PCU}
+        {vt: results_dir / f"{prefix}edgedata_{vt}.xml" for vt in PCU}
     )
-
-    # --- calibration table ---
-    modeled = leg_volumes(jmap, counts, COMPARE_HOURS)
-    cdf = pd.read_parquet(ROOT / "data/processed/counts_2019.parquet")
-    daily = cdf[cdf.metric == "pcu_24h"].set_index(
-        ["intersection", "leg", "direction"]
-    ).value
-    rows = []
-    for key, target_24h in daily.items():
-        target = WINDOW_SHARE * target_24h
-        m = modeled.get(key, 0.0)
-        dev = (m - target) / target
-        rows.append(
-            {
-                "intersection": key[0],
-                "leg": key[1],
-                "direction": key[2],
-                "modeled_pcu_0712": round(m, 1),
-                "target_pcu_0712": round(target, 1),
-                "pcu_24h": target_24h,
-                "deviation": round(dev, 4),
-                "pass": abs(dev) <= TOL,
-            }
-        )
-    cal = pd.DataFrame(rows).sort_values(["intersection", "leg", "direction"])
-    cal.to_csv(RESULTS / "baseline_calibration.csv", index=False)
-    n_pass = int(cal["pass"].sum())
-    criterion_met = n_pass / len(cal) >= PASS_SHARE
-
-    # --- §7 metrics ---
-    nh = net_hourly(RESULTS / "baseline_edgedata_net.xml")
+    nh = net_hourly(results_dir / f"{prefix}edgedata_net.xml")
     win_bins = [b for b in COMPARE_HOURS if ANALYSIS[0] <= b < ANALYSIS[1]]
 
     in_edges = {}
@@ -190,7 +162,7 @@ def main():
         ]
         for i, edges in in_edges.items()
     }
-    qs = queue_series(RESULTS / "baseline_queues.xml", lanes_by_int)
+    qs = queue_series(results_dir / f"{prefix}queues.xml", lanes_by_int)
     Q_i = {
         i: round(max((v for t, v in s.items() if ANALYSIS[0] <= t < ANALYSIS[1]),
                      default=0.0), 1)
@@ -214,13 +186,7 @@ def main():
             t_diss = round((t0 - 36000) / 60, 1)
             break
 
-    metrics = {
-        "criterion": f"A7: |dev| <= {TOL} on >= {PASS_SHARE:.0%} of 77 leg-directions, "
-                     f"daily tier via WINDOW_SHARE={WINDOW_SHARE} (A1 profile, 07:00-12:00)",
-        "n_pass": n_pass,
-        "n_records": len(cal),
-        "pass_rate": round(n_pass / len(cal), 3),
-        "criterion_met": criterion_met,
+    return {
         "d_i_s_per_veh": d_i,
         "Q_i_max_queue_m": Q_i,
         "T_c_min": {"eastbound_Tripureshwor_to_Jadhibuti": round(tc_east, 1),
@@ -230,6 +196,53 @@ def main():
         "t_diss_min_after_1000": t_diss,
         "t_diss_prepeak_ref_m": round(ref, 1),
         "D_net_veh_h": round(D_net, 0),
+    }
+
+
+def main():
+    import pandas as pd
+
+    jmap = list(csv.DictReader(open(ROOT / "sim/net/junction_map.csv")))
+    counts = edge_counts(
+        {vt: RESULTS / f"baseline_edgedata_{vt}.xml" for vt in PCU}
+    )
+
+    # --- calibration table ---
+    modeled = leg_volumes(jmap, counts, COMPARE_HOURS)
+    cdf = pd.read_parquet(ROOT / "data/processed/counts_2019.parquet")
+    daily = cdf[cdf.metric == "pcu_24h"].set_index(
+        ["intersection", "leg", "direction"]
+    ).value
+    rows = []
+    for key, target_24h in daily.items():
+        target = WINDOW_SHARE * target_24h
+        m = modeled.get(key, 0.0)
+        dev = (m - target) / target
+        rows.append(
+            {
+                "intersection": key[0],
+                "leg": key[1],
+                "direction": key[2],
+                "modeled_pcu_0712": round(m, 1),
+                "target_pcu_0712": round(target, 1),
+                "pcu_24h": target_24h,
+                "deviation": round(dev, 4),
+                "pass": abs(dev) <= TOL,
+            }
+        )
+    cal = pd.DataFrame(rows).sort_values(["intersection", "leg", "direction"])
+    cal.to_csv(RESULTS / "baseline_calibration.csv", index=False)
+    n_pass = int(cal["pass"].sum())
+    criterion_met = n_pass / len(cal) >= PASS_SHARE
+
+    metrics = {
+        "criterion": f"A7: |dev| <= {TOL} on >= {PASS_SHARE:.0%} of 77 leg-directions, "
+                     f"daily tier via WINDOW_SHARE={WINDOW_SHARE} (A1 profile, 07:00-12:00)",
+        "n_pass": n_pass,
+        "n_records": len(cal),
+        "pass_rate": round(n_pass / len(cal), 3),
+        "criterion_met": criterion_met,
+        **s7_metrics(RESULTS),
     }
     (RESULTS / "baseline_metrics.json").write_text(json.dumps(metrics, indent=2))
     print(json.dumps(metrics, indent=2))
