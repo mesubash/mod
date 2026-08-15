@@ -90,7 +90,7 @@ git; code, configs, specs, and small CSVs go in.
 | Milestone | Deliverable | Exit criterion |
 | --- | --- | --- |
 | M1 | `od_2011.parquet`, `growth_factors.csv`, `counts_2019.parquet` | **DONE 2026-08-15** — 14/14 tests; OD totals validated against printed totals (one documented source discrepancy: person table's unprinted external row, 3,636 trips); 29 stations' growth factors with per-station flag counts. See `pipeline/README.md`. |
-| M2 | `specs/model-spec.md` + config schema | reviewed against paper §5; every symbol (p_t, Δt, m, GEH tol) defined once |
+| M2 | `specs/model-spec.md` + config schema | **DONE 2026-08-15** — adversarially verified against source PDFs (9 findings fixed, incl. replacing the daily-GEH gate with a ±15% criterion, A7); 138-fact cited base in `specs/facts-extracted.json`; 8 assumptions registered |
 | M3 | audited `.net.xml` + validated baseline | GEH < 5 on calibrated turning movements vs 2019 counts; documented queue-pattern match |
 | M4 | results parquet + figures for surface, S0–S3, robustness | every run reproducible from YAML + seed; compliance-threshold curves produced |
 
