@@ -173,6 +173,7 @@ set, B_cap sweep.
 | A6 | Zone table transcribed from raster pages (App 1.1.1 has no text layer) | agent visual transcription; total count matches Table 5.1.4 | ★ spot-verify 5 random zone rows before paper submission |
 | A7 | ±15% daily-volume criterion, ≥85% of 77 leg-directions (M3 exit) | no collected source defines a daily-volume screening standard; hourly GEH inapplicable at daily magnitudes | replace with GEH < 5 hourly if OCR yields hourly counts; collect DMRB citation |
 | A8 | OD "car" mode composition (whether taxi/tempo ride inside it) unknown | vol04 prints only 4 vehicle OD tables; aggregation not stated | check vol03 demand-model class definitions at M3; occupancy sensitivity (1.9 vs 7.8) if tempo included |
+| A9 | S1 school_share = 0.46 of peak-hour trips, sensitivity 0.25 | derived from sourced person-trip values: to-school 19.1% of 3,438,393 daily trips (Table 6.1.5 p.6-5/6) × 48% peak concentration ÷ (20% × total) = 0.459; person-trip level — school trips skew to walking, so the vehicle-trip share is lower | sensitivity run at 0.25; upgrade if a mode-by-purpose split surfaces |
 
 ## 10. Fact provenance
 

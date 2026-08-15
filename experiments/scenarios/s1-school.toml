@@ -1,11 +1,13 @@
 # S1 school-shift (spec §8): the to-school component of peak demand moves
-# -60 min. school_share is the school share OF peak-hour demand, sized via
-# the A1 departure profile; 48% [vol02 p.6-7] is the peak concentration of
-# to-school trips, NOT this share — do not invert. TOML has no null, so the
-# unsized parameter is omitted and s1_school_shift fails loudly until a
-# sized value is added here, e.g. school_share = 0.12.
+# -60 min. school_share = school share OF peak-hour demand, derived from
+# sourced person-trip values (spec A9): to-school 19.1% of daily trips
+# [vol02 Table 6.1.5 p.6-5/6] x 48% peak concentration [p.6-7] / (20% of
+# total in peak [p.6-7]) = 0.459 -> 0.46. Person-trip level; school trips
+# skew to walking, so the vehicle-trip share is lower: 0.25 sensitivity
+# value runs alongside per A9.
 name = "s1-school"
 seeds = [101, 202, 303]
-notes = "school component of peak moves -60 min; school_share pending A1 sizing"
+notes = "school component of peak moves -60 min; share per spec A9"
 
 [transforms.s1_school_shift]
+school_share = [0.46, 0.25]
