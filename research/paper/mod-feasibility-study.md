@@ -1,7 +1,7 @@
 # Temporal and Mode-Shift Travel-Demand Distribution for a Saturated Urban Network: A Feasibility Study for Kathmandu Valley
 
 **Project MOD — feasibility and research-design paper**
-Draft v1.0 · 2026-08-14 · status: working draft for supervisor/committee review
+Draft v1.1 · 2026-08-15 · status: working draft for supervisor/committee review; §5.1–5.3 and §7 updated to as-built (M1–M3)
 
 All claims cite numbered references (§References); bracketed numbers [n]
 throughout. Sources marked **[local]** are held in
@@ -317,13 +317,13 @@ is possible (★ §7).
   capacity [46]. Nudges alone move nothing [31]; any modeled shift must
   respect bus supply.
 
-## 5. Proposed Methodology and Architecture
+## 5. Methodology and Architecture
 
-### 5.1 Data pipeline (research architecture, stage 1)
+### 5.1 Data pipeline (stage 1 — implemented)
 
 ```text
 JICA 2012 Vol 4 (50×50 person-trip + mode OD)      [8]
-        │  digitize (pdftotext -layout; ~1 day; QA vs row/col totals)
+        │  pdftotext -layout parse; validated vs printed totals
         ▼
 Growth-factor update ── DoR AADT ratios FY11/12→24/25 [12]
         │               (per-station sanity filter; cross-check ATO 2024 [47])
@@ -331,20 +331,52 @@ Growth-factor update ── DoR AADT ratios FY11/12→24/25 [12]
 Corridor cordon OD ── JICA 2017 §13.4.3.2 method [9-v2]
         │             (cordon around study corridor; crossing-point OD)
         ▼
-Calibration/validation ── JICA 2019 15-h classified counts,
-        │                 9 intersections, signal timings, queues [10]
+Calibration/validation ── JICA 2019 daily leg-direction counts
+        │                 (Table 4.1: 77 records, 9 intersections) [10]
         ▼
 Time-sliced demand (15-min departure profiles, AM window)
 ```
 
-Acceptance criterion: simulated baseline link volumes and turning movements
-within a stated tolerance (target GEH < 5 on calibrated movements — to be
-finalized in the model spec) of the 2019 counts; queue patterns
-qualitatively matching the documented bottlenecks [2,3].
+The pipeline is implemented (M1; modules, provenance, and run commands in
+`pipeline/README.md`). As-built extraction facts:
 
-### 5.2 Study network
+- **OD extraction confirmed.** All five printed 2011 tables (person trips
+  plus motorcycle, car, truck, bus vehicle trips) parse from
+  `pdftotext -layout` output; each matrix is validated against its printed
+  row, column, and grand totals before writing. One source discrepancy is
+  documented: the person table's printed column totals include an
+  unprinted external-zone origin row of 3,636 trips; the four vehicle
+  tables match their printed totals exactly.
+- **Growth factors are filtered per station.** For each of the 29 DoR
+  stations, growth is computed over the longest run of surveys whose
+  annualized year-over-year ratios stay within 0.5–2.0; transitions
+  outside the band (the Satdobato-type jumps flagged in §4.1) are treated
+  as count-method breaks and excluded [12].
+- **The 2019 calibration counts are daily-tier only; the OCR question is
+  closed.** Only the report's Table 4.1 summary (daily leg-direction PCU,
+  77 records) exists as text in the PDF. The 15-minute classified sheets
+  went to JICA as spreadsheets and were never printed; hourly volumes
+  survive only as small unlabeled line-chart images whose values are line
+  pixels, not characters. The OCR method itself passed its control:
+  tesseract on the rendered Table 4.1 page matched the text-extracted data
+  on 15 of 15 leg-direction rows — the failure is the source, not the
+  method (verification log,
+  [07-phase0-findings](../07-phase0-findings.md)).
 
-**Primary candidate**: the Tripureshwor–Thapathali–Maitighar–New
+Acceptance criterion (assumption A7,
+[model spec §7](../../specs/model-spec.md)): modeled daily leg-direction
+PCU volume within ±15% of the 2019 counts on at least 85% of the 77
+leg-direction records, plus a documented qualitative match of queue
+locations to the known bottlenecks [2,3]. The earlier GEH < 5 target was
+replaced because the GEH screening statistic is defined for hourly flows
+and is not scale-invariant: at daily volumes of this magnitude it would
+demand roughly 2% agreement, unachievable from a 2011-seeded
+growth-factored model. With the hourly tier unrecoverable, GEH-hourly is
+off the table for this source.
+
+### 5.2 Study network (as built)
+
+**Corridor**: the Tripureshwor–Thapathali–Maitighar–New
 Baneshwor–Tinkune–Koteshwor–Jadibuti axis with its cross streets — because
 (a) every binding intersection on it is documented with verified saturation
 data [9], (b) the 2019 ground-truth counts cover exactly these nine
@@ -352,21 +384,53 @@ junctions [10], (c) it hosts the falsification evidence [2], and (d) prior
 simulation precedent exists [13b]. Study unit = corridor + feeding network,
 per the workspace's network-not-isolated-corridor principle.
 
-### 5.3 Simulation architecture (stage 2)
+**Network build**: an OSM bounding-box extract (27.655–27.715 N,
+85.275–85.375 E, retrieved 2026-08-15) [36], converted with SUMO
+`netconvert` [50] and filtered to the passenger-connected component:
+27,969 edges, 11,355 nodes (`sim/net/`). All 77 count leg-directions are
+mapped to network edges. The leg numbering is the 2019 report's own: it
+was read from the report's intersection diagrams, and 38 observed-PCU
+values printed on those diagrams were checked against the extracted count
+data with zero mismatches, so the junction mapping reproduces the report's
+numbering, not a convention chosen here [10]. Geometry caveat: OSM is
+current, not 2019 — Koteshwor and Jadibuti were grade-separated after the
+counts, so those two junctions are compared on cordon-edge volumes, not
+turn-level movements.
 
-- **Platform**: SUMO microsimulation. SUMO has no endogenous
+### 5.3 Simulation architecture (stage 2 — built, in calibration)
+
+- **Platform**: SUMO microsimulation [50]. SUMO has no endogenous
   departure-time/mode choice [48]; both levers are applied **exogenously to
   the demand file** — the honest match to our design, since we transfer
   behavioral response rates from the literature rather than estimating
   local choice models (upgrade path: MATSim coupling [48], or local SP
   survey, §6 M5).
-- **Network build**: OSM extract → `netconvert` → manual corridor attribute
-  audit (lanes, permitted movements, signal locations vs 2019 signal data
-  [10]).
-- **Calibration**: Kathmandu driving-behavior parameters from [44];
-  saturation-flow sanity checks against [49].
-- **Baseline**: current departure profile + current mode split, routed to
-  equilibrium (`duaIterate`), validated per §5.1.
+- **Demand injection**: TAZ-based — 16 traffic-assignment zones (8
+  corridor zones, 8 external gate groups) spawning demand over 3,284
+  weighted source edges. This replaced the first baseline configuration,
+  which injected each zone through a single edge and was falsified by
+  insertion starvation: 21,288 of 234,760 vehicles entered the network
+  over the 6 h window, with the top origin edge assigned about five times
+  its lane capacity.
+- **Junction control (A10)**: nine of the ten binding junctions were
+  police-controlled at survey time (§4.2), and no numeric signal timings
+  exist as text in the 2019 report [10]. SUMO priority junctions deadlock
+  under conflicting saturated flows, so the police-metered junctions are
+  modeled as gap-based actuated signals [51] — the nearest SUMO analog to
+  police metering — registered as assumption A10 with a cycle-length
+  sensitivity path.
+- **Driver behavior (A11)**: SUMO's sublane model [51] with motorcycle
+  lateral parameters transferred from the GA-calibrated Kathmandu VISSIM
+  thesis [44]: minGapLat 0.3 m, the middle of the thesis's calibrated
+  0.2–0.41 m standing lateral distance. The VISSIM→SUMO mapping is
+  approximate and is registered as assumption A11, swept over the
+  calibrated range ends. Saturation-flow sanity checks against [49].
+- **Baseline assignment**: current departure profile + current mode split,
+  routed to user equilibrium with `duaIterate` [51] — mesoscopic
+  assignment iterations, with microscopic runs for validation and metric
+  extraction. Status: in calibration iteration; the baseline is accepted
+  only when the §5.1 criterion is met, and no result in this paper depends
+  on it yet.
 
 ### 5.4 Experiment design (stage 3)
 
@@ -411,7 +475,7 @@ simulation platform is deliberately undecided.
 | --- | --- | --- |
 | M0 — Verification closeout | ★ items: office-hours change implementation [28]; obtain 2 remaining nepjol papers + SMEC report manually [45]; JICA OD license check for open release | each ★ resolved or documented as limitation |
 | M1 — Data extraction | Digitize OD matrices [8]; filter DoR growth factors [12]; extract 2019 counts [10] into machine-readable form | QA: matrix totals match printed totals; growth factors pass sanity filter |
-| M2 — Model spec | Written internal definitions: zone system, cordon, time slices, vehicle classes/PCU [49], metrics, GEH tolerance, scenario parameterization | spec reviewed against this paper's §5 |
+| M2 — Model spec | Written internal definitions: zone system, cordon, time slices, vehicle classes/PCU [49], metrics, calibration tolerance (A7), scenario parameterization | spec reviewed against this paper's §5 |
 | M3 — Network + baseline | OSM build, corridor audit, calibration, baseline validation | acceptance criterion §5.1 met |
 | M4 — Experiments | Surface + S0–S3 + robustness | all runs reproducible from config |
 | M5 — (Optional) local behavior | Small SP survey on corridor departure-time flexibility (replaces transferred parameters) | n, instrument TBD |
@@ -448,6 +512,36 @@ principle.
    argument, never as an input parameter. ★
 7. **Single-corridor external validity**: results bind to the study
    corridor; valley-wide generalization is future work.
+8. **Calibration tier is daily leg volumes**: the 2019 hourly/15-minute
+   counts are unrecoverable — the printed report holds them only as raster
+   images and unlabeled charts, and the OCR route is closed after a passed
+   method control (§5.1; verification log,
+   [07-phase0-findings](../07-phase0-findings.md)). Within-day temporal
+   validation therefore rests on the sourced departure-profile anchors
+   (A1), not on counted hourly flows.
+9. **A10/A11 are structural modeling assumptions**: police control modeled
+   as actuated signals, and motorcycle lateral behavior transferred from a
+   VISSIM calibration [44] into SUMO's sublane model. Both are registered
+   decisions with sensitivity paths (cycle length; lateral-gap and
+   lateral-resolution sweeps), not sourced facts
+   ([model spec §9](../../specs/model-spec.md)).
+10. **Demand-model class coverage**: modeled cordon demand in the analysis
+    window is 0.61× what the 2019 counts imply, with per-junction ratios
+    0.23–1.24. The gap is structural — the OD vehicle modes carry no
+    separate taxi/tempo/microbus (A8), and centroid/gate placement is
+    unresolved (A2) — not a growth-factor error: matching the counts by
+    scale alone would need a factor outside every DoR station's observed
+    2011–2025 range. Documented in
+    [results/demand_sanity.md](../../results/demand_sanity.md); addressed
+    at per-junction calibration, never by global rescaling.
+11. **Simulation calibration was iterative, and the failures are part of
+    the record**: two baseline configurations were falsified and
+    documented before the current one — single-edge demand injection
+    starved insertion (21,288 of 234,760 vehicles), and the rebuilt
+    TAZ-based demand gridlocked on unsignalized priority junctions. The
+    current equilibrium-assignment configuration is not yet accepted
+    against the §5.1 criterion; until it is, no simulation output should
+    be read as a validated baseline.
 
 ## 8. Conclusion
 
@@ -489,6 +583,8 @@ Format: [n] Author/Institution (year). *Title*. Source. — **[local]**
 - [42] Braess, D. (1968; transl. 2005). *On a paradox of traffic planning*. — [local] `theory-braess-2005-paradox-translation.pdf`, `theory-braess-1968-original-german.pdf`
 - [43] Li, Z-C., Huang, H-J., Yang, H. (2020). *Fifty years of the bottleneck model*. Transp. Res. B 139. <https://pmc.ncbi.nlm.nih.gov/articles/PMC7333998/>
 - [48] SUMO 2020 conf. *MATSim–SUMO coupling*. — [local] `pivot-matsim-sumo-coupling.pdf`; The MATSim Book <https://matsim.org/the-book/>
+- [50] Alvarez Lopez, P. et al. (2018). *Microscopic Traffic Simulation using SUMO*. IEEE ITSC. <https://elib.dlr.de/124092/>
+- [51] Eclipse SUMO documentation (used at v1.27.1): sublane model, actuated traffic lights, duaIterate assignment. <https://sumo.dlr.de/docs/>
 - Supporting compendia: FHWA HOP-18-071 — [local] `pivot-fhwa-incentives-compendium.pdf`; Berkeley incentives comparison — [local] `pivot-incentives-comparison-berkeley.pdf`
 
 ### Kathmandu — official data & plans

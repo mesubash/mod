@@ -91,7 +91,7 @@ git; code, configs, specs, and small CSVs go in.
 | --- | --- | --- |
 | M1 | `od_2011.parquet`, `growth_factors.csv`, `counts_2019.parquet` | **DONE 2026-08-15** — 14/14 tests; OD totals validated against printed totals (one documented source discrepancy: person table's unprinted external row, 3,636 trips); 29 stations' growth factors with per-station flag counts. See `pipeline/README.md`. |
 | M2 | `specs/model-spec.md` + config schema | **DONE 2026-08-15** — adversarially verified against source PDFs (9 findings fixed, incl. replacing the daily-GEH gate with a ±15% criterion, A7); 138-fact cited base in `specs/facts-extracted.json`; 8 assumptions registered |
-| M3 | audited `.net.xml` + validated baseline | GEH < 5 on calibrated turning movements vs 2019 counts; documented queue-pattern match |
+| M3 | audited `.net.xml` + validated baseline | **In calibration iteration 3 (equilibrium assignment)** — history: starved (single-edge injection) → gridlocked (priority junctions) → converging (mesoscopic duaIterate on the signal-proxy net). Exit: A7 ±15% daily on ≥85% of 77 leg-directions + documented queue-pattern match (GEH-hourly closed by the OCR verdict, spec §7) |
 | M4 | results parquet + figures for surface, S0–S3, robustness | every run reproducible from YAML + seed; compliance-threshold curves produced |
 
 ## 2. The Gate (after M4)
