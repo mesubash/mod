@@ -1,0 +1,845 @@
+{
+ "peaks": {
+  "facts": [
+   {
+    "topic": "JICA 2012 — Table 6.2.12 peak-hour definitions (CONFIRMED)",
+    "value": "Table 6.2.12 'Degree of Saturation' uses column headers Morning 9:00-10:00 and Evening 16:00-17:00 for all 10 intersections.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-35 (Table 6.2.12)",
+    "quote": "Table 6.2.12 Degree of Saturation ... Morning Evening ... 9:00-10:00 16:00-17:00"
+   },
+   {
+    "topic": "JICA 2012 — internal inconsistency on the same page",
+    "value": "Table 6.2.13 on the same printed page labels the evening peak as 17:00-18:00, not 16:00-17:00 as in Table 6.2.12.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-35 (Table 6.2.13)",
+    "quote": "Traffic Flow at Morning Peak(9:00-10:00)   Traffic Flow at Evening Peak(17:00-18:00)"
+   },
+   {
+    "topic": "JICA 2012 — hourly-variation peak timing (traffic counts)",
+    "value": "Peak hour on Arniko and Tribhuvan Highways was 9:30-10:30 morning and 18:00-18:30 evening; Kuponde 9:30-10:30 and 16:30-17:30 (text has a typo, saying 'evening' twice); traffic decreased after 18:00.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-25, section 6.2 (3) 2) Hourly Variation",
+    "quote": "The peak hour of traffic in Arniko Highway and Tribuvan Highway was from 9:30 to 10:30 in the morning and from 18:00 to 18:30 in the evening. On the other hand, the peak hour at Kuponde was from 9:30 to 10:30 in the evening and from 16:30 to 17:30 in the evening. The hourly traffic volume gradually decreased after 18:00."
+   },
+   {
+    "topic": "JICA 2012 — traffic count observation hours",
+    "value": "16-hour (6:00-22:00) counts at all survey points; 24-hour counts at 15 points; Type B day-night ratio (24h/16h) used for conversion: National Highway 1.07, Feeder Road 1.05, Urban Road 1.04.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-25, section 6.2 (3) 1) Day-Night Ratio and Table 6.2.6",
+    "quote": "However, 16-hour (6:00-22:00) traffic was counted at all survey points for this survey. Two types of day-night ratio were calculated based on 24-hour count at 15 points."
+   },
+   {
+    "topic": "JICA 2012 — peak share of daily trips (trip generation)",
+    "value": "Peak rate of trip generation for all purposes was 20%, occurring 9:00-10:00; to-work peak rate 42%, to-school 48%.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-7, section 6.1 3) Hourly Trip Generation",
+    "quote": "The peak rate of trip generation for all purposes was 20% which occurred from 9:00 to 10:00. The major trip purposes in peak hour were going to work and to school at peak rates of 42% and 48%, respectively."
+   },
+   {
+    "topic": "JICA 2012 — peak concentration by mode",
+    "value": "15% to 24% of total trips (by mode) were concentrated in the 9:00-10:00 peak hour; concentration dropped to less than half before and after that hour.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 6-14, section 6.1 (2) Hourly Variation",
+    "quote": "Of the total trips, 15% to 24% were concentrated in the peak hours of 9:00 to 10:00. Note that the concentrations of trips became less than half before and after the peak hour."
+   },
+   {
+    "topic": "JICA 2012 — screenline observation hours",
+    "value": "Screen line survey: 10 points on river crossings (Bagmati, Bishnumati, Manahara, Dhobi Khola) inside Ring Road, each with a 24-hour traffic count on 1 workday.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 5-18 section 5.3.4; also Table 5.3.1 on page 5-11 ('Survey point: 10 points / 24 hrs, 1 day (workday)')",
+    "quote": "...composed the screen line survey points where a 24-hr traffic count was conducted."
+   },
+   {
+    "topic": "JICA 2012 — intersection count observation hours",
+    "value": "Intersection counts at 10 points: 3 hours during morning peak plus 3 hours during evening peak on one workday. Exact clock windows of the two 3-hour periods: NOT FOUND in Vol 02 text.",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, printed page 5-19 section 5.3.5; also Table 5.3.1 page 5-11 ('3 hrs during morning peak and 3 hrs during evening peak, 1 day (workday)')",
+    "quote": "Each survey was conducted for three hours during peak hours in the morning and three hours during peak hours in the evening for one workday."
+   },
+   {
+    "topic": "JICA 2019 — count observation window",
+    "value": "Traffic volume survey at 9 intersections counted 15 consecutive hours, 06:00-21:00, on a weekday (Mon-Wed), video-monitored, recorded in 15-minute intervals.",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, appendix page A4-12, section 4.2.2 Scope",
+    "quote": "Traffic volume counting was conducted in each direction of traffic flows for 15 consecutive hours from 06:00 to 21:00 on a weekday (Monday through Wednesday excluding weekends and public holidays)."
+   },
+   {
+    "topic": "JICA 2019 — 14.5/14.75-hour variants",
+    "value": "Table 4.1 'Hours' column: 15 h at Koteshwor, Thapathali, Tripureshwor, Shahid Gate; 14.75 h at Maitighar; 14.5 h at Tinkune (South/West/North), New Baneshwor, Kalimati, Jadhibuti. E.g. 'Maitighar 1 in 58,467 14.75 64,413' and 'Tinkune South 1 in 26,493 14.5 29,234'. No textual explanation for the shortfall from 15 h is given.",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, appendix pages A4-18 to A4-19, Table 4.1 Summary of Traffic Volume Data (PCU/Day)",
+    "quote": "Intersection Leg Direction Observed PCU Hours 24H converted PCU ... Koteshwor 1 in 58,675 15 64,543 ... Maitighar 3 out 39,987 14.75 44,053 ... Kalimati 1 in 28,549 14.5 31,502"
+   },
+   {
+    "topic": "JICA 2019 — 15h-to-24h conversion rule",
+    "value": "15-hour volumes were converted to 24-hour PCU by adding 10% of observed traffic.",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, appendix page A4-13, section 4.2.5 Survey Results",
+    "quote": "traffic volume recorded over a 15-hour period was converted into 24-hour traffic volumes in PCU by adding a 10% of observed traffic."
+   },
+   {
+    "topic": "JICA 2019 — textual statement on when/where peaks occurred",
+    "value": "Only a directional statement: morning peak flows East-to-center, evening peak the reverse. No clock times for the peaks at the 9 intersections are given in the text (hourly profiles are in Figure 4.4 as images only).",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, appendix page A4-13, section 4.2.5 Survey Results",
+    "quote": "The results of hourly fluctuation of traffic volume show the trend of rush-hour traffic. Traffic flows during the morning peak hour originate from the East sections and terminate in the city center (or towards the West). The evening peak hour traffic volumes reveal the reverse flows moving from the center (or the West) to the East."
+   },
+   {
+    "topic": "JICA 2019 — signal phase/green-time data",
+    "value": "Methodology states signal phase / effective green time / congestion length were recorded by manual counting, but NO numeric phase or green-time values appear as extractable text anywhere in Vol 02 (values, if any, are inside figure images). NOT FOUND as text.",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, appendix page A4-12, section 4.2.2 Scope",
+    "quote": "Manual counting was used to record the setting of signal phase by effective green time and congestion length."
+   },
+   {
+    "topic": "Maitighar-Tinkune 2017 — peak periods measured",
+    "value": "CCTV data for morning peak 9:00-11:00 and evening peak 16:00-18:00 on three working days (Kathmandu District Court and Tinkune); Saturday off-peak 6:00-8:00 and one day of 9:00-11:00 peak for Baneshwor.",
+    "source": "evidence-maitighar-tinkune-bottleneck-2017.pdf (Timalsena, Marsani, Tiwari, Proceedings of IOE Graduate Conference 2017, pp. 623-628), printed page 624, section 4.1 Secondary Data",
+    "quote": "CCTV data for the morning peak hours (9:00-11:00) and evening peak hours (16:00-18:00) for three working days for Kathmandu District Court and Tinkune intersection has been collected from the Metropolitan Police Office, Ranipokhari, Kathmandu."
+   },
+   {
+    "topic": "Maitighar-Tinkune 2017 — peak volumes printed",
+    "value": "Table 3 (Maitighar-Tinkune route), row '9.00-11.00': Bike 3807, Car 1327, Micro 100, Tempo 97, Std Bus 21, Bus 271 vehicles; row '16.00-17.00': Bike 5644, Car 1515, Micro 104, Tempo 94, Std Bus 24, Bus 351. Caveats: evening row is labeled 16.00-17.00 (1 h) though data collection was 16:00-18:00, and Table 4 (Tinkune-Maitighar route) prints identical numbers to Table 3. No single peak-hour PCU total is printed.",
+    "source": "evidence-maitighar-tinkune-bottleneck-2017.pdf, printed page 627, Tables 3 and 4",
+    "quote": "9.00-11.00  3807 4949  1327 2387  100 1340  97 625  21 470  271 5166 / 16.00-17.00  5644 7338  1515 2952  104 2164  94 1079  24 1379  351 11301"
+   },
+   {
+    "topic": "Thapathali 2023 — survey period",
+    "value": "Video survey over 5 days, 01/06/2022 to 05/06/2022: three weekdays and two weekend days.",
+    "source": "evidence-thapathali-intersection-performance-2023.pdf (Maharjan & Marsani, Proceedings of 13th IOE Graduate Conference, April 2023, pp. 23-32), printed page 26, section 4.2 Data Collection",
+    "quote": "The video of traffic flow at the Thapathali intersection for 5 Days from 01/06/2022 to 05/06/2022 which included three weekdays and two weekends were recorded."
+   },
+   {
+    "topic": "Thapathali 2023 — peak-hour volumes",
+    "value": "Weekday peak-hour volume: 5,593 PCU morning, 4,883 PCU evening; weekend: 4,652 PCU morning, 4,547 PCU evening. Peak hour was derived from classified counts at 15-minute intervals; morning peak exceeded evening peak on both day types.",
+    "source": "evidence-thapathali-intersection-performance-2023.pdf, printed page 23 (Abstract); leg-level figures on printed page 28, section 5.2",
+    "quote": "The peak hour traffic volume during the weekdays was 5,593 PCU in the morning and 4,883 PCU in the evening, while the weekend traffic volume was 4,652 PCU in the morning and 4,547 PCU in the evening."
+   },
+   {
+    "topic": "Thapathali 2023 — leg-level peak volumes",
+    "value": "Weekday morning peak by approach: Kupondole (S) 2,491 PCU, Maternity Rd (E) 274, Maitighar (N) 1,427, Tripureshwor (W) 1,401; weekday evening: 1,782 / 315 / 1,559 / 1,227; weekend morning: 2,002 / 110 / 1,376 / 1,165; weekend evening: 1,727 / 129 / 1,443 / 1,249.",
+    "source": "evidence-thapathali-intersection-performance-2023.pdf, printed page 28, section 5.2 Traffic Volume",
+    "quote": "For weekdays, during the morning peak hour period, Kupondole (South leg) had 2,491 PCU, Maternity Road (East leg) had 274 PCU, Maitighar (North leg) had 1,427 PCU, and Tripureshwor (West leg) had 1,401 PCU"
+   },
+   {
+    "topic": "Thapathali 2023 — clock times of the measured peak hours",
+    "value": "NOT FOUND. The paper says only 'morning peak hour' / 'evening peak hour' and that peak hour volume came from 15-minute classified counts; no clock times (e.g. 9:00-10:00) and no daily recording window (start/end hours of video) are printed anywhere in the text.",
+    "source": "evidence-thapathali-intersection-performance-2023.pdf, whole text searched (pp. 23-32)",
+    "quote": "Volume Data The peak hour volume obtained from the classified vehicle count for 15 minutes interval."
+   }
+  ],
+  "notes": "Method: pdftotext -layout on all four PDFs; page attribution via form-feed page breaks plus printed footers (6-xx / 5-xx for JICA 2012, A4-xx appendix pages for JICA 2019, 623-628 and 23-32 for the two IOE papers). Key negatives verified by exhaustive grep: (a) JICA 2012 Vol02 never states the clock windows of the two 3-hour intersection-count periods; (b) JICA 2019 Vol02 contains no numeric signal phase/green-time values as text — only the A4-12 methodology sentence (values may exist inside Figure 4.2 images, not extractable); (c) Thapathali 2023 never prints clock times for its peak hours. Bonus nearby fact if useful: Thapathali 2023 Table 5 (printed p. 28) gives police-assigned peak-hour phase timings P1-P5 per day (e.g. Day1: 74/121/73/57/116 s, sum 441 s; Day4: 9/25/17/12/27 s, sum 90 s). Also note the JICA 2012 internal contradiction on p. 6-35: Table 6.2.12 header says evening 16:00-17:00 while Table 6.2.13 on the same page says Evening Peak(17:00-18:00). Working text files kept in the session scratchpad (jica2012v2.txt, jica2019v2.txt, maitighar2017.txt, thapathali2023.txt)."
+ },
+ "pcu": {
+  "facts": [
+   {
+    "topic": "2014 IOE paper - study sites",
+    "value": "Three signalized intersections studied: Koteshwor, Tinkune, Jadibuti (all pre-timed signals)",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.387",
+    "quote": "Three signalized intersections: Koteshwor, Tinkune and Jadibuti were selected for the study. All intersections have pre-timed signal control system."
+   },
+   {
+    "topic": "2014 IOE paper - PCU Car (estimated)",
+    "value": "1",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (table 'Average calculated PCU value', Estimated Value row) and p.391 (Conclusion)",
+    "quote": "The PCU value suggested for the heterogeneous traffic condition of Kathmandu is, Car=1"
+   },
+   {
+    "topic": "2014 IOE paper - PCU Truck (estimated)",
+    "value": "2.65",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (Estimated Value row) and p.391 (Conclusion)",
+    "quote": "Truck=2.65"
+   },
+   {
+    "topic": "2014 IOE paper - PCU Bus (estimated)",
+    "value": "2.19",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (Estimated Value row) and p.391 (Conclusion)",
+    "quote": "Bus=2.19"
+   },
+   {
+    "topic": "2014 IOE paper - PCU Two-wheeler/motorcycle (estimated)",
+    "value": "0.25",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (Estimated Value row) and p.391 (Conclusion)",
+    "quote": "Two-wheeler=0.25"
+   },
+   {
+    "topic": "2014 IOE paper - PCU Microbus (estimated)",
+    "value": "1.67",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (Estimated Value row) and p.391 (Conclusion)",
+    "quote": "Microbus=1.67"
+   },
+   {
+    "topic": "2014 IOE paper - PCU Tempo (estimated)",
+    "value": "1.3",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (Estimated Value row) and p.391 (Conclusion)",
+    "quote": "Tempo=1.3"
+   },
+   {
+    "topic": "2014 IOE paper - NRS comparison PCU values",
+    "value": "Nepal Road Standards values shown alongside: Car 1, Truck 3, Bus 3, Two-wheeler 0.5, Microbus 1.5, Tempo NA",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 ('NRS Value' row of PCU table)",
+    "quote": "NRS Value  1  3  3  0.5  1.5  NA"
+   },
+   {
+    "topic": "2014 IOE paper - truck category definition",
+    "value": "Truck class pools all truck types (low truck volume at the site)",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389",
+    "quote": "The truck represents all types of trucks including multi axel truck, heavy truck as well as tipper. As the volume of truck is very low in that area, all types of truck were considered in the same category."
+   },
+   {
+    "topic": "2014 IOE paper - bus category definition",
+    "value": "Bus class pools minibus through large bus",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389",
+    "quote": "The bus also represents all types of bus including mini bus to large bus."
+   },
+   {
+    "topic": "2014 IOE paper - vehicle categories used",
+    "value": "Six vehicle categories only (Car, Truck, Bus, Two-wheeler, Microbus, Tempo); non-motorized excluded",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.391 (Recommendation 2)",
+    "quote": "Vehicles were classified into only six different categories. Multi axel trucks, heavy truck and tippers; mini bus and large bus were all considered in a single group."
+   },
+   {
+    "topic": "2014 IOE paper - saturation flow model (proposed)",
+    "value": "S = 525.88 W (PCU/hr, W = approach width), R-squared 0.956; chosen as Model 2",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389 (model table) and p.391 (Conclusion)",
+    "quote": "The regression model developed for saturation flow rate is mainly based on approach width, S = 525.88 W"
+   },
+   {
+    "topic": "2014 IOE paper - model selection rationale",
+    "value": "Model 2 (S=525.88W) proposed for non-lane-based traffic; other models (R2 up to 0.961) rejected as more complex for similar fit",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.389",
+    "quote": "model 2 is the simplest model and has the satisfactory value of R square. Hence, Model 2 is proposed in this study to estimate saturation flow for non-lane based traffic condition."
+   },
+   {
+    "topic": "2014 IOE paper - delay model fit",
+    "value": "Control-delay vs stopped-delay regression: Model 1 (non-zero constant) adjusted R2 0.95, Model 2 (zero constant) 0.93; Model 1 preferred. Equation coefficients NOT FOUND in extractable text (rendered as images in the PDF)",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.390 (model table)",
+    "quote": "The adjusted R square value of the equation where constant is a non-zero has the higher value, so this equation is more efficient."
+   },
+   {
+    "topic": "2014 IOE paper - delay model validation",
+    "value": "Model developed with motorcycle GPS data validated against car data, R-squared 0.983",
+    "source": "evidence-saturation-flow-delay-model-koteshwor-tinkune-jadibuti-2014.pdf, p.391",
+    "quote": "Control delay calculated using the model showed good correlation with the field data. R square was found to be 0.983. So, it is recommended that this model can be used for car also."
+   },
+   {
+    "topic": "JICA 2012 - PCU Bicycle",
+    "value": "0.2",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 Passenger Car Unit",
+    "quote": "Ratio 0.2 0.3 1.0 1.0 1.5 1.0 1.5 3.0 4.0 4.0 (columns: Bicycle, Motorcycle, Car, Taxi, Light Truck, Tempo, Microbus, Minibus, Large Bus, Heavy Truck)"
+   },
+   {
+    "topic": "JICA 2012 - PCU Motorcycle",
+    "value": "0.3",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 and accompanying text",
+    "quote": "the PCU for motorcycles and bicycles were 0.3 and 0.2, respectively, as based from Vietnamese standards considering the same traffic situation."
+   },
+   {
+    "topic": "JICA 2012 - PCU Car",
+    "value": "1.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Car column of Ratio row)",
+    "quote": "Car ... 1.0"
+   },
+   {
+    "topic": "JICA 2012 - PCU Taxi",
+    "value": "1.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Taxi column of Ratio row)",
+    "quote": "Taxi ... 1.0"
+   },
+   {
+    "topic": "JICA 2012 - PCU Light Truck",
+    "value": "1.5",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Light Truck column of Ratio row)",
+    "quote": "Light Truck ... 1.5"
+   },
+   {
+    "topic": "JICA 2012 - PCU Tempo",
+    "value": "1.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 and text",
+    "quote": "The JICA Survey Team adopted 1.0 as the PCU of tempos, and 1.5 as the PCU of microbuses based on the size of each vehicle."
+   },
+   {
+    "topic": "JICA 2012 - PCU Microbus",
+    "value": "1.5",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 and text",
+    "quote": "1.5 as the PCU of microbuses based on the size of each vehicle"
+   },
+   {
+    "topic": "JICA 2012 - PCU Minibus",
+    "value": "3.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Minibus column of Ratio row)",
+    "quote": "Minibus ... 3.0"
+   },
+   {
+    "topic": "JICA 2012 - PCU Large Bus",
+    "value": "4.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Large Bus column of Ratio row)",
+    "quote": "Large Bus ... 4.0"
+   },
+   {
+    "topic": "JICA 2012 - PCU Heavy Truck",
+    "value": "4.0",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27, Table 6.2.7 (Heavy Truck column of Ratio row)",
+    "quote": "Heavy Truck ... 4.0"
+   },
+   {
+    "topic": "JICA 2012 - PCU basis",
+    "value": "PCUs based on Nepal Road Standards (2027 BS); motorcycle/bicycle from Vietnamese standards; tempo/microbus set by JICA Survey Team",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-27",
+    "quote": "The following PCU for each vehicle type was adopted based on the Nepal Road Standards (2027). However, the PCU for motorcycles and bicycles were 0.3 and 0.2, respectively, as based from Vietnamese standards"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Motorcycle",
+    "value": "1.1 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 Average Number of Passengers (identical values repeated in Table 6.2.11, p.6-33)",
+    "quote": "Average Passenger (person/vehicle)  1.1  7.8  1.9  2.0  1.8  1.9  1.4 (columns: Motorcycle, Tempo, Car, Taxi, Light Truck, Heavy Truck, Average of Total)"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Tempo",
+    "value": "7.8 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 (Tempo column)",
+    "quote": "Tempo ... 7.8"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Car",
+    "value": "1.9 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 (Car column)",
+    "quote": "Car ... 1.9"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Taxi",
+    "value": "2.0 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 (Taxi column)",
+    "quote": "Taxi ... 2.0"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Light Truck",
+    "value": "1.8 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 (Light Truck column)",
+    "quote": "Light Truck ... 1.8"
+   },
+   {
+    "topic": "JICA 2012 - occupancy Heavy Truck",
+    "value": "1.9 persons/vehicle",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2 (Heavy Truck column)",
+    "quote": "Heavy Truck ... 1.9"
+   },
+   {
+    "topic": "JICA 2012 - occupancy all-vehicle average",
+    "value": "1.4 persons/vehicle (average of total, buses excluded from this table)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-19, Table 6.2.2",
+    "quote": "The average number of passengers of passenger cars, light trucks, heavy trucks, and taxies were almost two passengers."
+   },
+   {
+    "topic": "JICA 2012 - occupancy Bus (planning value)",
+    "value": "15 passengers per bus (value that reconciles ~948,000 bus person trips with bus operations)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-39, Section 6.3.1",
+    "quote": "Therefore, if 15 is applied as the average number of passengers per bus, it would correspond with the number of person trips."
+   },
+   {
+    "topic": "JICA 2012 - observed bus occupancy at terminals",
+    "value": "Old Bus Park: Microbus 7.3 arr / 16.0 dep; Minibus 12.3 arr / 22.4 dep; Large Bus 18.4 arr / 32.7 dep. Gongabun Bus Park: Microbus 4.2/6.2; Minibus 6.1/8.9; Large Bus 15.2/30.5 (persons/bus)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-43, Table 6.3.3 Average Number of Passenger of Bus",
+    "quote": "It showed that the number of passengers in arriving buses was less than in departing buses."
+   },
+   {
+    "topic": "JICA 2012 - ideal saturation flow rate",
+    "value": "2,000 PCU per lane (ideal, used for intersection degree-of-saturation calculation)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-34, Section 6.2.3",
+    "quote": "s0: Ideal saturation flow rate per lane, 2,000 PCU"
+   },
+   {
+    "topic": "JICA 2012 - basic traffic capacity",
+    "value": "2,200 PCU/h (multi-lane road, one direction); 2,500 PCU/h (two-lane road, both directions)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-28",
+    "quote": "CB: Basic traffic capacity 2,200 (PCU/h/) Multi-lane road, one direction 2,500 (PCU/h/) Two-lane road, both direction"
+   },
+   {
+    "topic": "JICA 2012 - 24-hour road capacity (urban, inside Ring Road)",
+    "value": "Narrow 2-lane 6,000; 2-lane 17,000; 4-lane 52,000; 6-lane 75,000 PCU/24hr (rural values 7,000/20,000/57,000/83,000)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-28, Table 6.2.8 Road Capacity",
+    "quote": "Narrow 2-lane 6,000 7,000 / 2-lane 17,000 20,000 / 4-lane 52,000 57,000 / 6-lane 75,000 83,000"
+   },
+   {
+    "topic": "JICA 2012 - degree of saturation at intersections",
+    "value": "All surveyed intersections had degree of saturation >0.9; Chabahil, New Baneshwor, Thapathali, Balaju, Kalanki, Sorakhutte exceeded 1.80",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, p.6-34",
+    "quote": "the degrees of saturation at Chabahil, New Baneshwor, Thapathali, Balaju, Kalanki, and Sorakhutte intersections were more than 1.80"
+   },
+   {
+    "topic": "JICA 2012 vol03 - PCU conversion factors",
+    "value": "NOT FOUND in vol03 — no PCU-per-vehicle-class table printed; vol03 only uses PCU as a unit (capacities in pcu/day, BPR volumes in PCU). The factor table is in vol02 Table 6.2.7",
+    "source": "data-jica-2012-traffic-survey-vol03.pdf (searched 'PCU', 'passenger car unit')",
+    "quote": "NOT FOUND"
+   },
+   {
+    "topic": "JICA 2012 vol03 - vehicle occupancy",
+    "value": "NOT FOUND in vol03 — no persons-per-vehicle table (searched 'occupancy', 'passengers per', 'per vehicle')",
+    "source": "data-jica-2012-traffic-survey-vol03.pdf",
+    "quote": "NOT FOUND"
+   },
+   {
+    "topic": "JICA 2012 vol03 - road capacities for demand model",
+    "value": "Capacities (pcu/day): narrow 2-lane both-dir 6,000 inside / 7,000 outside Ring Road; 2-lane 17,000/20,000; 4-lane 52,000/57,000; 6-lane 75,000/83,000; one-way narrow 2-lane 14,000/17,000; one-way 2-lane 27,000/33,000",
+    "source": "data-jica-2012-traffic-survey-vol03.pdf, p.8-8, Table 8.2.4a 'Capacities of Roads' (unit: pcu/day)",
+    "quote": "a. Capacities of Roads  unit: pcu/day"
+   },
+   {
+    "topic": "JICA 2012 vol03 - BPR assignment function",
+    "value": "BPR link performance function with alpha=0.48, beta=2.82; Vol = Traffic Volume (PCU), C = Ideal Traffic Capacity (PCU)",
+    "source": "data-jica-2012-traffic-survey-vol03.pdf, p.8-24, Section 8.3.4",
+    "quote": "Vol: Traffic Volume (PCU) ... α, β: parameter α=0.48, β=2.82"
+   },
+   {
+    "topic": "ATO 2024 - mode share (Google EIE 2023)",
+    "value": "Walking and cycling 28%, Private 69%, Public transport 3%",
+    "source": "data-ato-kathmandu-transport-profile-2024.pdf, p.5, 'Trips Mode share (b)' chart",
+    "quote": "Google Evironmental Insights Explorer (2023)  28%  69%  3%"
+   },
+   {
+    "topic": "ATO 2024 - mode share (primary data 2011)",
+    "value": "Walking and cycling 42%, Private 30%, Public transport 28%",
+    "source": "data-ato-kathmandu-transport-profile-2024.pdf, p.5, 'Trips Mode share (b)' chart",
+    "quote": "Primary data (2011)  42%  30%  28%"
+   },
+   {
+    "topic": "ATO 2024 - mode share comparability caveat",
+    "value": "Mode-share figures from different sources are not directly comparable (mobile data vs survey vs secondary sources)",
+    "source": "data-ato-kathmandu-transport-profile-2024.pdf, p.5, footnote (b)",
+    "quote": "The methodologies used for mode share assessments vary across different studies, making direct comparison of results inadvisable."
+   },
+   {
+    "topic": "ATO 2024 - vehicle occupancy figures",
+    "value": "NOT FOUND — no persons-per-vehicle or load-factor figures anywhere in the profile (searched 'occupancy', 'passengers', 'load factor', 'per vehicle')",
+    "source": "data-ato-kathmandu-transport-profile-2024.pdf",
+    "quote": "NOT FOUND"
+   },
+   {
+    "topic": "JICA 2019 vol02 - 9-class vehicle classification",
+    "value": "1) Motorcycle, 2) Tempo, 3) Car, 4) Taxi, 5) Light Truck, 6) Heavy Truck, 7) Micro Bus, 8) Mini Bus, 9) Large Bus",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, p.A4-12, Section 4.2.3 Vehicular classification",
+    "quote": "1) Motorcycle 4) Taxi 7) Micro Bus / 2) Tempo 5) Light Truck 8) Mini Bus / 3) Car 6) Heavy Truck 9) Large Bus"
+   },
+   {
+    "topic": "JICA 2019 vol02 - PCU factors used",
+    "value": "NOT FOUND — traffic volumes are reported in PCU (Figure 4.4, Table 4.1) but the per-class PCU conversion factors are not printed anywhere in vol02 (all 'PCU' hits checked); also absent from vol01",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf (and cross-checked data-jica-2019-urban-transport-survey-vol01.pdf)",
+    "quote": "NOT FOUND"
+   },
+   {
+    "topic": "JICA 2019 vol02 - 15h to 24h PCU conversion",
+    "value": "24-hour PCU volumes derived by adding 10% to the observed 15-hour count",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, p.A4-13, Section 4.2.5",
+    "quote": "traffic volume recorded over a 15-hour period was converted into 24-hour traffic volumes in PCU by adding a 10% of observed traffic"
+   },
+   {
+    "topic": "JICA 2019 vol02 - intersection vehicle mix",
+    "value": "Motorcycle ~70% of vehicles at all 9 intersections, car ~15%; together >85%",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, p.A4-13",
+    "quote": "Motorcycle accounts almost 70% of the total vehicle share at all intersections, followed by car about 15%. Together these two private transports constitute over 85% of the total share of vehicles."
+   },
+   {
+    "topic": "JICA 2019 vol02 - highest intersection volumes",
+    "value": "Inbound max: Shahid Gate leg 2, 89,126 PCU/day (24h converted); Koteshwor leg 1, 64,543; Maitighar leg 1, 64,413. Outbound max: Shahid Gate leg 1, 81,862",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, p.A4-13 (text) and Table 4.1, p.A4-18",
+    "quote": "Shahid Gate (leg 2) records the highest daily traffic volume reaching 89,126 in PCU unit. Koteshwor (leg 1) comes second totaling 64,543 PCU per day, followed by Maitighar (leg 1) with 64,413."
+   },
+   {
+    "topic": "JICA 2019 vol02 - survey scope",
+    "value": "Counts at 9 intersections (Koteshwor, Tinkune, New Baneshwor, Maitighar, Thapathali, Tripureshwor, Kalimati, Shahid Gate, Jadhibuti), 15 consecutive hours 06:00-21:00 on a weekday, video-recorded, 15-minute intervals",
+    "source": "data-jica-2019-urban-transport-survey-vol02.pdf, p.A4-12 (Sections 4.2.2, 4.2.4)",
+    "quote": "Traffic volume counting was conducted in each direction of traffic flows for 15 consecutive hours from 06:00 to 21:00 on a weekday"
+   }
+  ],
+  "notes": "Page numbers are the documents' printed page numbers (2014 paper: IOE proceedings pages 387-392; JICA 2012 vol02: chapter pages 6-xx; vol03: 8-x; JICA 2019 vol02: appendix pages A4-xx; ATO profile: plain page numbers), verified via formfeed page mapping of pdftotext -layout output. Key caveats: (1) JICA 2019 vol02 prints all volumes in PCU but never prints the conversion factors — the nearest documented Kathmandu factor set is JICA 2012 vol02 Table 6.2.7; (2) the 2014 paper's delay-model equations are embedded as images and could not be extracted, only their fit statistics (adj. R2 0.95/0.93, validation R2 0.983); (3) JICA 2012 vol02 Table 6.2.2 (p.6-19) and Table 6.2.11 (p.6-33) contain identical occupancy values; buses are excluded there and covered by the 15-passengers/bus planning value (p.6-39) and terminal counts in Table 6.3.3 (p.6-43); (4) ATO 2024 has mode shares but no occupancy figures."
+ },
+ "zones": {
+  "facts": [
+   {
+    "topic": "zone-system",
+    "value": "The 2012 JICA survey divided the survey area into 50 traffic zones built from municipal wards and VDCs, consistent with the 1993 M/P zoning",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, sec 5.1.3 'Zoning in Traffic Survey', p. 5-3",
+    "quote": "Basically, the method of zoning was consistent with the zoning of the M/P (1993) in which each traffic zone is constituted of wards and VDCs. ... The total number of zones within the survey area was 50."
+   },
+   {
+    "topic": "zone-system",
+    "value": "Zone count increased by 5 over the 1993 M/P (45 -> 50) to reflect urban expansion in the city periphery",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, sec 5.1.3, p. 5-3",
+    "quote": "Compared with the M/P (1993), the total number of zones was increased by 5 from the previous 45."
+   },
+   {
+    "topic": "zone-system",
+    "value": "Table 5.1.4 breakdown: Kathmandu N.P. 19 zones/35 wards; Kirtipur N.P. 2 zones/15 wards; Kathmandu rural 10 zones/56 VDCs; Lalitpur N.P. 6 zones/21 wards; Lalitpur rural 4 zones/21 VDCs; Bhaktapur N.P. 4 zones/17 wards; Madhiapur Thimi N.P. 2 zones/17 wards; Bhaktapur rural 3 zones/16 VDCs; Total 50 zones, 105 wards, 91 VDCs",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, Table 5.1.4 'Number of Zones', p. 5-3",
+    "quote": "Total 50 105 91"
+   },
+   {
+    "topic": "zone-system",
+    "value": "Zones are grouped into large zones by district/municipality: 100 Kathmandu N.P., 200 Kirtipur N.P., 300 Lalitpur N.P., 400 Bhaktapur N.P., 500 Madhyapur Thimi N.P., 600 Kathmandu Dist., 700 Lalitpur Dist., 800 Bhaktapur Dist.; columns are Large Zone No., District, Small Zone No., Ward/VDC, 2001 Zone Population, 2011 Zone Population",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1 'Zone Code and Population', pp. AP 1-1 to AP 1-4 (PDF pp.4-7, table stored as page images)",
+    "quote": "Large Zone No. | District | Small Zone No. | Ward/VDC | 2001 Zone Population | 2011 Zone Population"
+   },
+   {
+    "topic": "zone-system-external",
+    "value": "External zones 900/901 are NOT listed in the Appendix 1.1.1 zone code table (it covers only 101-803); NOT FOUND there. External traffic appears only in the OD tables: the Person Trip OD Table uses code 901 as a destination column (column total 4,060 person trips, no 901 origin row; grand total 3,438,393), and the Vehicle OD tables use code 900 as both an origin row and destination column",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.4 Person Trip OD Table p. AP 1-6 and Appendix 1.2.6 Vehicle OD Table (e.g. Motorcycle VT OD Table)",
+    "quote": "...801 802 803 901 Total (person OD header); ...801 802 803 900 Total (vehicle OD header); 901 column total 4,060"
+   },
+   {
+    "topic": "zone-system-external",
+    "value": "About 24,000 vehicles/day cross the survey-area boundary; Table 6.2.3 total 23,610 vehicles (Eastern Area Outside 15,420; Western Area Outside 7,510; Lalitpur South 670; India 10)",
+    "source": "data-jica-2012-traffic-survey-vol02.pdf, sec 6.2 (6) 'Movement to/from Outside the Survey Area', Table 6.2.3",
+    "quote": "Around 24,000 vehicles go in and out of the survey area. The eastern area outside the survey area has the largest connection with the survey area and occupied two thirds of the total vehicles."
+   },
+   {
+    "topic": "zone-system",
+    "value": "A separate demand-forecast zone system exists: Figure 8.2.3 'Small Zones around the Ring Road (50 Zones)' and Figure 8.2.4 'Zones for Traffic Assignment in Kathmandu Valley (86 Zones)' are listed in the vol01 table of contents (pp. 8-5, 8-6); chapter 8 body is not in vol01/vol02 text",
+    "source": "data-jica-2012-traffic-survey-vol01.pdf, List of Figures",
+    "quote": "Figure 8.2.4 Zones for Traffic Assignment in Kathmandu Valley（86 Zones）.......... 8-6"
+   },
+   {
+    "topic": "zone",
+    "value": "101|Kathmandu N.P. Ward 1|2001:8,464 2011:13,700|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1 (PDF p.4, page image)",
+    "quote": "101 Ward 1 8,464 13,700"
+   },
+   {
+    "topic": "zone",
+    "value": "102|Kathmandu N.P. Ward 2|2001:13,655 2011:13,600|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "102 Ward 2 13,655 13,600"
+   },
+   {
+    "topic": "zone",
+    "value": "103|Kathmandu N.P. Wards 3,4|2001:50,321 2011:85,900|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "103 Ward 3 / Ward 4 50,321 85,900"
+   },
+   {
+    "topic": "zone",
+    "value": "104|Kathmandu N.P. Ward 5|2001:15,340 2011:18,500|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "104 Ward 5 15,340 18,500"
+   },
+   {
+    "topic": "zone",
+    "value": "105|Kathmandu N.P. Wards 6,7|2001:78,846 2011:116,700|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "105 Ward 6 / Ward 7 78,846 116,700"
+   },
+   {
+    "topic": "zone",
+    "value": "106|Kathmandu N.P. Wards 8,9|2001:38,697 2011:57,300|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "106 Ward 8 / Ward 9 38,697 57,300"
+   },
+   {
+    "topic": "zone",
+    "value": "107|Kathmandu N.P. Wards 10,34 (New Baneshwor / Old Baneshwor area)|2001:72,113 2011:110,500|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; corridor position from vol02 Figure 5.1.1 Zoning Map p. 5-4 (PDF p.4)",
+    "quote": "107 Ward 10 / Ward 34 72,113 110,500"
+   },
+   {
+    "topic": "zone",
+    "value": "108|Kathmandu N.P. Ward 11 (Tripureshwor-Thapathali-Maitighar riverfront)|2001:15,244 2011:17,700|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; corridor position from vol02 Figure 5.1.1 Zoning Map p. 5-4",
+    "quote": "108 Ward 11 15,244 17,700"
+   },
+   {
+    "topic": "zone",
+    "value": "109|Kathmandu N.P. Wards 12,21 (Teku area, west of Tripureshwor)|2001:22,682 2011:26,700|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; adjacency from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "109 Ward 12 / Ward 21 22,682 26,700"
+   },
+   {
+    "topic": "zone",
+    "value": "110|Kathmandu N.P. Wards 13,14 (Kalimati area)|2001:64,209 2011:100,300|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; adjacency from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "110 Ward 13 / Ward 14 64,209 100,300"
+   },
+   {
+    "topic": "zone",
+    "value": "111|Kathmandu N.P. Ward 15|2001:32,441 2011:52,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "111 Ward 15 32,441 52,000"
+   },
+   {
+    "topic": "zone",
+    "value": "112|Kathmandu N.P. Ward 16|2001:45,450 2011:87,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "112 Ward 16 45,450 87,000"
+   },
+   {
+    "topic": "zone",
+    "value": "113|Kathmandu N.P. Wards 17,18,26,28|2001:37,167 2011:46,100|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "113 Ward 17 / Ward 18 / Ward 26 / Ward 28 37,167 46,100"
+   },
+   {
+    "topic": "zone",
+    "value": "114|Kathmandu N.P. Wards 19,20,22,23,24,25 (city core)|2001:39,351 2011:44,200|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; adjacency from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "114 Ward 19 / Ward 20 / Ward 22 / Ward 23 / Ward 24 / Ward 25 39,351 44,200"
+   },
+   {
+    "topic": "zone",
+    "value": "115|Kathmandu N.P. Wards 27,30|2001:17,685 2011:16,300|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "115 Ward 27 / Ward 30 17,685 16,300"
+   },
+   {
+    "topic": "zone",
+    "value": "116|Kathmandu N.P. Ward 29|2001:24,543 2011:44,600|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "116 Ward 29 24,543 44,600"
+   },
+   {
+    "topic": "zone",
+    "value": "117|Kathmandu N.P. Ward 31|2001:14,502 2011:16,600|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "117 Ward 31 14,502 16,600"
+   },
+   {
+    "topic": "zone",
+    "value": "118|Kathmandu N.P. Wards 32,33|2001:45,952 2011:62,200|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "118 Ward 32 / Ward 33 45,952 62,200"
+   },
+   {
+    "topic": "zone",
+    "value": "119|Kathmandu N.P. Ward 35 (Tinkune-Koteshwor-Jadibuti stretch)|2001:35,184 2011:76,600|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1; corridor position from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "119 Ward 35 35,184 76,600"
+   },
+   {
+    "topic": "zone",
+    "value": "201|Kirtipur N.P. Wards 1-12,16,17,18,19 + MACHHEGAUN (Kathmandu Dist.)|2001:37,054 2011:63,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "201 Ward 1 ... Ward 19 / MACHHEGAUN(Kathmandu Dist.) 37,054 63,000"
+   },
+   {
+    "topic": "zone",
+    "value": "202|Kirtipur N.P. Wards 13,14,15|2001:6,652 2011:7,100|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "202 Ward 13 / Ward 14 / Ward 15 6,652 7,100"
+   },
+   {
+    "topic": "zone",
+    "value": "301|Lalitpur N.P. Wards 1,2,3,10 (across Bagmati from Thapathali)|2001:33,616 2011:48,600|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2 (PDF p.5); adjacency from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "301 Ward 1 / Ward 2 / Ward 3 / Ward 10 33,616 48,600"
+   },
+   {
+    "topic": "zone",
+    "value": "302|Lalitpur N.P. Wards 4,13|2001:17,524 2011:31,300|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "302 Ward 4 / Ward 13 17,524 31,300"
+   },
+   {
+    "topic": "zone",
+    "value": "303|Lalitpur N.P. Wards 5,14,15|2001:29,455 2011:43,100|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "303 Ward 5 / Ward 14 / Ward 15 29,455 43,100"
+   },
+   {
+    "topic": "zone",
+    "value": "304|Lalitpur N.P. Wards 6,7,8,9,17,22|2001:43,456 2011:60,100|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "304 Ward 6 / Ward 7 / Ward 8 / Ward 9 / Ward 17 / Ward 22 43,456 60,100"
+   },
+   {
+    "topic": "zone",
+    "value": "305|Lalitpur N.P. Wards 11,12,16,18,19|2001:28,172 2011:27,700|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "305 Ward 11 / Ward 12 / Ward 16 / Ward 18 / Ward 19 28,172 27,700"
+   },
+   {
+    "topic": "zone",
+    "value": "306|Lalitpur N.P. Wards 20,21|2001:10,768 2011:12,500|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "306 Ward 20 / Ward 21 10,768 12,500"
+   },
+   {
+    "topic": "zone",
+    "value": "401|Bhaktapur N.P. Wards 1,3,4,5|2001:19,316 2011:23,800|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "401 Ward 1 / Ward 3 / Ward 4 / Ward 5 19,316 23,800"
+   },
+   {
+    "topic": "zone",
+    "value": "402|Bhaktapur N.P. Wards 2,6,7|2001:11,707 2011:14,300|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "402 Ward 2 / Ward 6 / Ward 7 11,707 14,300"
+   },
+   {
+    "topic": "zone",
+    "value": "403|Bhaktapur N.P. Wards 11,12,14,16,17|2001:23,340 2011:26,800|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "403 Ward 11 / Ward 12 / Ward 14 / Ward 16 / Ward 17 23,340 26,800"
+   },
+   {
+    "topic": "zone",
+    "value": "404|Bhaktapur N.P. Wards 8,9,10,13,15|2001:18,180 2011:19,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "404 Ward 8 / Ward 9 / Ward 10 / Ward 13 / Ward 15 18,180 19,000"
+   },
+   {
+    "topic": "zone",
+    "value": "501|Madhyapur Thimi N.P. Wards 1,2,3,4,5,6,7,8,10,17|2001:23,989 2011:37,600|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "501 Ward 1 ... Ward 8 / Ward 10 / Ward 17 23,989 37,600"
+   },
+   {
+    "topic": "zone",
+    "value": "502|Madhyapur Thimi N.P. Wards 9,11,12,13,14,15,16 (Thimi side of Jadibuti crossing)|2001:23,762 2011:46,700|on_corridor:yes",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2; adjacency from vol02 Figure 5.1.1 Zoning Map",
+    "quote": "502 Ward 9 / Ward 11 / Ward 12 / Ward 13 / Ward 14 / Ward 15 / Ward 16 23,762 46,700"
+   },
+   {
+    "topic": "zone",
+    "value": "601|Kathmandu Dist. GOTHATAR|2001:8,269 2011:26,800|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3 (PDF p.6)",
+    "quote": "601 GOTHATAR 8,269 26,800"
+   },
+   {
+    "topic": "zone",
+    "value": "602|Kathmandu Dist. MULPANI, DAANCHHI, BHADRABAS, AALAPOT|2001:18,579 2011:29,800|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "602 MULPANI / DAANCHHI / BHADRABAS / AALAPOT 18,579 29,800"
+   },
+   {
+    "topic": "zone",
+    "value": "603|Kathmandu Dist. INDRAYANI, PUKHULACHHI, SUNTOL, BAJRAYOGINI (SANKHU), GAGALPHEDI, LAPSEPHEDI, NAGLEBHARE|2001:29,489 2011:31,200|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "603 INDRAYANI ... NAGLEBHARE 29,489 31,200"
+   },
+   {
+    "topic": "zone",
+    "value": "604|Kathmandu Dist. KAPAN, JORPATI, GOKARNESWOR, BALUWA, NAYAPATI, SUNDARIJAL|2001:73,038 2011:156,200|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "604 KAPAN / JORPATI / GOKARNESWOR / BALUWA / NAYAPATI / SUNDARIJAL 73,038 156,200"
+   },
+   {
+    "topic": "zone",
+    "value": "605|Kathmandu Dist. GONGGABU, DHAPASI, KHADKA BHADRAKALI, MAHANKAL, TOKHA SARSWOTI, TOKHA CHANDESWORI, CHUNIKHEL, CHAPALI BHADRAKALI, BUDANILKANTHA, JHOR MAHANKAL|2001:73,713 2011:162,100|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "605 GONGGABU ... JHOR MAHANKAL 73,713 162,100"
+   },
+   {
+    "topic": "zone",
+    "value": "606|Kathmandu Dist. MANMAIJU, GOLDHUNGA, DHARMASTHALI, FUTUNG, JITPURPHEDI, KABHRESTHALI, SANGLA|2001:37,268 2011:80,600|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "606 MANMAIJU ... SANGLA 37,268 80,600"
+   },
+   {
+    "topic": "zone",
+    "value": "607|Kathmandu Dist. ICHANG NARAYAN, SITAPAILA, BHIMDHUNGA, RAMKOT, SEUCHATAR|2001:33,055 2011:66,800|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "607 ICHANG NARAYAN ... SEUCHATAR 33,055 66,800"
+   },
+   {
+    "topic": "zone",
+    "value": "608|Kathmandu Dist. NAIKAP NAYA BHANJYANG, NAIKAP PURANO BHANJYANG, TINTHANA|2001:13,873 2011:22,500|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "608 NAIKAP NAYA BHANJYANG / NAIKAP PURANO BHANJYANG / TINTHANA 13,873 22,500"
+   },
+   {
+    "topic": "zone",
+    "value": "609|Kathmandu Dist. BALAMBU, SATUNGAL, CHOUKETAR DAHACHOK, MATATIRTHA, MAHADEVATHAN, THANKOT, BAAD BHANJYANG|2001:38,288 2011:62,500|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "609 BALAMBU ... BAAD BHANJYANG 38,288 62,500"
+   },
+   {
+    "topic": "zone",
+    "value": "610|Kathmandu Dist. CHALNAKHEL|2001:3,636 2011:4,400|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "610 CHALNAKHEL 3,636 4,400"
+   },
+   {
+    "topic": "zone",
+    "value": "701|Lalitpur Dist. SAINBU, KHOKANA, BUNGAMATI, CHHAMPI, DUKUCHHAP|2001:25,239 2011:40,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4 (PDF p.7)",
+    "quote": "701 SAINBU / KHOKANA / BUNGAMATI / CHHAMPI / DUKUCHHAP 25,239 40,000"
+   },
+   {
+    "topic": "zone",
+    "value": "702|Lalitpur Dist. SUNAKOTHI, DHAPAKHEL, THECHO, JHARUWARASI, CHAPAGAUN, BADIKHEL|2001:39,886 2011:57,200|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "702 SUNAKOTHI ... BADIKHEL 39,886 57,200"
+   },
+   {
+    "topic": "zone",
+    "value": "703|Lalitpur Dist. HARISIDDHI, THAIBA, GODAMCHAUR, BISANKHUNARAYAN, GODAWARI|2001:27,489 2011:37,300|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "703 HARISIDDHI ... GODAWARI 27,489 37,300"
+   },
+   {
+    "topic": "zone",
+    "value": "704|Lalitpur Dist. IMADOL, TIKATHALI, SIDDHIPUR, LUBHU, LAMATAR|2001:35,802 2011:63,700|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "704 IMADOL / TIKATHALI / SIDDHIPUR / LUBHU / LAMATAR 35,802 63,700"
+   },
+   {
+    "topic": "zone",
+    "value": "801|Bhaktapur Dist. BALKOT, SIRUTAR, DADHIKOT, KAUTUNJE, GUNDU, SIPADOL|2001:45,034 2011:67,400|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "801 BALKOT / SIRUTAR / DADHIKOT / KAUTUNJE / GUNDU / SIPADOL 45,034 67,400"
+   },
+   {
+    "topic": "zone",
+    "value": "802|Bhaktapur Dist. NANKHEL, CHITAPOL, TATHALI, SUDAL, BAGESWORI|2001:28,428 2011:28,500|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "802 NANKHEL / CHITAPOL / TATHALI / SUDAL / BAGESWORI 28,428 28,500"
+   },
+   {
+    "topic": "zone",
+    "value": "803|Bhaktapur Dist. CHANGUNARAYAN, CHHALING, DUWAKOT, JHAUKHEL, NAGARKOT|2001:30,747 2011:39,000|on_corridor:no",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "803 CHANGUNARAYAN / CHHALING / DUWAKOT / JHAUKHEL / NAGARKOT 30,747 39,000"
+   },
+   {
+    "topic": "zone-total",
+    "value": "100 (Kathmandu N.P.) total: 2001:671,846 2011:1,006,500",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "100 Total 671,846 1,006,500"
+   },
+   {
+    "topic": "zone-total",
+    "value": "200 (Kirtipur N.P.) total: 2001:43,706 2011:70,100",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-1",
+    "quote": "200 Total 43,706 70,100"
+   },
+   {
+    "topic": "zone-total",
+    "value": "300 (Lalitpur N.P.) total: 2001:162,991 2011:223,300",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "300 Total 162,991 223,300"
+   },
+   {
+    "topic": "zone-total",
+    "value": "400 (Bhaktapur N.P.) total: 2001:72,543 2011:83,900",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "400 Total 72,543 83,900"
+   },
+   {
+    "topic": "zone-total",
+    "value": "500 (Madhyapur Thimi N.P.) total: 2001:47,751 2011:84,300",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-2",
+    "quote": "500 Total 47,751 84,300"
+   },
+   {
+    "topic": "zone-total",
+    "value": "600 (Kathmandu Dist.) total: 2001:329,208 2011:642,900",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-3",
+    "quote": "600 Total 329,208 642,900"
+   },
+   {
+    "topic": "zone-total",
+    "value": "700 (Lalitpur Dist.) total: 2001:128,416 2011:198,200",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "700 Total 128,416 198,200"
+   },
+   {
+    "topic": "zone-total",
+    "value": "800 (Bhaktapur Dist.) total: 2001:104,209 2011:134,900",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "800 Total 104,209 134,900"
+   },
+   {
+    "topic": "zone-total",
+    "value": "Survey Area Total: 2001:1,560,670 2011:2,444,100",
+    "source": "data-jica-2012-traffic-survey-vol04.pdf, Appendix 1.1.1, p. AP 1-4",
+    "quote": "Survey Area Total Total 1,560,670 2,444,100"
+   }
+  ],
+  "notes": "METHOD: The Appendix 1.1.1 table (pp. AP 1-1 to AP 1-4 = PDF pages 4-7 of vol04) is stored as raster page images with no extractable text, so pages were rendered with pdftoppm (150 dpi) and transcribed visually; rendered pages kept at /private/tmp/claude-501/-Users-isubash-Developer-mod/2f653dbb-0bd3-47a6-ae97-d65cdb5ba364/scratchpad/vol04zone-04..07.png. Quotes for zone rows are transcriptions from those page images, not text-layer extractions. All 50 small zones (101-119, 201-202, 301-306, 401-404, 501-502, 601-610, 701-704, 801-803) are covered; count matches Table 5.1.4 (19+2+6+4+2+10+4+3 = 50).\n\nEXTERNAL ZONES: Codes 900/901 are NOT FOUND in the Appendix 1.1.1 zone code table. They appear only in OD tables: 901 as a destination-only column in the Person Trip OD Table (Appendix 1.1.4, AP 1-5/1-6; column total 4,060, no 901 origin row), and 900 as origin row + destination column in the Vehicle OD tables (Appendix 1.2.6). The tables print no name for 900/901; vol02 sec 6.2(6) describes boundary movement (~24,000 veh/day, Table 6.2.3: Eastern Area Outside, Western Area Outside, Lalitpur South, India) but does not explicitly label these as zone 900/901 — that linkage is NOT stated in the files.\n\nCORRIDOR CAVEAT: For municipal zones the Ward/VDC column prints only ward numbers — no locality names (Tripureshwor, Baneshwor, Koteshwor etc. are never mapped to wards anywhere in vol01/vol02/vol04 text). The on_corridor flags therefore rest on geographic position in Figure 5.1.1 Zoning Map (vol02, p. 5-4 = PDF p.4; high-res crop at scratchpad/crop-center.png): zone 108 fronts the Bagmati between 109 and 107 (Tripureshwor-Thapathali-Maitighar stretch); 107 sits east of 108 on the axis alignment (New Baneshwor; vol04 Appendix 1.2.3 lists 'G. New Baneshwor Intersection' and 'E. Thapathali Intersection' as survey points but without zone numbers); 119 is the southeast KMC zone at the river bend (Koteshwor; 'H. Koteshwor Intersection' in Appendix 1.2.3); 502 is the Thimi zone across the boundary at Jadibuti; 109 (Teku), 110 (Kalimati per task example), 114 (city core per task example) and 301 (Lalitpur across the Thapathali bridge) border the axis. Treat yes-flags on 109/110/114/301/502 as 'adjacent' and 107/108/119 as 'on'. Borderline cases marked no: 801 (BALKOT is across the Bagmati from the Koteshwor-Jadibuti stretch), 704 (TIKATHALI across the river to the south), 116/118 (Anamnagar/Putalisadak-area wards possibly touching the Maitighar-Baneshwor road, but no file evidence of ward localities). Zone-system description sourced from vol02 sec 5.1.3/Table 5.1.4 (vol01 contains only TOC references to zoning; the 86-zone assignment system body is in a volume not examined here, likely vol03)."
+ }
+}

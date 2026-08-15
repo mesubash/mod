@@ -376,7 +376,7 @@ Sensitivity surface over three dials, each dimension bounded by evidence:
 | --- | --- | --- |
 | p_t: share of targeted population retiming | 0–25% | participant-level results 10–20% [21,22,23] |
 | Δt: retiming magnitude | −15 / −30 min (pre-peak) | ~30 min acceptability ceiling [26] |
-| m: motorcycle→bus shift share | 0–15% of new PT ridership, bus-capacity-constrained | [31,39,40]; crowding constraint [45b] |
+| m: motorcycle→bus shift share | 0–15% of corridor motorcycle trips in the analysis window, bus-capacity-constrained | [31,39,40]; crowding constraint [45b] |
 
 Named scenarios run on the surface:
 
