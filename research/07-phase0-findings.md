@@ -281,6 +281,10 @@ the research paper ([paper/](paper/)). Headlines:
   proposal (10:00→9:00) is a ready-made, politically pre-legitimized
   simulation scenario — never quantified. PM peak is 3–4 h wide — little
   retiming room there.
+  (**Superseded 2026-08-16** on the peak-shape half: measured counts show
+  the AM peak is broad and lower than the PM peak — see "Measured hourly
+  profile" below. The ~10:00 synchronization and the school-timing scenario
+  stand.)
 - **Mode shift:** information nudges ≈ zero (tightly estimated); incentives
   modest but habit-forming for PT uptake; motorcycle users more shiftable
   than car users (SP evidence; 72% stated willingness in a Kathmandu
@@ -386,6 +390,21 @@ peakier than what was measured:
    peaks sharper than the two-way total. This is the stronger of the two
    objections, and it is recoverable: the per-direction columns are on the
    same detail pages.
+
+The two corridor-interior studies that print peak volumes do not settle it
+either, because they contradict each other on the AM/PM ordering and neither
+prints a daily denominator. Thapathali 2023 measures a weekday AM peak hour
+of 5,593 PCU against 4,883 PCU in the evening, AM higher by 15%
+(`evidence-thapathali-intersection-performance-2023`, and the paper never
+prints the clock times of either peak). Maitighar–Tinkune 2017 prints a
+09:00–11:00 row and a 16:00–17:00 row whose evening vehicle counts are the
+larger of the two (bikes 5,644 against 3,807) despite the shorter labeled
+span (`evidence-maitighar-tinkune-bottleneck-2017`, Table 3; the report
+collected 16:00–18:00, so the 1-hour label may be wrong). This retires an
+earlier claim in the paper's §4.4 that "IOE studies find the AM peak higher
+and sharper than the flatter 3–4 h PM peak [2,3]": [3] supports *higher*,
+[2] does not, and neither source states anything about sharpness or PM peak
+width.
 
 Corridor-interior hourly evidence is unavailable from the collected sources.
 The 2019 JICA survey counted hourly flows at exactly the nine corridor

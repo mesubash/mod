@@ -160,10 +160,13 @@ Builds the baseline corridor demand (spec §4-§5) in five steps:
    traffic is about 3x flatter. Departures spread evenly inside 15-min
    bins; per-cell cumulative-floor rounding conserves totals to <1 trip.
 
-Vehicle types are PCU-consistent (spec §3): length+minGap = PCU x car space
-(4.3+2.5 m), i.e. motorcycle 1.84+0.2 (0.3 PCU), bus/truck 24.7+2.5
-(4.0 PCU, A4); other parameters are SUMO per-vClass defaults (module
-ponytail note: bus/truck length is queue-space bookkeeping, not geometry).
+Vehicle types carry physical geometry (A12): motorcycle 2.2 m, car 4.3 m,
+bus 12.0 m, truck 10.0 m, plus minGap. PCU (spec §3) is a separate
+accounting weight used only for count comparison — encoding it as length
+gave buses 24.7 m and starved arterial capacity, the diagnosed cause of the
+second gridlocked baseline. Driving behaviour models forced-gap operation:
+tau 0.8-1.0, impatience, and jmIgnoreFoeProb 0.4/0.25/0.15
+(motorcycle/car/heavy) with jmTimegapMinor on the light classes.
 Motorcycles additionally carry sublane laterals (A11): latAlignment
 compact, minGapLat 0.3 m (TU thesis Table 4-25 calibrated standing
 lateral distance 0.2-0.41 m); inert unless sumo runs with

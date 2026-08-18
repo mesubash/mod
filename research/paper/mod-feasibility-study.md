@@ -1,7 +1,7 @@
 # Temporal and Mode-Shift Travel-Demand Distribution for a Saturated Urban Network: A Feasibility Study for Kathmandu Valley
 
 **Project MOD — feasibility and research-design paper**
-Draft v1.1 · 2026-08-15 · status: working draft for supervisor/committee review; §5.1–5.3 and §7 updated to as-built (M1–M3)
+Draft v1.2 · 2026-08-16 · status: working draft for supervisor/committee review; §5.1–5.3 and §7 updated to as-built (M1–M3); abstract, §2.4, §3, §4.4, §7 and §8 revised to the measured departure profile (A1)
 
 All claims cite numbered references (§References); bracketed numbers [n]
 throughout. Sources marked **[local]** are held in
@@ -530,7 +530,10 @@ Sensitivity surface over three dials, each dimension bounded by evidence:
 Named scenarios run on the surface:
 
 - **S1 — School shift**: school-linked trips move −60 min (10:00→9:00
-  start), per the 2020 proposal [29,30]. RQ3.
+  start), per the 2020 proposal [29,30]. On the measured profile these
+  departures land in 08:00–09:00, the one hour of the window materially
+  below the peak (5.5% against 6.8% [52]), so the shift is in the right
+  direction but into a 1.3-percentage-point trough. RQ3.
 - **S2 — Anchored incentive**: p_t of employment-cluster trips retime ≤30
   min (INSTANT design transfer [22]). RQ1/RQ2.
 - **S3 — Joint**: S2 + capacity-constrained mode shift m. RQ1.
@@ -701,6 +704,7 @@ Format: [n] Author/Institution (year). *Title*. Source. — **[local]**
 - [9] JICA (2017). *Project on Urban Transport Improvement for Kathmandu Valley*, Final Report (Vol 1 = master plan, V/C assignment, TDM Table 8.4.1 [9-v1]; Vol 2 = cordon method §13.4.3.2 [9-v2]). — [local] `data-jica-2017-urban-transport-vol01/02.pdf`
 - [10] JICA (2019). *Data Collection Survey on Urban Transport in Kathmandu Valley*, Final Report (Vol 2 = 15-h classified counts, 9 intersections). — [local] `data-jica-2019-urban-transport-survey-vol01/02.pdf` (dating verified from title page)
 - [12] Department of Roads, Nepal. *Traffic counts, ssrn.dor.gov.np* (scraped 29 stations, FY 2011/12–2024/25). — [local] `data-dor-ssrn-aadt-kathmandu-valley-stations.csv`
+- [52] Department of Roads, Nepal. *Traffic count station hourly detail*, ssrn.dor.gov.np — per-hour, per-direction, per-class counts for the survey days behind each station-year AADT row; URL pattern `https://ssrn.dor.gov.np/traffic_controller/get_detail/<location>/<id>`, e.g. <https://ssrn.dor.gov.np/traffic_controller/get_detail/Manohara%20Bridge/1582>. Stations 64 Manohara Bridge, 65 Ring Road (Sinamangal), 58 Satdobato South, FY 2024/25, 3 survey days each, retrieved 2026-08-16 via `pipeline/dor_hourly.py` → `data/processed/hourly_profile.parquet`
 - [33] ADB (2020). *Kathmandu Sustainable Urban Transport Project — Completion Report* (Loan 2656; restructuring plan not approved). — [local] `masterplan-adb-ksutp-completion-report-2020.pdf` (+ MaYA factsheet)
 - [34] UNESCAP (2022). *Comprehensive Public Transport and Mass Transit Plan for Kathmandu Valley*. <https://repository.unescap.org/handle/20.500.12870/6300>
 - [45] Watchlist & unobtained items: see `library/README.md` (Master Plan primary doc; INJET 95704/82531; SMEC 2014 restructuring report)

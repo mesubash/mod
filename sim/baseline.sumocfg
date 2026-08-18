@@ -2,10 +2,16 @@
 <!-- M3 baseline run: 06:00-12:00 wall clock (21600-43200 s, matching the
      depart times duarouter wrote into baseline.rou.xml). Analysis window
      08:00-11:00 = 28800-39600 s. queue-output sampled every 60 s for
-     Q_i / t_diss; meanData outputs defined in baseline.add.xml. -->
+     Q_i / t_diss; meanData outputs defined in baseline.add.xml.
+
+     Net is corridor-calibrated (A10 actuated signals standing in for police
+     metering); lateral-resolution activates the A11 sublane parameters so the
+     63%-motorcycle fleet filters instead of queueing lane-bound.
+     time-to-teleport 600 s and ignore-junction-blocker 60 s: rationale in
+     stress-options.txt. -->
 <sumoConfiguration>
     <input>
-        <net-file value="net/corridor-filtered.net.xml"/>
+        <net-file value="net/corridor-calibrated.net.xml"/>
         <route-files value="demand/baseline.rou.xml"/>
         <additional-files value="baseline.add.xml"/>
     </input>
@@ -20,6 +26,10 @@
     </output>
     <processing>
         <threads value="4"/>
+        <lateral-resolution value="0.8"/>
+        <time-to-teleport value="600"/>
+        <ignore-junction-blocker value="60"/>
+        <collision.mingap-factor value="0"/>
     </processing>
     <report>
         <no-step-log value="true"/>
