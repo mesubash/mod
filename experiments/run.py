@@ -12,15 +12,30 @@ import itertools
 import json
 import subprocess
 import tomllib
+from pathlib import Path
 
 from experiments import transforms
 from pipeline.baseline_eval import s7_metrics
 from pipeline.common import REPO
-from pipeline.cordon import NET, run_duarouter
+from pipeline.cordon import run_duarouter
 
 BASELINE_TRIPS = REPO / "sim/demand/baseline.trips.xml"
 ADD = REPO / "sim/baseline.add.xml"
 SUMO = REPO / ".venv/bin/sumo"
+SCENARIO_DIR = REPO / "experiments/scenarios"
+
+# Scenarios must run under identical physics to the baseline they are compared
+# against: same net (A10 actuated signal proxies) and same options as
+# sim/baseline.sumocfg (A11 sublane resolution, teleport and blocker handling).
+# Keep this block in sync with that config.
+SIM_NET = REPO / "sim/net/corridor-calibrated.net.xml"
+SUMO_OPTS = [
+    "--lateral-resolution", "0.8",
+    "--time-to-teleport", "600",
+    "--ignore-junction-blocker", "60",
+    "--collision.mingap-factor", "0",
+    "--threads", "4", "--no-step-log", "--duration-log.statistics",
+]
 
 ABBR = {"p_t": "pt", "dt_minutes": "dt", "school_share": "sch", "b_cap": "bcap"}
 
@@ -39,8 +54,8 @@ def expand(tf_cfg):
     return combos
 
 
-def simulate(scenario, run_id, trips_path):
-    outdir = REPO / "results" / scenario / run_id
+def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
+    outdir = (outbase or REPO / "results" / scenario) / run_id
     outdir.mkdir(parents=True, exist_ok=True)
     rou = trips_path.parent / f"{run_id}.rou.xml"
     run_duarouter(trips_path, rou)
@@ -48,27 +63,54 @@ def simulate(scenario, run_id, trips_path):
     # copy redirects them into outdir (files then match s7_metrics prefix="")
     add = outdir / "run.add.xml"
     add.write_text(ADD.read_text().replace("../results/baseline_", f"{outdir}/"))
-    subprocess.run(
-        [str(SUMO), "-n", str(NET), "-r", str(rou), "-a", str(add),
-         "--begin", "21600", "--end", "43200",
-         "--statistic-output", str(outdir / "stats.xml"),
-         "--queue-output", str(outdir / "queues.xml"),
-         "--queue-output.period", "60",
-         "--threads", "4", "--no-step-log", "--duration-log.statistics"],
-        check=True, capture_output=True, text=True)
+    cmd = [str(SUMO), "-n", str(SIM_NET), "-r", str(rou), "-a", str(add),
+           "--begin", "21600", "--end", "43200",
+           "--statistic-output", str(outdir / "stats.xml"),
+           "--queue-output", str(outdir / "queues.xml"),
+           "--queue-output.period", "60", *SUMO_OPTS]
+    if mode == "meso":
+        # Mesoscopic ignores sublane laterals and falls back to static signals;
+        # it is the sweep mode (order-of-magnitude faster), with headline points
+        # re-run microscopically.
+        cmd = [c for c in cmd if c not in ("--lateral-resolution", "0.8")]
+        cmd.append("--mesosim")
+    subprocess.run(cmd, check=True, capture_output=True, text=True)
     (outdir / "metrics.json").write_text(
         json.dumps(s7_metrics(outdir, prefix=""), indent=2))
-    print(f"{scenario}/{run_id}: metrics.json written")
+    print(f"{scenario}/{run_id}: metrics.json written", flush=True)
+
+
+def run_baseline(outbase, mode):
+    """Unmodified baseline under the same options as every scenario."""
+    outbase.mkdir(parents=True, exist_ok=True)
+    simulate("baseline", "baseline", BASELINE_TRIPS, outbase.parent, mode)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("config")
+    ap.add_argument("config", nargs="?",
+                    help="path to a scenario TOML (or use --scenario)")
+    ap.add_argument("--scenario",
+                    help="scenario name resolved in experiments/scenarios/, "
+                         "or 'baseline' for the unmodified demand")
+    ap.add_argument("--mode", choices=("micro", "meso"), default="micro",
+                    help="meso is the sweep mode; micro for headline runs")
+    ap.add_argument("--seeds", type=int,
+                    help="use only the first N seeds from the config")
+    ap.add_argument("--out", type=Path,
+                    help="output base directory (default results/<scenario>)")
+    ap.add_argument("--skip-completed", action="store_true",
+                    help="skip runs whose metrics.json already exists")
     ap.add_argument("--dry-run", action="store_true",
                     help="stop after writing scenario trips (no duarouter/sumo)")
     args = ap.parse_args()
 
-    with open(args.config, "rb") as f:
+    if args.scenario == "baseline":
+        run_baseline(args.out or REPO / "results/sweep/baseline", args.mode)
+        return
+
+    config = args.config or SCENARIO_DIR / f"{args.scenario}.toml"
+    with open(config, "rb") as f:
         cfg = tomllib.load(f)
     tf_cfg = cfg["transforms"]
     if tf_cfg == "none":
@@ -81,9 +123,15 @@ def main():
     demand_dir = REPO / "sim/demand" / cfg["name"]
     demand_dir.mkdir(parents=True, exist_ok=True)
 
+    seeds = cfg["seeds"][:args.seeds] if args.seeds else cfg["seeds"]
+    outbase = args.out or REPO / "results" / cfg["name"]
+
     for tag, tfs in expand(tf_cfg):
-        for seed in cfg["seeds"]:
+        for seed in seeds:
             run_id = f"{tag}_seed{seed}" if tag else f"seed{seed}"
+            if args.skip_completed and (outbase / run_id / "metrics.json").exists():
+                print(f"{cfg['name']}/{run_id}: complete, skipping", flush=True)
+                continue
             trips, notes = baseline, []
             for tname, params in tfs:
                 res = getattr(transforms, tname)(trips, seed=seed, **params)
@@ -94,13 +142,14 @@ def main():
                     trips = res
             comment = (f"scenario {cfg['name']} run {run_id}, "
                        f"source sim/demand/baseline.trips.xml, "
-                       f"config {args.config}, transforms {tfs or 'none'}"
+                       f"config {config}, transforms {tfs or 'none'}"
                        + "".join(f"; {n}" for n in notes))
             trips_path = demand_dir / f"{run_id}.trips.xml"
             transforms.write_trips(trips_path, vtypes, trips, comment)
-            print(f"{cfg['name']}/{run_id}: {len(trips)} trips -> {trips_path}")
+            print(f"{cfg['name']}/{run_id}: {len(trips)} trips -> {trips_path}",
+                  flush=True)
             if not args.dry_run:
-                simulate(cfg["name"], run_id, trips_path)
+                simulate(cfg["name"], run_id, trips_path, outbase, args.mode)
 
 
 if __name__ == "__main__":

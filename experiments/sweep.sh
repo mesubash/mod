@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Standalone M4 scenario sweep. Builds everything from a fresh clone and runs
+# the full experiment grid unattended. Safe to interrupt and re-run: completed
+# runs are skipped.
+#
+#   ./experiments/sweep.sh              # trimmed grid (default, ~8h)
+#   PROFILE=full ./experiments/sweep.sh # complete surface (~22h)
+#   PROFILE=min ./experiments/sweep.sh  # headline points only (~3h)
+#   MODE=micro ./experiments/sweep.sh   # microscopic (slow; default meso)
+#
+# Nohup it and walk away:
+#   nohup ./experiments/sweep.sh > sweep.log 2>&1 &
+#   tail -f sweep.log
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+REPO=$PWD
+PROFILE=${PROFILE:-trimmed}
+MODE=${MODE:-meso}
+RESULTS=$REPO/results/sweep
+mkdir -p "$RESULTS"
+
+log() { echo "[$(date '+%F %T')] $*"; }
+
+log "MOD sweep starting: profile=$PROFILE mode=$MODE"
+
+# --- 1. environment -----------------------------------------------------
+command -v uv >/dev/null || { echo "uv not found: https://docs.astral.sh/uv/"; exit 1; }
+uv sync --quiet
+log "dependencies ready ($(uv run python -c 'import sumolib; print("sumo", sumolib.version.gitDescribe())' 2>/dev/null || echo 'sumo via eclipse-sumo'))"
+
+# --- 2. network (rebuilt from the committed OSM extract) ----------------
+NET=sim/net/corridor-calibrated.net.xml
+if [ ! -f "$NET" ]; then
+  log "building network from data/raw/corridor.osm"
+  uv run netconvert --osm-files data/raw/corridor.osm -o sim/net/corridor.net.xml \
+    --geometry.remove --ramps.guess --junctions.join --tls.discard-simple \
+    --remove-edges.by-vclass pedestrian,bicycle
+  uv run netconvert -s sim/net/corridor.net.xml -o sim/net/corridor-filtered.net.xml \
+    --keep-edges.by-vclass passenger --keep-edges.components 1
+  uv run netconvert -s sim/net/corridor-filtered.net.xml -n sim/net/tls-patch.nod.xml \
+    -o "$NET"
+  log "network built"
+else
+  log "network present, skipping build"
+fi
+
+# --- 3. baseline demand (duarouter; ~20 min on first run) ---------------
+if [ ! -f sim/demand/baseline.rou.xml ]; then
+  log "building baseline demand + routes"
+  uv run python -m pipeline.cordon
+  log "demand built"
+else
+  log "baseline routes present, skipping build"
+fi
+
+# --- 4. baseline run (reference for every scenario delta) ---------------
+if [ ! -f "$RESULTS/baseline/metrics.json" ]; then
+  log "running baseline"
+  mkdir -p "$RESULTS/baseline"
+  uv run python -m experiments.run --scenario baseline --mode "$MODE" \
+    --out "$RESULTS/baseline" || log "WARNING: baseline run returned nonzero"
+else
+  log "baseline metrics present, skipping"
+fi
+
+# --- 5. scenario grid ---------------------------------------------------
+case "$PROFILE" in
+  full)    SCENARIOS=(s0-spatial-control s1-school s2-retime-grid s3-joint); SEEDS=3 ;;
+  trimmed) SCENARIOS=(s0-spatial-control s1-school s2-retime-grid s3-joint); SEEDS=1 ;;
+  min)     SCENARIOS=(s0-spatial-control s1-school s2-retime-grid);          SEEDS=1 ;;
+  *) echo "unknown PROFILE=$PROFILE (full|trimmed|min)"; exit 1 ;;
+esac
+
+for scenario in "${SCENARIOS[@]}"; do
+  log "=== scenario $scenario (seeds=$SEEDS) ==="
+  uv run python -m experiments.run \
+      --scenario "$scenario" \
+      --mode "$MODE" \
+      --seeds "$SEEDS" \
+      --out "$RESULTS/$scenario" \
+      --skip-completed \
+    || log "WARNING: $scenario returned nonzero; continuing"
+done
+
+# --- 6. collect ---------------------------------------------------------
+log "collecting results"
+uv run python -m experiments.collect --results "$RESULTS" \
+    --out "$RESULTS/summary.csv" || log "WARNING: collect failed"
+
+log "sweep complete. Summary: $RESULTS/summary.csv"
+log "Send back: results/sweep/summary.csv and results/sweep/*/metrics.json"

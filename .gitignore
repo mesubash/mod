@@ -17,3 +17,6 @@ sim/demand/
 UI-GUARDRAILS.md
 UI-PROMPT.md
 COORDINATION.md
+sim/dua/
+!data/processed/*.parquet
+!data/processed/*.csv
