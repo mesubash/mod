@@ -9,10 +9,11 @@ Outputs: results/baseline_calibration.csv, results/baseline_metrics.json.
 
 Daily-tier comparison (the OCR stage recovered no hourly counts): modeled
 leg-direction PCU summed over 07:00-12:00 (warm-up hour excluded) is compared
-against WINDOW_SHARE x pcu_24h, where WINDOW_SHARE = 0.50 is the sum of the
-A1 departure-profile hourly shares for 07:00-12:00 (6+9+20+9+6 % of daily,
-pipeline/cordon.py). The same profile built the demand, so this tier tests
-growth factor + spatial allocation + routing, not the profile itself.
+against WINDOW_SHARE x pcu_24h, where WINDOW_SHARE is the sum of the measured
+A1 hourly shares for 07:00-12:00 (pipeline/cordon.py HOURLY_SHARE, from
+data/processed/hourly_profile.parquet). The same profile built the demand, so
+this tier tests growth factor + spatial allocation + routing, not the profile
+itself.
 """
 
 import csv
@@ -20,10 +21,13 @@ import json
 from xml.etree import ElementTree as ET
 
 from pipeline.common import REPO as ROOT
+from pipeline.cordon import HOURLY_SHARE
 
 # spec §3 primary PCU set
 PCU = {"motorcycle": 0.3, "car": 1.0, "bus": 4.0, "truck": 4.0}
-WINDOW_SHARE = 0.50          # A1 shares, 07:00-12:00
+# Derived from the demand profile itself so the two can never drift apart: a
+# hardcoded 0.50 survived the A1 correction and inflated every target by 1.5x.
+WINDOW_SHARE = sum(share for hour, share in HOURLY_SHARE.items() if hour >= 7)
 COMPARE_HOURS = range(25200, 43200, 3600)   # 07:00-12:00 bins
 ANALYSIS = (28800, 39600)    # 08:00-11:00
 TOL, PASS_SHARE = 0.15, 0.85  # A7

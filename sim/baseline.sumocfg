@@ -8,7 +8,11 @@
      metering); lateral-resolution activates the A11 sublane parameters so the
      63%-motorcycle fleet filters instead of queueing lane-bound.
      time-to-teleport 600 s and ignore-junction-blocker 60 s: rationale in
-     stress-options.txt. -->
+     stress-options.txt. collision.action=warn (A13): with the sublane model a
+     dense motorcycle fleet registers constant minor lateral overlaps; removing
+     those vehicles destroyed the third baseline (96,225 of 145,191 teleports
+     were collisions). Real motorcycles brush past each other; log, do not
+     delete. -->
 <sumoConfiguration>
     <input>
         <net-file value="net/corridor-calibrated.net.xml"/>
@@ -30,6 +34,7 @@
         <time-to-teleport value="600"/>
         <ignore-junction-blocker value="60"/>
         <collision.mingap-factor value="0"/>
+        <collision.action value="warn"/>
     </processing>
     <report>
         <no-step-log value="true"/>

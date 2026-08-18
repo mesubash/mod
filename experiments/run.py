@@ -34,6 +34,7 @@ SUMO_OPTS = [
     "--time-to-teleport", "600",
     "--ignore-junction-blocker", "60",
     "--collision.mingap-factor", "0",
+    "--collision.action", "warn",
     "--threads", "4", "--no-step-log", "--duration-log.statistics",
 ]
 
