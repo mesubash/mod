@@ -17,16 +17,36 @@ def _built(path):
         pytest.skip(f"{path.name} not built (run pipeline.cordon)")
 
 
-def test_a1_anchors():
-    # sourced anchors: 20% of daily in 09:00-10:00, adjacent hours < half that
-    assert HOURLY_SHARE[9] == 0.20
-    assert HOURLY_SHARE[8] < 0.10 and HOURLY_SHARE[10] < 0.10
+def test_a1_matches_measured_profile():
+    # A1 is the measured DoR profile (pipeline/dor_hourly.py), not an assumed
+    # peak: every hour within 0.005 of the pooled station-day mean, morning
+    # rising monotonically to the 09:00 peak, no hour above 10% of daily.
+    measured = {6: 0.038, 7: 0.047, 8: 0.055, 9: 0.068, 10: 0.067, 11: 0.064}
     assert set(HOURLY_SHARE) == set(range(6, 12))
+    for hour, share in measured.items():
+        assert abs(HOURLY_SHARE[hour] - share) < 0.005
+    assert HOURLY_SHARE[6] < HOURLY_SHARE[7] < HOURLY_SHARE[8] < HOURLY_SHARE[9]
+    assert max(HOURLY_SHARE.values()) < 0.10
 
 
-def test_vtype_space_matches_pcu():
-    for mode, a in VTYPES.items():
-        assert a["length"] + a["minGap"] == pytest.approx(PCU[mode] * CAR_SPACE)
+def test_vtype_geometry_is_physical():
+    # A12: lengths are real vehicle dimensions, not PCU-space bookkeeping —
+    # encoding PCU as length gave buses 24.7 m and starved arterial capacity.
+    # PCU stays a separate accounting weight, so the two must NOT agree.
+    physical = {"motorcycle": 2.2, "car": 4.3, "bus": 12.0, "truck": 10.0}
+    for mode, length in physical.items():
+        assert VTYPES[mode]["length"] == length
+        assert VTYPES[mode]["length"] + VTYPES[mode]["minGap"] <= 15.0
+    assert VTYPES["bus"]["length"] != pytest.approx(PCU["bus"] * CAR_SPACE)
+
+
+def test_vtype_forced_gap_behaviour():
+    # A12: Kathmandu's manually-metered junctions flow because drivers force
+    # gaps; motorcycles most aggressive, heavy vehicles least.
+    probs = {m: VTYPES[m]["jmIgnoreFoeProb"] for m in VTYPES}
+    assert probs["motorcycle"] > probs["car"] > probs["bus"]
+    assert all(0 < p < 0.5 for p in probs.values())
+    assert VTYPES["motorcycle"]["tau"] < VTYPES["bus"]["tau"]
 
 
 def test_vtype_motorcycle_sublane_params():
@@ -47,11 +67,16 @@ def test_slice_conserves_total():
         assert sum(bins) == math.floor(daily * WINDOW_SHARE + 1e-9)
 
 
-def test_slice_peak_hour_dominates():
+def test_slice_follows_measured_profile():
+    # The measured profile is a broad plateau, not a spike: 09:00 is the
+    # morning maximum but 08:00-11:00 sit within 20% of it (contrast with the
+    # superseded trip-generation assumption, which put 09:00 at 2x its
+    # neighbours). Guards against reintroducing an assumed peak.
     bins = slice_bins(4000)
     hours = [sum(bins[i:i + 4]) for i in range(0, 24, 4)]
     assert hours[3] == max(hours)  # 09:00-10:00
-    assert hours[2] * 2 < hours[3] + 4  # adjacent under half, rounding slack
+    for adjacent in (hours[2], hours[4], hours[5]):
+        assert adjacent > 0.8 * hours[3]
 
 
 def test_taz_edge_counts_and_weights():

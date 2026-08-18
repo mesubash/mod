@@ -44,18 +44,17 @@ DUAROUTER = REPO / ".venv/bin/duarouter"
 # sensitivity: 65 Sinamangal 1.54x, 60 RR-Manohara 1.12x.
 GROWTH_STATION = 64
 
-# A1: share of DAILY trips departing per clock hour. Sourced anchors
-# [vol02 p.6-7, p.6-14]: 09:00-10:00 carries 20% of daily trips and each
-# adjacent hour is under half the peak share (9% < 10%). The taper shape
-# (9/6/3%) between the anchors is the registered A1 assumption.
-HOURLY_SHARE = {6: 0.03, 7: 0.06, 8: 0.09, 9: 0.20, 10: 0.09, 11: 0.06}
+# A1 (revised 2026-08-16): share of DAILY VEHICLE trips departing per clock
+# hour, measured — pooled hourly counts from three DoR stations (Manohara
+# Bridge on the corridor, Ring Road Sinamangal, Satdobato), 3 survey days each,
+# FY 2024/25, via pipeline/dor_hourly.py -> data/processed/hourly_profile.parquet.
+# Supersedes the earlier 20%-peak assumption, which took JICA's person-trip
+# GENERATION peak [vol02 p.6-7] as a vehicle-departure share: trip generation
+# counts when people start trips (walk and school trips included) and is ~3x
+# peakier than road traffic. Measured AM peak is 6.8% of daily, not 20%.
+HOURLY_SHARE = {6: 0.038, 7: 0.047, 8: 0.055, 9: 0.068, 10: 0.067, 11: 0.064}
 ANALYSIS = (8 * 3600, 11 * 3600)  # spec §4 analysis window 08:00-11:00
 
-# PCU-consistent space (spec §3): length + minGap = PCU x car space (4.3+2.5 m),
-# car=1.0, motorcycle=0.3, bus=truck=4.0 (A4). Other params come from SUMO's
-# per-vClass defaults.
-# ponytail: 24.7 m bus/truck is queue-space bookkeeping, not geometry — swap
-# for real dims + sublane model at M3 if junction dynamics misbehave.
 # Sublane laterals (A11, active only with --lateral-resolution, see
 # sim/stress-options.txt): motorcycle minGapLat 0.3 m = mid of the TU thesis
 # calibrated "Minimum Lateral Distance (Standing) at 0 km/h" range 0.2-0.41 m
@@ -63,12 +62,28 @@ ANALYSIS = (8 * 3600, 11 * 3600)  # spec §4 analysis window 08:00-11:00
 # Other classes keep SUMO defaults: minGapLat 0.6 sits inside the thesis
 # driving-range calibration 0.6-0.9 m; maxSpeedLat/lcSublane defaults (1.0).
 CAR_SPACE = 4.3 + 2.5
+# A12 (2026-08-16): physical vehicle geometry, not PCU-space bookkeeping. The
+# earlier length = PCU x car-space encoding gave buses and trucks 24.7 m each
+# (a bus is ~12 m), inflating queue storage ~35% and starving arterial
+# capacity — the diagnosed cause of the second gridlocked baseline. PCU stays a
+# separate accounting weight (see PCU below) used only for count comparison.
+# Driving behaviour models Kathmandu's forced-gap operation: short headways and
+# probabilistic right-of-way violation at minor approaches, which is what keeps
+# the real police-metered junctions flowing (JICA 2012 records 9 of 10 study
+# junctions under manual control; the IOE saturation-flow study documents
+# non-lane-based operation degrading conventional signal capacity).
 VTYPES = {
-    "motorcycle": {"vClass": "motorcycle", "length": 1.84, "minGap": 0.2,
-                   "latAlignment": "compact", "minGapLat": 0.3},
-    "car": {"vClass": "passenger", "length": 4.3, "minGap": 2.5},
-    "bus": {"vClass": "bus", "length": 24.7, "minGap": 2.5},
-    "truck": {"vClass": "truck", "length": 24.7, "minGap": 2.5},
+    "motorcycle": {"vClass": "motorcycle", "length": 2.2, "minGap": 0.5,
+                   "latAlignment": "compact", "minGapLat": 0.3,
+                   "tau": 0.8, "impatience": 1.0, "jmIgnoreFoeProb": 0.4,
+                   "jmTimegapMinor": 0.8},
+    "car": {"vClass": "passenger", "length": 4.3, "minGap": 2.0,
+            "tau": 0.9, "impatience": 0.8, "jmIgnoreFoeProb": 0.25,
+            "jmTimegapMinor": 1.0},
+    "bus": {"vClass": "bus", "length": 12.0, "minGap": 2.5,
+            "tau": 1.0, "impatience": 0.7, "jmIgnoreFoeProb": 0.15},
+    "truck": {"vClass": "truck", "length": 10.0, "minGap": 2.5,
+              "tau": 1.0, "impatience": 0.7, "jmIgnoreFoeProb": 0.15},
 }
 PCU = {"motorcycle": 0.3, "car": 1.0, "bus": 4.0, "truck": 4.0}
 

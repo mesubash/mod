@@ -67,17 +67,28 @@ reconciliation value). Tempo's 7.8 matters if tempos ride inside the OD
 
 ## 4. Time structure
 
-- **AM peak hour: 09:00–10:00.** Trip-generation peak: 20% of all daily
-  trips, to-work 42%, to-school 48% concentrate there [vol02 §6.1 p.6-7];
-  per-mode concentration 15–24% in that hour, under half before/after
-  [p.6-14]. Road-count peak was 9:30–10:30 on Arniko/Tribhuvan highways
-  [p.6-25]. This synchronization is the intervention target (paper §4.4).
+- **AM peak hour: 09:00–10:00, and it is broad.** Measured vehicle shares
+  of daily traffic, pooled over three DoR stations × 3 survey days,
+  FY 2024/25, 216 station-day-hours (`pipeline/dor_hourly.py` →
+  `data/processed/hourly_profile.parquet`; portal endpoint in
+  `pipeline/README.md`): 08:00 5.5%, **09:00 6.8%**, 10:00 6.7%, 11:00
+  6.4% — the 08:00–11:00 window carries 19.0% of daily traffic and the
+  peak hour is 1.63× the mean hour.
+  The clock position agrees with JICA's 2012 road counts (peak 9:30–10:30
+  on the Arniko and Tribhuvan highways [vol02 p.6-25]) and with the ~10:00
+  institutional start times (paper §4.4). The magnitude does **not** agree
+  with JICA's trip-**generation** peak (20% of daily trips in 09:00–10:00
+  [vol02 §6.1 p.6-7]; 15–24% per mode, under half before/after [p.6-14]),
+  which counts trip starts of all modes including walking and is not a
+  vehicle-departure share — do not use it for A1.
 - **Simulation window: 06:00–12:00**; 06:00–07:00 warm-up (excluded from
   metrics), analysis window 08:00–11:00. Demand departs in 15-minute
-  slices (matches 2019 count resolution).
-- **Evening peak: not modeled in v1.** Wide/flat (paper §4.4); 2012 report
-  is itself inconsistent about its window (Table 6.2.12 says 16:00–17:00,
-  Table 6.2.13 says 17:00–18:00, same page 6-35).
+  slices (matches 2019 count resolution), uniform inside each hour.
+- **Evening peak: not modeled in v1** — but it is the *larger* peak:
+  17:00 carries 7.4% of daily traffic against the AM peak's 6.8%, and
+  09:00–18:00 is a 6.0–7.4% plateau (same measurement). The 2012 report is
+  itself inconsistent about its evening window (Table 6.2.12 says
+  16:00–17:00, Table 6.2.13 says 17:00–18:00, same page 6-35).
 - **24h conversions** (for any daily comparisons): 2019 report's stated
   rule is observed+10% [A4-13 §4.2.5]; 6 of 11 sites observed 14.5/14.75h
   rather than 15h and their printed ratios run 1.1017–1.1035 — always use
@@ -90,9 +101,8 @@ reconciliation value). Tempo's 7.8 matters if tempos ride inside the OD
 1. Seed: `data/processed/od_2011.parquet` vehicle modes (2011 base).
 2. Growth: factor per corridor-relevant DoR station from
    `growth_factors.csv` (station→corridor mapping is A3, fixed at M3).
-3. Time-slicing: hourly departure profile anchored on the sourced shares
-   (20% of daily in 09:00–10:00; under half of that per adjacent hour)
-   — exact curve is A1.
+3. Time-slicing: the measured hourly shares of §4 — 06:00–12:00 =
+   3.8/4.7/5.5/6.8/6.7/6.4% of daily trips (A1).
 4. Corridor sub-OD via the §2 cordon method.
 
 ## 6. Supply-side reference values
@@ -165,7 +175,7 @@ set, B_cap sweep.
 
 | ID | Assumption | Basis | Resolution |
 | --- | --- | --- | --- |
-| A1 | Departure-profile curve between sourced anchor shares | anchors sourced, curve interpolated | fit to any recoverable hourly figure (2012 Fig 6.2.x are images); sensitivity on curve shape |
+| A1 | Hourly departure profile = the measured DoR shares of §4, applied to every corridor OD cell and uniform inside each hour | **measured**, not assumed (2026-08-16): 216 station-day-hours, 3 stations × 3 survey days, FY 2024/25, `pipeline/dor_hourly.py` | Two residual gaps, both narrowing the peak-shape claim rather than the levels: (a) the three stations are highway/Ring-Road cross-sections, not corridor-interior — no corridor-interior hourly data exists (2019 junction profiles are chart images, §10 / verification log); (b) the counts are both-direction totals, so a tidal profile is flattened — recoverable from the per-direction columns of the same detail pages. Δt = 15/30 min also runs below the profile's hourly resolution. Sensitivity: peak-hour share ±1 pp, and a per-direction profile when extracted |
 | A2 | Corridor zone set (§1) | zoning-map figure, image-read | verify against georeferenced zone map during M3 network build |
 | A3 | DoR station→corridor mapping for growth factors | not yet chosen | fix at M3 from station locations; document per-link |
 | A4 | OD "bus"/"truck" PCU = large-class value (4.0) | OD modes are aggregates; class split unknown | sensitivity with IOE 2014 set (bus 2.19, truck 2.65) brackets it |

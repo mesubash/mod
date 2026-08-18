@@ -298,3 +298,188 @@ the research paper ([paper/](paper/)). Headlines:
 - **Adversarial notes retained:** durability decay, latent-demand refill
   (Downs), peak widening at shoulders, gaming/selection, PT-capacity
   failure under odd-even episodes.
+
+---
+
+## Measured hourly profile — the AM peak is broad (added 2026-08-16)
+
+The departure-time assumption A1 was carried from Phase 0 as an *assumption*
+interpolated between two JICA trip-generation anchors. It has now been
+replaced by a measurement, and the measurement contradicts the shape the
+earlier anchors implied.
+
+### The measurement
+
+Hourly vehicle counts were pulled from the Department of Roads SSRN traffic
+portal's per-station detail pages
+(`traffic_controller/get_detail/<location>/<id>`), which publish per-hour,
+per-direction, per-class counts for the survey days behind each station-year
+AADT row. Three FY 2024/25 stations, 3 survey days each, 216 station-day-hours
+(`pipeline/dor_hourly.py` → `data/processed/hourly_profile.parquet`,
+retrieved 2026-08-16):
+
+| Station | Where |
+| --- | --- |
+| 64 Manohara Bridge | the study corridor's own Arniko Highway crossing |
+| 65 Ring Road (Sinamangal) | Ring Road, north of the corridor's east end |
+| 58 Satdobato South (Chapagaun) | southern radial out of Lalitpur |
+
+Pooled share of daily traffic by clock hour (both directions):
+
+| Hour | 06 | 07 | 08 | 09 | 10 | 11 | 12–16 | 17 | 18 | 19 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| % of daily | 3.8 | 4.7 | 5.5 | **6.8** | 6.7 | 6.4 | 6.0–6.3 | **7.4** | 7.0 | 5.8 |
+
+- AM peak hour is 09:00 at 6.8% of daily traffic; 10:00 is 6.7%.
+- The 08:00–11:00 analysis window carries 19.0% of daily traffic.
+- The PM peak (17:00, 7.4%) is **higher** than the AM peak.
+- 09:00–18:00 is a plateau, 6.0–7.4% per hour; the AM peak hour is 1.63× the
+  mean hour, the PM peak 1.78×.
+- Per station, the corridor's own crossing is the flattest in the morning:
+  Manohara Bridge 6.5% at 09:00 against 8.5% at 17:00; Ring Road Sinamangal
+  6.4% / 7.0%; only Satdobato South peaks in the morning (7.5% at 09:00).
+- Not a weekend artifact: one of the nine station-days (Satdobato,
+  2025-03-29) is a Saturday, Nepal's weekly holiday. Dropping it moves the
+  pooled AM peak 6.79% → 6.76% and the 08:00–11:00 window 18.99% → 18.92%.
+
+### What it corrects
+
+A1 previously used 06:00–12:00 shares of 3/6/9/20/9/6%, anchored on JICA
+2012: "the peak rate of trip generation for all purposes was 20% which
+occurred from 9:00 to 10:00" [vol02 §6.1 p.6-7] and "15% to 24% were
+concentrated in the peak hours of 9:00 to 10:00 … concentrations became less
+than half before and after the peak hour" [p.6-14].
+
+Both anchors are real and correctly quoted. The error was in their
+application: they are **person-trip generation** rates — the share of daily
+trip *starts*, over all modes including walking, from an 18,100-household
+survey — and they were used as the share of daily *vehicle departures* at a
+road cross-section. The two are not the same quantity. Trip generation
+counts a trip once, at its start, and school trips (48% of which fall in the
+peak hour [p.6-7]) skew heavily to walking; a road count records vehicles
+present on a link in that hour, mixing purposes, trip lengths and start
+times. The measured road profile is about three times flatter than the
+generation profile.
+
+The clock position of the peak is unaffected and is now corroborated twice.
+JICA's own 2012 *road* counts put the peak at 9:30–10:30 on the Arniko and
+Tribhuvan highways [vol02 p.6-25]; the 2025 DoR counts put the two highest
+AM hours at 09:00 and 10:00. Two independent measurements 13 years apart
+agree on *when* the AM peak falls. Neither supports the claim that it is
+sharp.
+
+### What the three stations cannot settle
+
+The stations are highway and Ring-Road cross-sections, not corridor-interior
+links. Two mechanisms would make a corridor-interior commuter profile
+peakier than what was measured:
+
+1. **Through traffic.** Highway and circumferential cross-sections carry
+   freight and long-distance movements whose diurnal pattern is not
+   commuter-driven. Against this: the corridor is itself dominated by
+   through movements — 78–80% of bikes and cars on Maitighar–Tinkune travel
+   straight through [evidence-maitighar-tinkune-bottleneck-2017], so the gap
+   between "highway station" and "corridor link" may be narrower here than
+   the objection assumes.
+2. **Directional aggregation.** The parser keeps the both-direction total of
+   each hourly row. A tidal flow — AM inbound, PM outbound — has directional
+   peaks sharper than the two-way total. This is the stronger of the two
+   objections, and it is recoverable: the per-direction columns are on the
+   same detail pages.
+
+Corridor-interior hourly evidence is unavailable from the collected sources.
+The 2019 JICA survey counted hourly flows at exactly the nine corridor
+junctions, but its hourly profiles survive only as Figure 4.4 line-chart
+images with no data labels (verification log above, checked 2026-08-15), so
+they cannot be read as numbers. This cuts both ways: the earlier "sharp AM
+peak" premise had no corridor-interior support either — it rested on a
+household-survey generation statistic.
+
+### How flat is flat — the analogs' own baselines
+
+The pivot rests on international programs that flattened peaks. Whether a
+6.8% peak hour leaves room depends on what *their* baselines looked like, so
+the collected `pivot-` PDFs were re-read for stated baseline peak
+concentrations. Most do not state one.
+
+| Source | Baseline peak concentration as stated | Peak window |
+| --- | --- | --- |
+| CAPRI, Stanford (TRB 2015) | **peak-hour trip ratio 38.2% AM, 37.3% PM**, of the 3-hour monitoring window 07:00–10:00; full AM distribution 30.2 / 38.2 / 31.6 (p.9–10) | 1 h (08:00–09:00) |
+| INSINC, Singapore | **B = 37.1%** of a commuter's 05:00–12:00 trips in the peak hour — stated inside a worked "For example" calculation (p.5). Separately: "over 76% of morning peak trips are due to just 20% of commuters" (p.2) | 1 h (07:30–08:29) |
+| INSTANT, Bangalore (NetEcon) | only the complement: "the proportion of early commuters has reduced from 29% in 2005 to 16% in 2007" (p.2), early = departing before 07:30 | none stated; credit thresholds 08:00 / 08:30 |
+| Spitsmijden overview | none stated (only *reduction* shares, e.g. 250 cars ≈ 1.5% of peak flow) | 2 h Zoetermeer, 3 h Gouda, 4 h Hollandse Brug |
+| Beijing pre-peak discount [26] | not held locally; the paper cites the null result only | discount before 07:00 |
+| Berkeley comparison, FHWA compendium, Gravert | none stated for any program | various, tabulated in the FHWA doc |
+
+No document in the library states a peak-to-base ratio, a peak factor, or a
+sharp-versus-flat characterization of its baseline curve. ★ Any claim that
+these programs ran on "sharp" peaks is therefore unsupported by the sources
+the project holds.
+
+Two comparisons are possible, and they point in opposite directions.
+
+- **Against CAPRI, on CAPRI's own denominator, Kathmandu is only slightly
+  flatter.** Kathmandu's 08:00–11:00 window splits 29.0 / 35.8 / 35.2 against
+  Stanford's 30.2 / 38.2 / 31.6. Peak-to-early-shoulder is 1.23× here against
+  Stanford's 1.27×. CAPRI made participants 21.2% less likely to travel in
+  the AM peak hour off a baseline barely peakier than this one. On this
+  comparison the headroom argument survives intact.
+- **Against INSINC, Kathmandu is about half as concentrated.** INSINC's peak
+  hour holds 37.1% of a participant's 05:00–12:00 trips; Kathmandu's 09:00
+  holds 19.0% of the same 05:00–12:00 span. INSINC measures rail commuters —
+  a filtered commute stream — against a mixed road cross-section here, so
+  part of that gap is definitional rather than behavioral.
+
+The difference between the two comparisons is the shoulder shape, and that is
+the operative finding. Kathmandu has a usable *early* shoulder (08:00 is
+1.23× below the peak) and effectively no *late* shoulder (10:00 is 1.5%
+below the peak). Every program in the table that moved traffic rewarded
+*earlier* travel — CAPRI, INSINC, INSTANT, BART Perks all pay for pre-peak
+arrivals — so the shape is the right one for the intervention family the
+project is transferring, and the wrong one for any late-shift design.
+
+One warning sits in the same evidence. The Spitsmijden overview links peak
+*width* to departure-time response: participants shifted departure time 35%
+of the time at Zoetermeer's 2-hour window but only 16% and 15% at the
+4-hour windows, and the report states plainly that "shifts in departure time
+[are] not as popular in experiments that specify a longer peak period, such
+as 0600-1000" (p.3). Kathmandu's measured road profile is a wide-window
+case. The p_t = 10–20% dial in the paper's §5.4 sits at the low end of the
+Spitsmijden range for precisely this reason, which is the right place for it.
+
+### Consequences for the hypothesis and scenarios
+
+The measurement narrows the arithmetic room for departure-time shifting, and
+the size of that room can now be stated exactly rather than assumed.
+
+- **Ceiling on within-window retiming.** Perfectly levelling 08:00, 09:00 and
+  10:00 (19.0% of daily, mean 6.33%) cuts the peak hour from 6.79% to 6.33%
+  — a **6.8% reduction in peak-hour traffic**, and that is the ceiling, not
+  an expected value. Extending the levelling back to 07:00 raises the ceiling
+  to 13.0%, but requires shifts up to two hours, well past the ~30-minute
+  acceptability ceiling from the Beijing null [26].
+- **A −60 min shift from 10:00 into 09:00 is worthless, and the reverse is
+  what S1 does.** Levelling 09:00 and 10:00 alone yields a 0.8% peak-hour
+  cut: the two hours are already within 0.1 pp of each other. S1's
+  10:00→9:00 school-start change moves peak-hour (09:00–10:00) departures
+  into 08:00–09:00, which is the one genuinely lighter hour (5.5%), so the
+  direction is right — but the trough being filled is 1.3 pp deep, not the
+  11 pp the old profile implied.
+- **The threat to H1 is the plateau, not the smaller cut.** H1 claims
+  superlinear delay relief at intersections above saturation. Superlinearity
+  comes from the network crossing in and out of oversaturation; a 09:00–18:00
+  plateau at 6.0–7.4% per hour means the binding intersections may be
+  oversaturated continuously rather than transiently. Under continuous
+  oversaturation, deterministic queueing makes total delay roughly
+  proportional to the integral of excess demand, and relieving one hour while
+  the next hour is equally loaded does not let queues dissipate — `t_diss`
+  would stay censored (spec §7). The flat profile is therefore adverse to
+  H1's superlinearity claim specifically. Testing it is still the point:
+  RQ1 now has a real chance of returning the negative answer.
+- **Resolution below the hourly grid.** Δt = 15 and 30 min operate inside a
+  single hour of the profile; the model spreads departures uniformly within
+  each hour, so sub-hourly retiming results inherit that assumption.
+
+Registered in the assumption register as a measured A1
+([specs/model-spec.md §9](../specs/model-spec.md)) with the per-direction
+extraction as its sensitivity path.

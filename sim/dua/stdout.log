@@ -1,0 +1,17 @@
+> Executing step 0
+>> Running router on ../demand/baseline.trips.xml
+>>> Begin time: 2026-08-15 21:52:23.513687
+>>> End time: 2026-08-15 22:10:35.353562
+>>> Duration: 0:18:11.839875
+<<
+>> Running simulation
+>>> Begin time: 2026-08-15 22:10:35.353671
+>>> End time: 2026-08-15 22:15:17.340568
+>>> Duration: 0:04:41.986897
+<<
+< Step 0 ended (duration: 0:22:53.826956)
+------------------
+
+> Executing step 1
+>> Running router on 000/baseline_000.rou.alt.xml.gz
+>>> Begin time: 2026-08-15 22:15:17.341120

@@ -75,6 +75,31 @@ Ceiling (module ponytail note): the 0.5-2.0 band is tuned by eye on these
 29 stations; upgrade path is changepoint detection if new stations
 misclassify.
 
+## dor_hourly.py
+
+Input: the DoR SSRN hourly detail pages,
+`https://ssrn.dor.gov.np/traffic_controller/get_detail/<location>/<id>` (ids
+from the `hourly_detail_url` column of the AADT scrape). Three FY 2024/25
+stations: 64 Manohara Bridge (the corridor's own Arniko Highway crossing),
+65 Ring Road (Sinamangal), 58 Satdobato South (Chapagaun).
+
+Each page prints one row per survey day and clock hour, per vehicle class,
+per direction; the parser keeps the both-direction total (last cell) of each
+hourly row and yields 3 survey days per station.
+
+Output: `data/processed/hourly_profile.parquet`, 216 rows
+(3 stations x 3 days x 24 hours): `station` int, `location` str, `date` str,
+`hour` int, `total_veh` float. `hourly_shares()` pools it into the
+share-of-daily-traffic per hour that A1 uses (spec §4): AM peak 6.8% at
+09:00, 08:00-11:00 = 19.0%, PM peak 7.4% at 17:00.
+
+Run: `uv run python -m pipeline.dor_hourly`
+
+Ceilings: both-direction totals hide tidal asymmetry (the per-direction
+columns are on the same pages); the three stations are highway/Ring-Road
+cross-sections, so the profile is not corridor-interior (research/07 §"Measured
+hourly profile").
+
 ## cordon.py
 
 Inputs: `data/processed/od_2011.parquet`, `data/processed/growth_factors.csv`,
@@ -128,12 +153,12 @@ Builds the baseline corridor demand (spec §4-§5) in five steps:
    and intra-zonal trips drop out automatically (no cordon crossing).
    This step is unchanged by the TAZ injection, so `corridor_od.parquet`
    is byte-identical to the single-edge build.
-5. **Time slicing (A1 decision):** hourly shares of daily trips
-   06:00-12:00 = 3/6/9/20/9/6%. Sourced anchors [vol02 p.6-7, p.6-14]:
-   09:00-10:00 carries 20% of daily trips, each adjacent hour under half
-   the peak (9% < 10%); the 6/3% taper is the assumed part. Departures
-   spread evenly inside 15-min bins; per-cell cumulative-floor rounding
-   conserves totals to <1 trip.
+5. **Time slicing (A1):** the measured hourly shares of daily traffic from
+   `dor_hourly.py`, 06:00-12:00 = 3.8/4.7/5.5/6.8/6.7/6.4%. This replaced a
+   3/6/9/20/9/6% profile that read JICA's person-trip *generation* peak
+   [vol02 p.6-7, p.6-14] as a vehicle-departure share; measured road
+   traffic is about 3x flatter. Departures spread evenly inside 15-min
+   bins; per-cell cumulative-floor rounding conserves totals to <1 trip.
 
 Vehicle types are PCU-consistent (spec §3): length+minGap = PCU x car space
 (4.3+2.5 m), i.e. motorcycle 1.84+0.2 (0.3 PCU), bus/truck 24.7+2.5

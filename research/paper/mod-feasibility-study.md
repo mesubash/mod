@@ -30,13 +30,20 @@ original hypothesis**: spatial route redistribution is not viable inside the
 Ring Road because all screenline crossings already exceeded capacity in 2012,
 parallel alternatives are the most oversaturated links in the network
 (V/C 2.70–2.76) [9], and every major intersection operates above saturation
-(up to X = 2.27) [9]. The evidence instead supports a pivoted hypothesis:
-Kathmandu's sharp morning peak is partly a coordination artifact of
-institution start times synchronized at ~10:00 [27,28], and international
-experiments show such peaks can be flattened by targeted departure-time
-incentives (Bangalore INSTANT [22], Singapore INSINC [23], Dutch
-Spitsmijden [21]) within honest bounds: shifts ≤ ~30 minutes [26], 5–10%
-corridor-level peak reduction as an upper bound [23,25]. We propose a
+(up to X = 2.27) [9]. The evidence instead supports a pivoted hypothesis,
+now stated on a measured rather than an assumed demand profile: Department
+of Roads hourly counts at three valley stations put the AM peak hour at
+6.8% of daily traffic, the 08:00–11:00 window at 19.0%, and the PM peak
+above the AM peak [52]. The morning peak's *position* (~09:00–10:00) is the
+coordination artifact of institution start times synchronized at ~10:00
+[27,28]; its *height* is modest. Departure-time incentives have nonetheless
+worked on baselines of comparable mildness — Stanford CAPRI's peak hour
+held 38.2% of its 3-hour monitoring window against this corridor's 35.8%,
+and cut participants' peak-hour travel by 21.2% [38] — alongside Bangalore
+INSTANT [22], Singapore INSINC [23] and Dutch Spitsmijden [21], within
+honest bounds: shifts ≤ ~30 minutes [26], 5–10% corridor-level peak
+reduction as an upper bound [23,25], and an arithmetic ceiling of 6.8% from
+levelling the measured 08:00–11:00 window outright. We propose a
 simulation study — a sensitivity surface over retiming share, shift
 magnitude, and capacity-constrained motorcycle→bus mode shift, evaluated at
 the verified binding intersections — with two named policy scenarios: the
@@ -168,6 +175,26 @@ canonical null: a 30% discount before 7:00 produced "no discernible
 reduction of peak demand" after a year — the window was placed too early;
 ~30 minutes appears to be the maximum acceptable retiming [26].
 
+**What these programs started from.** Effect sizes are only interpretable
+against baselines, and most of this literature does not publish one. Three
+documents do. CAPRI defines a "peak-hour trip ratio" and measures
+Stanford-wide AM traffic at 30.2 / 38.2 / 31.6% across 07:00–08:00 /
+08:00–09:00 / 09:00–10:00 — a 1.21–1.27× peak-to-shoulder ratio [38].
+INSINC reports a participant peak-hour share of 37.1% of 05:00–12:00 trips,
+inside a worked example, and separately that "over 76% of morning peak
+trips are due to just 20% of commuters" [23]. INSTANT gives only the
+complement, the share departing before 07:30 falling from 29% (2005) to 16%
+(2007) [22]. The Spitsmijden compilation, the Berkeley comparison and the
+FHWA compendium state no baseline concentration for any program [21], and
+**no document in this collection states a peak-to-base ratio, a peak factor,
+or a sharp-versus-flat characterization of its baseline curve** — a claim
+that these programs flattened *sharp* peaks would be unsupported by the
+sources (★ §7). Spitsmijden does report that peak *width* predicts
+response: participants shifted departure time 35% of the time against a
+2-hour peak window (Zoetermeer) but 15–16% against 4-hour windows, and
+states that departure-time shifts are "not as popular in experiments that
+specify a longer peak period, such as 0600-1000" [21].
+
 **Mode-shift interventions.** Across three Swedish field experiments
 (n > 32,500), informational and social-norm nudges produced a tightly
 estimated zero effect on public-transport uptake, while an extended
@@ -191,12 +218,17 @@ individual decisions produce measurable network effects.
 
 ## 3. Problem Statement and Research Questions
 
-**Problem.** Kathmandu's AM peak concentrates home-based work and school
-trips into a narrow window fixed by synchronized institutional start times
-(~10:00 for government offices, schools, banks) [27,28], onto a network
-whose binding intersections already operate at saturation degrees of
-1.0–2.3 [9], with no spare parallel capacity [9] and no planned
-traveler-facing demand instrument [15–20].
+**Problem.** Kathmandu's AM peak falls in a window fixed by synchronized
+institutional start times (~10:00 for government offices, schools, banks)
+[27,28], onto a network whose binding intersections already operate at
+saturation degrees of 1.0–2.3 [9], with no spare parallel capacity [9] and
+no planned traveler-facing demand instrument [15–20]. Measured hourly
+counts show the peak is broad, not narrow: 6.8% of daily traffic in the AM
+peak hour against a 6.0–7.4% plateau from 09:00 to 18:00 [52]. That shapes
+the problem twice over — the corridor is loaded near its peak level for
+most of the working day, and the room available to departure-time shifting
+is bounded, at 6.8% of peak-hour traffic if the 08:00–11:00 window were
+levelled outright (§5.1).
 
 **Primary research question (RQ1).** By how much does network performance
 (delay, queue length, throughput) at the binding intersections of a
@@ -220,7 +252,12 @@ parameters?
 above saturation, retiming 10–20% of a targeted peak population by ≤30
 minutes reduces peak-hour delay at binding intersections nonlinearly (more
 than proportionally to the demand removed), at zero individual travel-time
-cost (retiming is a schedule cost, not a route cost). H1 is falsifiable: if
+cost (retiming is a schedule cost, not a route cost). The measured profile
+makes H1 harder to satisfy, not easier: superlinear relief comes from the
+network crossing out of oversaturation, and a 09:00–18:00 demand plateau
+[52] points to continuous rather than transient oversaturation, under which
+deterministic queueing gives delay roughly proportional to the integral of
+excess demand. H1 is falsifiable: if
 simulated relief is proportional or negligible, or the required compliance
 is impractical (§RQ2), the hypothesis fails and the negative result stands.
 
@@ -295,12 +332,32 @@ is possible (★ §7).
 
 ### 4.4 Why temporal + mode shift is the credible pivot
 
-- **Structure**: Kathmandu's government offices run 10:00–17:00 (summer)
-  [27]; schools cluster at ~10:00 [29]; banks ~10:00. Synchronized starts
-  stack work and school trips into one sharp AM window — IOE studies find
-  the AM peak higher and sharper than the flatter 3–4 h PM peak [2,3]. A
-  coordination-artifact peak is precisely the kind the international record
-  shows can be flattened [21,22,23].
+- **Structure — the peak's position is synchronized; its height is not
+  extreme.** Kathmandu's government offices run 10:00–17:00 (summer) [27];
+  schools cluster at ~10:00 [29]; banks ~10:00. The road counts agree on
+  *when* the resulting peak falls, twice and 13 years apart: JICA's 2012
+  counts put it at 9:30–10:30 on the Arniko and Tribhuvan highways [8], and
+  the 2025 DoR counts put the two highest AM hours at 09:00 (6.8%) and
+  10:00 (6.7%) [52]. They do not support calling it sharp. The earlier
+  draft of this paper did, on the strength of JICA's 20% trip-*generation*
+  peak [8]; that statistic counts trip starts of all modes including
+  walking and is not a vehicle-departure share (§5.1). The claim this study
+  now carries is the weaker and measurable one: institutional
+  synchronization fixes the peak's clock position, which is what a
+  departure-time instrument needs in order to have a target, while the
+  peak's height sets how much that instrument can move.
+- **How mild is too mild.** The programs in §2.4 that publish a baseline
+  ran on peaks of similar mildness. On CAPRI's own denominator — the
+  peak hour's share of a 3-hour window — Stanford was 38.2% and this
+  corridor is 35.8%, with peak-to-early-shoulder ratios of 1.27× and 1.23×
+  [38,52]; CAPRI still moved participants 21.2% off the peak hour [38]. The
+  asymmetry matters more than the level: 08:00 sits 1.23× below the peak
+  but 10:00 sits only 1.5% below it, so the corridor has an early shoulder
+  to fill and effectively no late one. Every program that moved traffic
+  rewarded *earlier* travel [22,23,38], which is the direction this shape
+  permits. Against that, Spitsmijden's own comparison warns that wide peak
+  windows draw weaker departure-time response [21], and Kathmandu's
+  measured profile is a wide-window case.
 - **Precedent inside government**: in March 2020 the traffic police and PM's
   Office proposed moving school hours to 9:00 explicitly to cut congestion;
   COVID intervened; it was never implemented or quantified [29,30]. A 2026
@@ -309,9 +366,18 @@ is possible (★ §7).
 - **Effect-size honesty**: participant-level retiming of 10–20% is
   achievable under sustained, verified incentives [21,22,23]; ~30 min is
   the acceptable-shift ceiling [26]; 5–10% corridor-level AM-peak reduction
-  is the defensible upper bound [23,25]. The scientific interest is that at
-  V/C ≥ 1.0, queueing theory predicts nonlinear returns to exactly such
-  cuts — RQ1 tests whether that regime is real on this corridor.
+  is the defensible upper bound [23,25]. The measured profile now supplies
+  an arithmetic ceiling from the other direction: levelling 08:00, 09:00
+  and 10:00 completely removes 6.8% of peak-hour traffic, which lands at
+  the bottom of that 5–10% band, and reaching 13.0% would require pulling
+  demand back to 07:00 — a two-hour shift, four times the acceptability
+  ceiling [26]. Levelling 09:00 and 10:00 alone yields 0.8%, so any design
+  that moves trips *later* within the window is not worth simulating. The
+  scientific interest is that at V/C ≥ 1.0, queueing theory predicts
+  nonlinear returns to small cuts; the flat plateau works against that
+  prediction by keeping the network oversaturated between the hours a
+  retiming policy can reach. RQ1 tests which effect dominates on this
+  corridor, and a negative answer is now a live outcome.
 - **Mode shift must be capacity-constrained**: 75% of Kathmandu PT users
   report peak overcrowding [45b]; odd-even episodes twice collapsed on PT
   capacity [46]. Nudges alone move nothing [31]; any modeled shift must
@@ -327,6 +393,8 @@ JICA 2012 Vol 4 (50×50 person-trip + mode OD)      [8]
         ▼
 Growth-factor update ── DoR AADT ratios FY11/12→24/25 [12]
         │               (per-station sanity filter; cross-check ATO 2024 [47])
+        │
+        ├── Departure profile ── DoR hourly detail pages, 3 stations [52]
         ▼
 Corridor cordon OD ── JICA 2017 §13.4.3.2 method [9-v2]
         │             (cordon around study corridor; crossing-point OD)
@@ -352,6 +420,23 @@ The pipeline is implemented (M1; modules, provenance, and run commands in
   annualized year-over-year ratios stay within 0.5–2.0; transitions
   outside the band (the Satdobato-type jumps flagged in §4.1) are treated
   as count-method breaks and excluded [12].
+- **The departure profile is measured, not assumed (A1).** The hourly
+  share of daily traffic now comes from the DoR portal's per-station
+  hourly detail pages [52]: three FY 2024/25 stations (Manohara Bridge —
+  the corridor's own Arniko Highway crossing, Ring Road Sinamangal,
+  Satdobato South), 3 survey days each, 216 station-day-hours
+  (`pipeline/dor_hourly.py` → `data/processed/hourly_profile.parquet`).
+  The AM peak hour (09:00) carries **6.8%** of daily traffic, 10:00 6.7%,
+  the 08:00–11:00 window 19.0%; the PM peak (17:00, 7.4%) is higher than
+  the AM peak and 09:00–18:00 is a 6.0–7.4% plateau. This replaced an
+  interpolated profile with a 20% peak hour, which had applied JICA's
+  person-trip *generation* peak [8, vol02 p.6-7] — the share of daily trip
+  *starts* over all modes including walking — as a vehicle-departure
+  share. Measured road traffic is about three times flatter. The clock
+  position is unchanged and independently corroborated: JICA's own 2012
+  road counts put the peak at 9:30–10:30 on the Arniko and Tribhuvan
+  highways [8, vol02 p.6-25]. Derivation and consequences in the
+  verification log [07-phase0-findings](../07-phase0-findings.md).
 - **The 2019 calibration counts are daily-tier only; the OCR question is
   closed.** Only the report's Table 4.1 summary (daily leg-direction PCU,
   77 records) exists as text in the PDF. The 15-minute classified sheets
@@ -542,6 +627,24 @@ principle.
     current equilibrium-assignment configuration is not yet accepted
     against the §5.1 criterion; until it is, no simulation output should
     be read as a validated baseline.
+12. **The peak-shape evidence is not corridor-interior.** The measured
+    departure profile (A1, §5.1) comes from three DoR stations that are
+    highway and Ring-Road cross-sections [52], and the counts used are
+    both-direction totals, which flatten a tidal profile; the per-direction
+    columns exist on the same pages and are the registered sensitivity
+    path. No corridor-interior hourly profile is available: the 2019 JICA
+    survey counted hourly flows at exactly the nine study junctions, but
+    they survive only as unlabeled line-chart images (limitation 8). The
+    two corridor-interior studies that print peak volumes disagree with
+    each other and with the stations — Thapathali's weekday AM peak hour
+    (5,593 PCU) exceeds its PM peak hour (4,883 PCU) [3], while
+    Maitighar–Tinkune's printed evening counts exceed its 09:00–11:00
+    morning counts [2] — and neither prints a daily denominator, so
+    neither yields a peak-hour share. The corridor-interior AM peak could
+    therefore be sharper than 6.8%; how much sharper is unmeasured. ★
+    Note that the premise this measurement replaced had no
+    corridor-interior support either: it rested on a household-survey
+    trip-generation statistic.
 
 ## 8. Conclusion
 
@@ -552,10 +655,15 @@ network whose intersections are past saturation. The original redistribution
 hypothesis was falsified by the city's own survey data, and the project's
 direction was changed accordingly. What survives is stronger: a feasible,
 fully-public-data corridor demand model; a demand-management gap that no
-deployed or planned system occupies; a sharply synchronized AM peak that
-international evidence says is the flattenable kind; and a government-
-proposed, never-quantified school-timing policy waiting to be its first
-test case. The proposed simulation study is falsifiable in both directions
+deployed or planned system occupies; an AM peak whose clock position is
+fixed by institutional synchronization and whose measured height, 6.8% of
+daily traffic, is close to the baselines the departure-time programs
+actually flattened; and a government-proposed, never-quantified
+school-timing policy waiting to be its first test case. The measurement
+also narrows the claim: with the corridor near its peak load from 09:00 to
+18:00, levelling the whole morning window would move 6.8% of peak-hour
+traffic, so the study is testing a small cut against a large queue, and
+the negative answer is a real possibility. The proposed simulation study is falsifiable in both directions
 and contributes reusable infrastructure — a sparse-data OD pipeline and an
 open corridor testbed — regardless of which way the hypothesis resolves.
 
