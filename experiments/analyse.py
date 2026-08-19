@@ -175,7 +175,7 @@ def scenario_table(df, out):
     lines = ["# Scenario results", "",
              "Delay is the mean across binding intersections; deltas are against",
              "the unmodified baseline under identical model settings. Absolute",
-             "levels are not calibrated (see paper §7) — read the deltas.", "",
+             "levels are not calibrated (see paper §8) — read the deltas.", "",
              table.to_markdown(index=False), ""]
     (out / "scenarios.md").write_text("\n".join(lines))
     return table
