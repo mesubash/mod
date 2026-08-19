@@ -62,6 +62,21 @@ The script is resumable — interrupt it, re-run it, and completed runs are
 skipped. It rebuilds the network and demand on first run (~30 min), then
 simulates.
 
+## What the sweep can and cannot measure
+
+The sweep runs mesoscopic by default, which is 10-50x faster and models flows
+and delays but **not lane-level queues**. `Q_i` (max queue) and `t_diss` (queue
+dissipation) come back as empty in meso runs — that is the mode's limit, not a
+failure. Delay, corridor travel time, throughput and total network delay are
+all measured normally.
+
+Re-run the headline points microscopically once the sweep is in, if queue
+lengths are wanted:
+
+```bash
+MODE=micro PROFILE=min ./experiments/sweep.sh 2>&1 | tee sweep-micro.log
+```
+
 ## What to send back
 
 ```text

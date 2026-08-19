@@ -89,9 +89,13 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
 
 
 def run_baseline(outbase, mode):
-    """Unmodified baseline under the same options as every scenario."""
+    """Unmodified baseline under the same options as every scenario.
+
+    Writes to <outbase>/baseline/ so the result sits at the same depth as every
+    scenario run; experiments.collect globs */*/metrics.json, and a baseline one
+    level shallower is silently missed, which drops every delta column."""
     outbase.mkdir(parents=True, exist_ok=True)
-    simulate("baseline", "baseline", BASELINE_TRIPS, outbase.parent, mode)
+    simulate("baseline", "baseline", BASELINE_TRIPS, outbase, mode)
 
 
 def main():

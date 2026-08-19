@@ -167,9 +167,14 @@ def s7_metrics(results_dir, prefix="baseline_"):
         for i, edges in in_edges.items()
     }
     qs = queue_series(results_dir / f"{prefix}queues.xml", lanes_by_int)
+    # Mesoscopic runs have no lane-level queues, so the queue file is empty of
+    # non-zero samples. Report None rather than 0.0: a zero here reads as "no
+    # queue formed", which is the opposite of "this mode cannot measure queues".
+    has_queues = any(v for s in qs.values() for v in s.values())
     Q_i = {
-        i: round(max((v for t, v in s.items() if ANALYSIS[0] <= t < ANALYSIS[1]),
-                     default=0.0), 1)
+        i: (round(max((v for t, v in s.items()
+                       if ANALYSIS[0] <= t < ANALYSIS[1]), default=0.0), 1)
+            if has_queues else None)
         for i, s in qs.items()
     }
 
@@ -184,8 +189,8 @@ def s7_metrics(results_dir, prefix="baseline_"):
         vals = [total.get(t0 + 60 * k, 0.0) for k in range(5)]
         return sum(vals) / 5
     ref = sum(total.get(t, 0.0) for t in range(28800, 32400, 60)) / 60
-    t_diss = ">120 min (censored)"
-    for t0 in range(36000, 43200 - 900, 300):
+    t_diss = ">120 min (censored)" if has_queues else None
+    for t0 in range(36000, 43200 - 900, 300) if has_queues else []:
         if all(mean5(t0 + 300 * j) <= ref for j in range(3)):
             t_diss = round((t0 - 36000) / 60, 1)
             break

@@ -166,3 +166,18 @@ def test_reroute_preserves_trips_and_reports_no_alternative(tmp_path):
     assert outside["route"] == "e1 e2 e3"                 # untouched
     for before, after in zip(trips, out):
         assert before["depart"] == after["depart"]        # departs never move
+
+
+def test_mode_shift_on_route_carrying_demand():
+    # The count-matched demand has no from/to attributes — OD comes from the
+    # route's first and last edge. This crashed the s3-joint sweep scenario.
+    trips = [
+        {"id": f"m{i}", "depart": f"{30000 + i}.0", "type": "motorcycle",
+         "route": "origin mid dest"}
+        for i in range(20)
+    ]
+    out, summary = transforms.mode_shift(trips, m=1.0, seed=3)
+    assert summary["converted"] == 20
+    buses = [t for t in out if t["type"] == "bus"]
+    assert buses, "expected at least one added bus"
+    assert all("route" in b for b in buses), "added buses must carry a route"

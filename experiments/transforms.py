@@ -26,6 +26,16 @@ def _in(t, window):
     return window[0] <= _depart(t) < window[1]
 
 
+def _od(t):
+    """Origin/destination of a trip, however the demand expresses it: <trip>
+    elements carry from/to, while routeSampler's <vehicle> elements carry an
+    embedded route whose first and last edges are the OD."""
+    if "from" in t and "to" in t:
+        return t["from"], t["to"]
+    edges = t["route"].split()
+    return edges[0], edges[-1]
+
+
 def read_trips(path):
     """(vtypes, vehicles) as attribute dicts.
 
@@ -100,13 +110,14 @@ def mode_shift(trips, m, b_cap=None, *, seed, window=ANALYSIS):
     od_pax, od_buses, buses = {}, {}, []
     for i in sorted(converted, key=lambda i: _depart(trips[i])):
         t = trips[i]
-        od = (t["from"], t["to"])
+        od = _od(t)
         od_pax[od] = od_pax.get(od, 0.0) + MC_OCC
         if od_pax[od] >= BUS_OCC * (od_buses.get(od, 0) + 1) - 1e-9:
             od_buses[od] = od_buses.get(od, 0) + 1
             buses.append({"id": f"busadd.{len(buses)}", "type": "bus",
-                          "depart": t["depart"], "from": od[0], "to": od[1],
-                          "departLane": "best"})
+                          "depart": t["depart"], "departLane": "best",
+                          **({"route": t["route"]} if "route" in t
+                             else {"from": od[0], "to": od[1]})})
     out += buses
 
     summary = {
