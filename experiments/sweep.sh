@@ -46,12 +46,20 @@ else
 fi
 
 # --- 3. baseline demand (duarouter; ~20 min on first run) ---------------
-if [ ! -f sim/demand/baseline.rou.xml ]; then
-  log "building baseline demand + routes"
-  uv run python -m pipeline.cordon
-  log "demand built"
+if [ ! -f sim/demand/sampled_sorted.rou.xml ]; then
+  log "building baseline demand + routes (~20 min)"
+  [ -f sim/demand/baseline.rou.xml ] || uv run python -m pipeline.cordon
+  log "generating count-matched demand (routeSampler)"
+  uv run python -m pipeline.count_targets
+  uv run python .venv/lib/python*/site-packages/sumo/tools/routeSampler.py \
+      -r sim/demand/baseline.rou.xml -d data/processed/count_targets.xml \
+      -o sim/demand/sampled.rou.xml --keep-attributes --seed 20260818
+  # SUMO discards vehicles that are out of departure order, silently
+  uv run python .venv/lib/python*/site-packages/sumo/tools/route/sort_routes.py \
+      sim/demand/sampled.rou.xml -o sim/demand/sampled_sorted.rou.xml
+  log "calibrated demand built"
 else
-  log "baseline routes present, skipping build"
+  log "calibrated demand present, skipping build"
 fi
 
 # --- 4. baseline run (reference for every scenario delta) ---------------

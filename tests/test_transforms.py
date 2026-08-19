@@ -1,5 +1,6 @@
 import pytest
 
+from experiments import transforms
 from experiments.transforms import PEAK, mode_shift, retime, s1_school_shift
 
 
@@ -105,3 +106,29 @@ def test_s1_touches_only_peak_window():
 def test_s1_requires_sized_share():
     with pytest.raises(ValueError, match="A1"):
         s1_school_shift(fixture(), seed=1)
+
+
+def test_route_file_round_trip(tmp_path):
+    # Count-matched demand (routeSampler) is a <vehicle>+<route> file, not
+    # <trip>s. Routes must survive transforms untouched while departs move.
+    src = tmp_path / "v.rou.xml"
+    src.write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<routes>\n'
+        '    <vType id="motorcycle" vClass="motorcycle" length="2.2"/>\n'
+        '    <vehicle id="m1" depart="32500.0" type="motorcycle">'
+        '<route edges="a b c"/></vehicle>\n'
+        '    <vehicle id="c1" depart="30000.0" type="car">'
+        '<route edges="f g"/></vehicle>\n</routes>'
+    )
+    vtypes, trips = transforms.read_trips(src)
+    assert [t["route"] for t in trips] == ["a b c", "f g"]
+
+    out = tmp_path / "out.rou.xml"
+    transforms.write_trips(
+        out, vtypes, transforms.retime(trips, p_t=1.0, dt_minutes=-30, seed=1), "t"
+    )
+    _, back = transforms.read_trips(out)
+    by_id = {t["id"]: t for t in back}
+    assert by_id["m1"]["route"] == "a b c"
+    assert float(by_id["m1"]["depart"]) == 32500.0 - 1800   # in peak, shifted
+    assert float(by_id["c1"]["depart"]) == 30000.0          # outside peak, kept

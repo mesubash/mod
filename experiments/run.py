@@ -19,7 +19,11 @@ from pipeline.baseline_eval import s7_metrics
 from pipeline.common import REPO
 from pipeline.cordon import run_duarouter
 
-BASELINE_TRIPS = REPO / "sim/demand/baseline.trips.xml"
+# Count-matched demand (pipeline/count_targets.py + routeSampler): reproduces
+# the 2019 counted volumes at GEH < 5 on 90.5% of locations. Routes are
+# embedded, so scenario runs skip duarouter — transforms move departs and
+# change types without altering paths.
+BASELINE_TRIPS = REPO / "sim/demand/sampled_sorted.rou.xml"
 ADD = REPO / "sim/baseline.add.xml"
 SUMO = REPO / ".venv/bin/sumo"
 SCENARIO_DIR = REPO / "experiments/scenarios"
@@ -58,8 +62,11 @@ def expand(tf_cfg):
 def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
     outdir = (outbase or REPO / "results" / scenario) / run_id
     outdir.mkdir(parents=True, exist_ok=True)
-    rou = trips_path.parent / f"{run_id}.rou.xml"
-    run_duarouter(trips_path, rou)
+    if trips_path.suffix == ".xml" and trips_path.name.endswith(".rou.xml"):
+        rou = trips_path          # routes already embedded
+    else:
+        rou = trips_path.parent / f"{run_id}.rou.xml"
+        run_duarouter(trips_path, rou)
     # baseline.add.xml hardcodes ../results/baseline_* output paths; per-run
     # copy redirects them into outdir (files then match s7_metrics prefix="")
     add = outdir / "run.add.xml"
@@ -145,7 +152,7 @@ def main():
                        f"source sim/demand/baseline.trips.xml, "
                        f"config {config}, transforms {tfs or 'none'}"
                        + "".join(f"; {n}" for n in notes))
-            trips_path = demand_dir / f"{run_id}.trips.xml"
+            trips_path = demand_dir / f"{run_id}.rou.xml"
             transforms.write_trips(trips_path, vtypes, trips, comment)
             print(f"{cfg['name']}/{run_id}: {len(trips)} trips -> {trips_path}",
                   flush=True)

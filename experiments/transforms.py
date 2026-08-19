@@ -24,10 +24,22 @@ def _in(t, window):
 
 
 def read_trips(path):
-    """(vtypes, trips) as attribute dicts."""
+    """(vtypes, vehicles) as attribute dicts.
+
+    Handles both demand forms: <trip> elements (origin/destination, routed
+    later by duarouter) and <vehicle> elements carrying an embedded <route>,
+    which is what routeSampler emits for the count-matched demand. A vehicle's
+    route travels with it under the "route" key so transforms can move departs
+    and change types without touching the path itself."""
     root = ET.parse(path).getroot()
-    return ([dict(v.attrib) for v in root.iter("vType")],
-            [dict(t.attrib) for t in root.iter("trip")])
+    vtypes = [dict(v.attrib) for v in root.iter("vType")]
+    trips = [dict(t.attrib) for t in root.iter("trip")]
+    for veh in root.iter("vehicle"):
+        entry = dict(veh.attrib)
+        if (route := veh.find("route")) is not None:
+            entry["route"] = route.get("edges")
+        trips.append(entry)
+    return vtypes, trips
 
 
 def write_trips(path, vtypes, trips, comment):
@@ -40,7 +52,13 @@ def write_trips(path, vtypes, trips, comment):
         for v in vtypes:
             f.write("    " + tag("vType", v) + "\n")
         for t in sorted(trips, key=_depart):
-            f.write("    " + tag("trip", t) + "\n")
+            if "route" in t:
+                attrs = {k: v for k, v in t.items() if k != "route"}
+                f.write(f"    {tag('vehicle', attrs)[:-2]}>\n"
+                        f'        <route edges="{t["route"]}"/>\n'
+                        "    </vehicle>\n")
+            else:
+                f.write("    " + tag("trip", t) + "\n")
         f.write("</routes>\n")
 
 
