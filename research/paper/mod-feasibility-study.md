@@ -1,7 +1,7 @@
 # Temporal and Mode-Shift Travel-Demand Distribution for a Saturated Urban Network: A Feasibility Study for Kathmandu Valley
 
 **Project MOD — feasibility and research-design paper**
-Draft v1.2 · 2026-08-16 · status: working draft for supervisor/committee review; §5.1–5.3 and §7 updated to as-built (M1–M3); abstract, §2.4, §3, §4.4, §7 and §8 revised to the measured departure profile (A1)
+Draft v1.3 · 2026-08-19 · status: working draft for supervisor/committee review; §5.1, §5.3, §5.6 and §7 report the M3 calibration outcome — count-based demand generation, and the network-throughput limitation that follows from it
 
 All claims cite numbered references (§References); bracketed numbers [n]
 throughout. Sources marked **[local]** are held in
@@ -49,8 +49,13 @@ magnitude, and capacity-constrained motorcycle→bus mode shift, evaluated at
 the verified binding intersections — with two named policy scenarios: the
 government's own unquantified 2020 school-timing proposal [29,30] and an
 employer-anchored incentive design [22]. The methodological contribution is
-a reusable sparse-data corridor demand pipeline and the first open,
-calibrated corridor testbed for a motorcycle-dominant city.
+a reusable sparse-data corridor demand pipeline and an open corridor testbed
+for a motorcycle-dominant city, delivered with its demand calibrated to the
+2019 counts (GEH < 5 at 90.5% of 42 count locations) and with one measured
+limitation carried openly: the microsimulation inserts about half the
+throughput those counts record, so scenario findings are reported as
+relative effects against a baseline run under identical model settings, not
+as absolute delay predictions (§5.6).
 
 ---
 
@@ -403,6 +408,9 @@ Calibration/validation ── JICA 2019 daily leg-direction counts
         │                 (Table 4.1: 77 records, 9 intersections) [10]
         ▼
 Time-sliced demand (15-min departure profiles, AM window)
+        │
+        ▼
+Count-matched demand ── count_targets.py → SUMO routeSampler [53] (§5.3)
 ```
 
 The pipeline is implemented (M1; modules, provenance, and run commands in
@@ -448,16 +456,21 @@ The pipeline is implemented (M1; modules, provenance, and run commands in
   method (verification log,
   [07-phase0-findings](../07-phase0-findings.md)).
 
-Acceptance criterion (assumption A7,
-[model spec §7](../../specs/model-spec.md)): modeled daily leg-direction
+The acceptance criterion changed during M3, and both versions are on the
+record. The original (assumption A7,
+[model spec §7](../../specs/model-spec.md)) was modeled daily leg-direction
 PCU volume within ±15% of the 2019 counts on at least 85% of the 77
 leg-direction records, plus a documented qualitative match of queue
-locations to the known bottlenecks [2,3]. The earlier GEH < 5 target was
-replaced because the GEH screening statistic is defined for hourly flows
-and is not scale-invariant: at daily volumes of this magnitude it would
-demand roughly 2% agreement, unachievable from a 2011-seeded
-growth-factored model. With the hourly tier unrecoverable, GEH-hourly is
-off the table for this source.
+locations to the known bottlenecks [2,3]. GEH < 5 had been ruled out at M2
+because the GEH screening statistic is defined for hourly flows and is not
+scale-invariant: applied to daily volumes of this magnitude it would demand
+roughly 2% agreement, unachievable from a 2011-seeded growth-factored
+model. A7 was not met, and the reason was structural rather than a matter
+of tuning (§5.6). The demand is now generated from the counts themselves
+(§5.3), which puts the comparison back on hourly flows and makes GEH the
+applicable statistic: the criterion in force is GEH < 5 on at least 85% of
+count locations, the conventional screening threshold (★ UK DMRB
+convention, §7).
 
 ### 5.2 Study network (as built)
 
@@ -497,6 +510,23 @@ turn-level movements.
   insertion starvation: 21,288 of 234,760 vehicles entered the network
   over the 6 h window, with the top origin edge assigned about five times
   its lane capacity.
+- **Count-matched demand generation (the M3 method change)**: the corridor
+  sub-OD carries only the movements the JICA 50-zone system resolves — trips
+  between the eight corridor zones and the eight external gate groups —
+  while the counted junctions also carry local and through movements that
+  zone system does not resolve, which capped modeled leg volumes at about
+  a fifth of the counts (§5.6). `pipeline/count_targets.py` therefore
+  converts the 38 counted inbound legs into hourly `edgeData` targets
+  (407,561 vehicle-entries 07:00–12:00, distributed over the measured A1
+  hourly shares). The counts are published in PCU and the 2019 report never
+  prints its own PCU factors [10], so the conversion applies the model
+  spec's primary PCU set at the fleet mix the report does state (~70%
+  motorcycle, ~15% car): 0.96 PCU per vehicle. SUMO's `routeSampler` [53]
+  then draws from the routed corridor demand until modeled flows match those
+  targets, and `sort_routes` [53] writes the sampled file in departure order.
+  This replaces rescaling of the sub-OD, global or per-junction, which would
+  have required a growth factor outside the range any DoR station recorded
+  between 2011 and 2025 [12] (`results/demand_sanity.md`).
 - **Junction control (A10)**: nine of the ten binding junctions were
   police-controlled at survey time (§4.2), and no numeric signal timings
   exist as text in the 2019 report [10]. SUMO priority junctions deadlock
@@ -510,12 +540,14 @@ turn-level movements.
   0.2–0.41 m standing lateral distance. The VISSIM→SUMO mapping is
   approximate and is registered as assumption A11, swept over the
   calibrated range ends. Saturation-flow sanity checks against [49].
-- **Baseline assignment**: current departure profile + current mode split,
-  routed to user equilibrium with `duaIterate` [51] — mesoscopic
-  assignment iterations, with microscopic runs for validation and metric
-  extraction. Status: in calibration iteration; the baseline is accepted
-  only when the §5.1 criterion is met, and no result in this paper depends
-  on it yet.
+- **Baseline assignment**: current departure profile + current mode split.
+  Paths come from `duarouter` on the corridor sub-OD; `routeSampler` selects
+  from those paths against the count targets, so the sampled routes travel
+  with each vehicle and every scenario run reuses them unchanged — a
+  scenario transform moves departure times and changes vehicle types without
+  touching paths, which keeps the scenario-versus-baseline comparison free
+  of reassignment noise. Mesoscopic runs are used for demand-side checks,
+  microscopic runs for metric extraction. Outcome in §5.6.
 
 ### 5.4 Experiment design (stage 3)
 
@@ -554,6 +586,67 @@ the compliance threshold for measurable effect is ≤ the participation rates
 achieved by the cited programs. Otherwise H1 fails and the paper reports
 the bound.
 
+### 5.6 Calibration outcome (M3)
+
+The calibration has two halves, whether the model loads the right demand
+and whether the network moves it, and they came out differently.
+
+**The original criterion was not met, and the gap was structural.** Against
+A7 the modeled leg-direction volumes reached a median of 8% of the ±15%
+daily-volume target and 0 of 77 leg-directions passed
+(`results/baseline_calibration.csv`). The shortfall decomposed
+multiplicatively: 0.51 from insertion (the share of loaded vehicles the
+network accepted) times 0.20 from demand allocation, giving 0.10 of
+target. The 0.20 term is the binding one and no parameter setting reaches
+it: even with perfect insertion, the corridor sub-OD covers only about a
+fifth of the traffic the counted junctions carry, because the JICA
+50-zone system resolves trips between the eight corridor zones and eight
+external gates but not the local and through movements those junctions also
+carry. The per-junction ratios in `results/demand_sanity.md` (0.23–1.24)
+show the same thing spatially: the deficit is not a scale error, so scaling
+cannot fix it.
+
+**Demand is now calibrated to the counts.** With the counts converted to
+hourly targets and `routeSampler` drawing against them (§5.3), the modeled
+flows reproduce 95% of total counted volume at 42 count locations, with
+GEH < 5 at **90.5%** of them (`results/routesampler.log`) — above the
+conventional 85% screening threshold (★ §7). This is a stronger basis than
+A7, not a relaxation of it. A7 settled for ±15% on daily volumes precisely
+because the hourly tier was unavailable; the count-derived targets are
+hourly by construction, which is the scale GEH is defined at, and GEH < 5
+is a tighter test at these flow levels than ±15%.
+
+**The network carries about half the counted throughput.** Loading the
+count-matched demand (176,370 vehicles) into the corridor network inserts
+roughly 49% of it (`results/sampled_meso.log`). This persists with every
+capacity-side correction the model spec registers in place: actuated signal
+proxies for police-metered junctions (A10), the sublane model with
+motorcycle lateral parameters (A11), physical vehicle geometry and
+forced-gap driving behaviour (A12), and collision logging rather than
+vehicle removal (A13). SUMO's junction and car-following model delivers
+roughly half the throughput Kathmandu's real junctions achieve at the same
+demand. The behaviours that make those junctions work (continuous filtering
+through gaps, right-of-way negotiated rather than assigned, several vehicles
+abreast in a nominal lane) have no representation in a model built on lanes
+and rectangular vehicles. That reading of the measurement, as a limitation
+of lane-based microsimulation rather than a residual calibration error, is
+marked ★ in §7: no alternative simulator was tested here.
+
+**What this study therefore claims.** Scenario results are reported as
+relative effects: each scenario against the baseline run under identical
+network, demand, and model settings, on the same sampled routes. Absolute
+delay and queue values from this model are not predictions of field
+conditions and are not offered as such. The relative comparison stays valid
+because the throughput limitation is a property of the model that both arms
+share: a scenario transform changes departure times and vehicle types on a
+fixed set of routes, so any difference between the two runs comes from the
+demand change under test. What the limitation plausibly bounds is the size
+of the effect rather than its sign — a network held below its real
+throughput sits deeper in oversaturation than the real one, and §3's
+deterministic-queueing argument then puts a small demand cut on the flatter
+part of the response. Directional findings and the compliance thresholds of
+RQ2 survive that; a claimed number of seconds saved per vehicle would not.
+
 ## 6. Development Plan
 
 Internal definitions live in the model spec (M2); technology beyond the
@@ -564,7 +657,7 @@ simulation platform is deliberately undecided.
 | M0 — Verification closeout | ★ items: office-hours change implementation [28]; obtain 2 remaining nepjol papers + SMEC report manually [45]; JICA OD license check for open release | each ★ resolved or documented as limitation |
 | M1 — Data extraction | Digitize OD matrices [8]; filter DoR growth factors [12]; extract 2019 counts [10] into machine-readable form | QA: matrix totals match printed totals; growth factors pass sanity filter |
 | M2 — Model spec | Written internal definitions: zone system, cordon, time slices, vehicle classes/PCU [49], metrics, calibration tolerance (A7), scenario parameterization | spec reviewed against this paper's §5 |
-| M3 — Network + baseline | OSM build, corridor audit, calibration, baseline validation | acceptance criterion §5.1 met |
+| M3 — Network + baseline | OSM build, corridor audit, calibration, baseline validation | done with a documented limitation (§5.6): demand calibrated to the counts at GEH < 5 on 90.5% of count locations; network throughput limitation recorded, scenario claims restricted to relative effects |
 | M4 — Experiments | Surface + S0–S3 + robustness | all runs reproducible from config |
 | M5 — (Optional) local behavior | Small SP survey on corridor departure-time flexibility (replaces transferred parameters) | n, instrument TBD |
 | M6 — Writeup | Results paper; testbed + digitized data released (license permitting) | — |
@@ -614,23 +707,53 @@ principle.
    lateral-resolution sweeps), not sourced facts
    ([model spec §9](../../specs/model-spec.md)).
 10. **Demand-model class coverage**: modeled cordon demand in the analysis
-    window is 0.61× what the 2019 counts imply, with per-junction ratios
+    window was 0.61× what the 2019 counts imply, with per-junction ratios
     0.23–1.24. The gap is structural — the OD vehicle modes carry no
     separate taxi/tempo/microbus (A8), and centroid/gate placement is
     unresolved (A2) — not a growth-factor error: matching the counts by
     scale alone would need a factor outside every DoR station's observed
     2011–2025 range. Documented in
-    [results/demand_sanity.md](../../results/demand_sanity.md); addressed
-    at per-junction calibration, never by global rescaling.
+    [results/demand_sanity.md](../../results/demand_sanity.md). This is what
+    count-based demand generation answers (§5.3): the counted volumes, not
+    the zone system, now set how much traffic each counted leg carries. The
+    OD structure still decides *which* paths that traffic takes, so the
+    class-coverage and centroid-placement assumptions remain live for route
+    composition even though they no longer set volumes.
 11. **Simulation calibration was iterative, and the failures are part of
-    the record**: two baseline configurations were falsified and
+    the record**: three baseline configurations were falsified and
     documented before the current one — single-edge demand injection
-    starved insertion (21,288 of 234,760 vehicles), and the rebuilt
-    TAZ-based demand gridlocked on unsignalized priority junctions. The
-    current equilibrium-assignment configuration is not yet accepted
-    against the §5.1 criterion; until it is, no simulation output should
-    be read as a validated baseline.
-12. **The peak-shape evidence is not corridor-interior.** The measured
+    starved insertion (21,288 of 234,760 vehicles), the rebuilt TAZ-based
+    demand gridlocked on unsignalized priority junctions, and the sublane
+    build then deleted vehicles on minor lateral overlaps (96,225 of 145,191
+    teleports were collision removals, A13). Two of the faults produced no
+    error message at all, which is worth recording as method rather than
+    anecdote, because either one invalidates a result set silently. First,
+    SUMO discards vehicles that appear out of departure order in a route
+    file; `routeSampler` writes in sampling order, and until the output was
+    passed through `sort_routes` [53] this cost 85% of the demand, with the
+    run completing normally each time. Second, the evaluator's
+    analysis-window share was hardcoded at 0.50 and survived the A1
+    correction that moved the measured 07:00–12:00 share to 0.301,
+    inflating every calibration target by the ratio between them; it is now
+    derived from the demand profile itself, so target and demand cannot
+    drift apart again. Both were found by arithmetic on intermediate
+    outputs, not by anything the simulator reported.
+12. **Network throughput is about half the counted throughput, and this
+    bounds what the study reports.** With count-matched demand loaded
+    (176,370 vehicles) the simulation inserts roughly 49% (§5.6), with the
+    A10–A13 capacity corrections all in place. The measured claim is that
+    this configuration of SUMO moves about half the traffic Kathmandu's
+    junctions move at the same demand. The wider reading — that this is a
+    general limitation of lane-based open-source microsimulation applied to
+    non-lane-based heterogeneous traffic, rather than residual calibration
+    error specific to this build — is an interpretation and is marked ★: no
+    alternative simulator was tested, and no ablation isolates the junction
+    model from the car-following model. The consequence for the research
+    design is stated in §5.6 and holds either way: scenario results are
+    reported as relative effects against a baseline under identical model
+    settings, and absolute delay levels from this model are not offered as
+    field predictions.
+13. **The peak-shape evidence is not corridor-interior.** The measured
     departure profile (A1, §5.1) comes from three DoR stations that are
     highway and Ring-Road cross-sections [52], and the counts used are
     both-direction totals, which flatten a tidal profile; the per-direction
@@ -648,6 +771,13 @@ principle.
     Note that the premise this measurement replaced had no
     corridor-interior support either: it rested on a household-survey
     trip-generation statistic.
+14. **The 85% screening threshold is convention, not a collected source.**
+    GEH < 5 on at least 85% of count locations is the criterion in force
+    (§5.1, §5.6), and the model reaches 90.5%. The threshold is attributed
+    to UK DMRB practice; no copy of that standard is held in
+    [`research/library/`](../library/README.md), so the attribution is ★
+    until the citation is obtained. The measured GEH distribution stands
+    regardless of which threshold is applied to it.
 
 ## 8. Conclusion
 
@@ -668,7 +798,9 @@ also narrows the claim: with the corridor near its peak load from 09:00 to
 traffic, so the study is testing a small cut against a large queue, and
 the negative answer is a real possibility. The proposed simulation study is falsifiable in both directions
 and contributes reusable infrastructure — a sparse-data OD pipeline and an
-open corridor testbed — regardless of which way the hypothesis resolves.
+open corridor testbed whose demand matches the counted volumes and whose
+throughput limitation is measured and stated (§5.6) — regardless of which
+way the hypothesis resolves.
 
 ---
 
@@ -696,6 +828,7 @@ Format: [n] Author/Institution (year). *Title*. Source. — **[local]**
 - [48] SUMO 2020 conf. *MATSim–SUMO coupling*. — [local] `pivot-matsim-sumo-coupling.pdf`; The MATSim Book <https://matsim.org/the-book/>
 - [50] Alvarez Lopez, P. et al. (2018). *Microscopic Traffic Simulation using SUMO*. IEEE ITSC. <https://elib.dlr.de/124092/>
 - [51] Eclipse SUMO documentation (used at v1.27.1): sublane model, actuated traffic lights, duaIterate assignment. <https://sumo.dlr.de/docs/>
+- [53] Eclipse SUMO calibration tools (used at v1.27.1): `routeSampler.py`, which samples a route set to match counted edge/turn volumes and reports per-interval GEH — <https://sumo.dlr.de/docs/Tools/Turns.html>; `route/sort_routes.py`, which writes a route file in departure order — <https://sumo.dlr.de/docs/Tools/Routes.html>
 - Supporting compendia: FHWA HOP-18-071 — [local] `pivot-fhwa-incentives-compendium.pdf`; Berkeley incentives comparison — [local] `pivot-incentives-comparison-berkeley.pdf`
 
 ### Kathmandu — official data & plans

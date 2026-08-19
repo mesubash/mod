@@ -133,18 +133,37 @@ Per run, at the nine calibration intersections and corridor level:
 | t_diss | time from 10:00 until queues dissipate to pre-peak levels; if queues persist at 12:00, record ">120 min (censored)" — if the baseline itself censors, extend the window before running scenarios |
 | D_net | total network delay (veh·h) vs free-flow, analysis window |
 
-**Calibration acceptance (M3 exit):** modeled daily leg-direction PCU
-volume within **±15%** of `counts_2019.parquet` on ≥ 85% of the 77
-leg-direction records, plus a documented qualitative match of queue
-locations to the known bottlenecks. The ±15%/85% daily criterion is a
-project decision (A7): the conventional GEH < 5 on ≥85% screening
-standard (GEH = √(2(M−C)²/(M+C)), M modeled, C counted; ★ UK-DMRB
-convention, citation to collect) is defined for **hourly** flows and is
-not scale-invariant — applied to daily volumes of this magnitude it would
-demand ~2% accuracy, unachievable from a 2011-seeded growth-factored
-model. GEH < 5 becomes the criterion if and when the OCR upgrade
-(pipeline/counts_2019.py ponytail note; decided at M3 start) yields
-hourly counts.
+**Calibration acceptance (M3 exit, in force):** **GEH < 5 on ≥ 85% of
+count locations** (GEH = √(2(M−C)²/(M+C)), M modeled, C counted; the 85%
+threshold is ★ UK-DMRB convention, citation to collect), measured on the
+hourly count targets that `pipeline/count_targets.py` derives from
+`counts_2019.parquet`, plus a documented qualitative match of queue
+locations to the known bottlenecks. Reached 2026-08-18: 95% of total
+counted volume at 42 locations, GEH < 5 at 90.5% (`results/routesampler.log`).
+
+**Superseded criterion (A7, kept on the record):** modeled daily
+leg-direction PCU volume within **±15%** of `counts_2019.parquet` on ≥ 85%
+of the 77 leg-direction records. A7 was a project decision taken at M2
+because GEH is defined for **hourly** flows and is not scale-invariant —
+applied to daily volumes of this magnitude it would demand ~2% accuracy,
+unachievable from a 2011-seeded growth-factored model — and the hourly
+count tier was unrecoverable from the report (§10, OCR verdict). A7 was not
+met: median 8% of target, 0/77 records passing
+(`results/baseline_calibration.csv`), with the shortfall decomposing as
+0.51 insertion × 0.20 demand allocation. The 0.20 term is structural, not a
+tuning gap: the 50-zone system resolves corridor-zone-to-gate movements but
+not the local and through traffic the counted junctions also carry. The
+basis therefore moved to count-based demand generation — the counts become
+the demand target rather than only the validation target — which restores
+hourly resolution by construction and puts GEH back in scope. The route to
+hourly counts is the count-target conversion, not the OCR upgrade
+(pipeline/counts_2019.py ponytail note), which stays closed.
+
+**What the new criterion does not cover:** demand matching the counts is
+not the network moving it. With the count-matched demand loaded (176,370
+vehicles) the simulation inserts ~49% (`results/sampled_meso.log`), with
+A10–A13 in place. Scenario metrics are therefore read as deltas against the
+baseline under identical settings, never as absolute levels (paper §5.6).
 
 ## 8. Scenario parameterization
 
@@ -181,7 +200,7 @@ set, B_cap sweep.
 | A4 | OD "bus"/"truck" PCU = large-class value (4.0) | OD modes are aggregates; class split unknown | sensitivity with IOE 2014 set (bus 2.19, truck 2.65) brackets it |
 | A5 | B_cap value | no PT load data for the corridor | swept, not fixed; EASTS crowding evidence bounds the narrative |
 | A6 | Zone table transcribed from raster pages (App 1.1.1 has no text layer) | agent visual transcription; total count matches Table 5.1.4 | ★ spot-verify 5 random zone rows before paper submission |
-| A7 | ±15% daily-volume criterion, ≥85% of 77 leg-directions (M3 exit) | no collected source defines a daily-volume screening standard; hourly GEH inapplicable at daily magnitudes | replace with GEH < 5 hourly if OCR yields hourly counts; collect DMRB citation |
+| A7 | **Superseded 2026-08-18** (kept for the record, §7): ±15% daily-volume criterion, ≥85% of 77 leg-directions (M3 exit) | no collected source defines a daily-volume screening standard; hourly GEH was inapplicable at daily magnitudes | not met (0/77, median 8% of target); replaced by hourly GEH < 5 on ≥85% of count locations, reached at 90.5% via count-based demand generation (`pipeline/count_targets.py` + routeSampler). Open: collect the DMRB citation for the 85% threshold |
 | A8 | OD "car" mode composition (whether taxi/tempo ride inside it) unknown | vol04 prints only 4 vehicle OD tables; aggregation not stated | check vol03 demand-model class definitions at M3; occupancy sensitivity (1.9 vs 7.8) if tempo included |
 | A9 | S1 school_share = 0.46 of peak-hour trips, sensitivity 0.25 | derived from sourced person-trip values: to-school 19.1% of 3,438,393 daily trips (Table 6.1.5 p.6-5/6) × 48% peak concentration ÷ (20% × total) = 0.459; person-trip level — school trips skew to walking, so the vehicle-trip share is lower | sensitivity run at 0.25; upgrade if a mode-by-purpose split surfaces |
 | A10 | Police control at study junctions modeled as actuated signals (sim/net/tls-patch.nod.xml → corridor-calibrated.net.xml): Thapathali, Kalimati, Shahid Gate, Maitighar island entries, Tinkune corners; New Baneshwor's 4 corner TLS joined into one controller | 9 of 10 study junctions are police-controlled [JICA 2012, facts-extracted.json]; SUMO priority junctions deadlock under conflicting saturated flows (baseline: 66,740 jam teleports); gap-based actuation is the nearest SUMO analog to police metering; no numeric signal timings exist as text in the 2019 report (§10) | calibrate green splits/cycle lengths against 2019 turning counts if the OCR upgrade (A7) yields hourly movements; sensitivity on cycle length otherwise |

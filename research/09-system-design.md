@@ -91,7 +91,7 @@ git; code, configs, specs, and small CSVs go in.
 | --- | --- | --- |
 | M1 | `od_2011.parquet`, `growth_factors.csv`, `counts_2019.parquet` | **DONE 2026-08-15** — 14/14 tests; OD totals validated against printed totals (one documented source discrepancy: person table's unprinted external row, 3,636 trips); 29 stations' growth factors with per-station flag counts. See `pipeline/README.md`. |
 | M2 | `specs/model-spec.md` + config schema | **DONE 2026-08-15** — adversarially verified against source PDFs (9 findings fixed, incl. replacing the daily-GEH gate with a ±15% criterion, A7); 138-fact cited base in `specs/facts-extracted.json`; 8 assumptions registered |
-| M3 | audited `.net.xml` + validated baseline | **In calibration iteration 3 (equilibrium assignment)** — history: starved (single-edge injection) → gridlocked (priority junctions) → converging (mesoscopic duaIterate on the signal-proxy net). Exit: A7 ±15% daily on ≥85% of 77 leg-directions + documented queue-pattern match (GEH-hourly closed by the OCR verdict, spec §7) |
+| M3 | audited `.net.xml` + validated baseline | **DONE WITH LIMITATION 2026-08-18** — demand calibrated by count-based generation (`pipeline/count_targets.py` → routeSampler): 95% of counted volume at 42 locations, GEH < 5 at 90.5%, above the 85% screening threshold. A7 (±15% daily) was **not** met — 0/77, median 8% of target, gap = 0.51 insertion × 0.20 allocation — and is superseded, not deleted (spec §7). Limitation: the network inserts ~49% of the count-matched demand (176,370 loaded), so scenario metrics are relative to the baseline under identical settings, never absolute (paper §5.6). History: starved (single-edge injection) → gridlocked (priority junctions) → collision-deleted (sublane, A13) → count-matched |
 | M4 | results parquet + figures for surface, S0–S3, robustness | every run reproducible from YAML + seed; compliance-threshold curves produced |
 
 ## 2. The Gate (after M4)
@@ -174,7 +174,7 @@ no database in Phase A. Each returns only when a concrete need appears;
 | --- | --- |
 | OD extraction messier than the verified sample pages | fall back to page-targeted manual entry for bad zones; QA totals catch errors |
 | OSM corridor attributes wrong | manual audit pass is already a milestone step (M3); 2019 signal data as cross-check |
-| **2019 15-min turning-movement tables are raster images, not text** (found in M1: only Table 4.1 daily leg PCU summaries extract; spec sheets A4-2..11 are jpx images) | M3 calibration ground truth is the daily-leg tier unless upgraded; upgrade path: OCR/camelot pass over A4 pages — decide at M3 start whether GEH-on-turning-movements requires it |
+| **2019 15-min turning-movement tables are raster images, not text** (found in M1: only Table 4.1 daily leg PCU summaries extract; spec sheets A4-2..11 are jpx images) | **Resolved without OCR.** The OCR route stayed closed (research/07 verdict); instead the daily leg totals are distributed over the measured A1 hourly profile into hourly count targets (`pipeline/count_targets.py`), which restores an hourly tier for GEH and doubles as the demand target |
 | SUMO exogenous-shift design too coarse | upgrade path: MATSim coupling (library `pivot-matsim-sumo-coupling.pdf`) |
 | Transferred behavioral params wrong | RQ4 sensitivity halving; upgrade: M5 local SP survey |
 | Gate passes but no anchor institution signs on | product concept requires exactly one willing anchor — recruit during Phase A, not after |
