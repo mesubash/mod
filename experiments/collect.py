@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 
-PARAM = re.compile(r"(pt|dt|sch|bcap|m)(-?[\d.]+)")
+PARAM = re.compile(r"(p_r|pt|dt|sch|bcap|m)(-?[\d.]+)")
 
 
 def flatten(metrics, prefix=""):
@@ -61,7 +61,8 @@ def add_deltas(df):
     if base.empty:
         return df
     reference = base.iloc[0]
-    scenario_params = {"scenario", "run_id", "seed", "pt", "dt", "sch", "bcap", "m"}
+    scenario_params = {"scenario", "run_id", "seed", "pt", "dt", "sch",
+                       "bcap", "m", "p_r"}
     metrics = [
         c for c in df.columns
         if c not in scenario_params
