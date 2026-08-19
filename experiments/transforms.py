@@ -9,10 +9,13 @@ Sign convention: dt_minutes is the spec's Δt — negative shifts earlier
 import random
 import xml.etree.ElementTree as ET
 
+from pipeline.common import REPO
+
 PEAK = (32400, 36000)      # 09:00-10:00, spec §4
 ANALYSIS = (28800, 39600)  # 08:00-11:00, spec §4
 MC_OCC = 1.1               # persons/motorcycle, spec §3
 BUS_OCC = 15               # persons/bus, spec §3
+NET_DEFAULT = REPO / "sim/net/corridor-calibrated.net.xml"
 
 
 def _depart(t):
@@ -126,3 +129,68 @@ def s1_school_shift(trips, school_share=None, *, seed):
         raise ValueError(
             "s1 school_share unset: size via the A1 profile first (spec §8 S1)")
     return retime(trips, school_share, -60, seed=seed)
+
+
+def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
+    """S0: divert a seeded random p_r share of peak trips onto their best
+    alternative path, leaving departure times unchanged.
+
+    This is the project's original hypothesis — spread traffic across roads
+    rather than across time. Each diverted vehicle keeps its origin and
+    destination but is rerouted so that its first counted corridor edge is
+    avoided, forcing it onto a parallel path if one exists. Vehicles with no
+    alternative stay on their route and are counted in the summary, because
+    "no alternative exists" is itself the result the scenario tests.
+
+    Operates on route-carrying demand (<vehicle> with embedded edges); trips
+    without a route are returned unchanged.
+    """
+    import sumolib
+
+    net = sumolib.net.readNet(str(net_path or NET_DEFAULT))
+    idx = [i for i, t in enumerate(trips) if _in(t, window) and t.get("route")]
+    chosen = set(random.Random(seed).sample(idx, round(p_r * len(idx))))
+
+    out, diverted, no_alternative = [], 0, 0
+    for i, trip in enumerate(trips):
+        if i not in chosen:
+            out.append(trip)
+            continue
+        edges = trip["route"].split()
+        alt = _alternative(net, edges)
+        if alt:
+            out.append({**trip, "route": " ".join(alt)})
+            diverted += 1
+        else:
+            out.append(trip)
+            no_alternative += 1
+    return out, {"selected": len(chosen), "diverted": diverted,
+                 "no_alternative": no_alternative}
+
+
+def _alternative(net, edges):
+    """Shortest path from origin to destination that avoids the route's
+    mid-section edge. None when no such path exists — the informative case,
+    since "this trip has no alternative" is what the scenario measures.
+
+    sumolib has no edge-exclusion argument, so the avoided edge is made
+    prohibitively slow for the duration of the search and restored after."""
+    if len(edges) < 3:
+        return None
+    blocked = edges[len(edges) // 2]          # mid-route edge stands for the corridor
+    try:
+        start, end = net.getEdge(edges[0]), net.getEdge(edges[-1])
+        avoid = net.getEdge(blocked)
+    except KeyError:
+        return None
+
+    original = avoid._speed
+    avoid._speed = 1e-6                       # cost = length/speed -> effectively closed
+    try:
+        path, _ = net.getShortestPath(start, end, vClass="passenger")
+    finally:
+        avoid._speed = original
+    if path is None:
+        return None
+    ids = [e.getID() for e in path]
+    return ids if blocked not in ids else None

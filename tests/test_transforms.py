@@ -1,6 +1,9 @@
 import pytest
 
 from experiments import transforms
+from pipeline.common import REPO
+
+_ANY_NET = REPO / "sim/net/corridor-calibrated.net.xml"
 from experiments.transforms import PEAK, mode_shift, retime, s1_school_shift
 
 
@@ -132,3 +135,34 @@ def test_route_file_round_trip(tmp_path):
     assert by_id["m1"]["route"] == "a b c"
     assert float(by_id["m1"]["depart"]) == 32500.0 - 1800   # in peak, shifted
     assert float(by_id["c1"]["depart"]) == 30000.0          # outside peak, kept
+
+
+def test_reroute_preserves_trips_and_reports_no_alternative(tmp_path):
+    # S0: diverted vehicles keep origin/destination and depart time; only the
+    # path changes. Trips with no alternative stay put and are counted, since
+    # "no alternative exists" is the finding the scenario tests.
+    trips = [
+        {"id": "a", "depart": "32500.0", "type": "car", "route": "e1 e2 e3"},
+        {"id": "b", "depart": "32600.0", "type": "car", "route": "e1 e2 e3"},
+        {"id": "outside", "depart": "20000.0", "type": "car", "route": "e1 e2 e3"},
+    ]
+    calls = {"n": 0}
+
+    def fake_alternative(net, edges):      # every other trip has an alternative
+        calls["n"] += 1
+        return ["e1", "x9", "e3"] if calls["n"] % 2 else None
+
+    original = transforms._alternative
+    transforms._alternative = fake_alternative
+    try:
+        out, summary = transforms.reroute(trips, 1.0, seed=1, net_path=_ANY_NET)
+    finally:
+        transforms._alternative = original
+
+    assert len(out) == len(trips)
+    assert summary["selected"] == 2                      # peak-window trips only
+    assert summary["diverted"] + summary["no_alternative"] == 2
+    outside = next(t for t in out if t["id"] == "outside")
+    assert outside["route"] == "e1 e2 e3"                 # untouched
+    for before, after in zip(trips, out):
+        assert before["depart"] == after["depart"]        # departs never move

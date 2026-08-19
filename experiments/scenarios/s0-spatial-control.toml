@@ -1,10 +1,14 @@
-# S0 spatial-rerouting control (spec §8, expected fail). Marker config only:
-# demand is unchanged (transform "none") and the S0 mechanics — how drivers
-# are diverted spatially at unchanged departure times — are decided at run
-# time, not here. run.py refuses a full run while reroute_control is set;
-# --dry-run writes the (identical) trips file for the provenance chain.
+# S0 spatial redistribution — the project's original hypothesis (spec §8).
+# Divert a share of peak trips onto alternative paths at unchanged departure
+# times: spread traffic across roads rather than across time. Documentary
+# evidence says this fails inside the Ring Road (all river crossings over
+# capacity in 2012; the parallel bridges are the most oversaturated links at
+# V/C 2.70-2.76; ~80% of corridor traffic is through-traffic) — this scenario
+# tests that in our own model instead of citing it. The share of selected trips
+# with no alternative at all is part of the result, reported in the run summary.
 name = "s0-spatial-control"
-transforms = "none"
-reroute_control = true
 seeds = [101, 202, 303]
-notes = "control, demand unchanged, spatial rerouting only, mechanics TBD at run time"
+notes = "original hypothesis: spatial redistribution at unchanged departure times"
+
+[transforms.reroute]
+p_r = [0.05, 0.10, 0.20]

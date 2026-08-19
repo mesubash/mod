@@ -123,9 +123,6 @@ def main():
     tf_cfg = cfg["transforms"]
     if tf_cfg == "none":
         tf_cfg = {}
-    if cfg.get("reroute_control") and not args.dry_run:
-        raise SystemExit("S0 rerouting mechanics are decided at run time (M4) "
-                         "and not implemented; only --dry-run works")
 
     vtypes, baseline = transforms.read_trips(BASELINE_TRIPS)
     demand_dir = REPO / "sim/demand" / cfg["name"]
