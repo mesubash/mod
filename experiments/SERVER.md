@@ -12,11 +12,40 @@ session involved.
 
 ## Run it
 
+On a VPS, run it inside tmux. `nohup` alone is not always enough: many
+distros ship systemd-logind with `KillUserProcesses=yes`, which kills your
+processes when the SSH session ends regardless of nohup.
+
 ```bash
 git clone <your-repo-url> mod && cd mod
-nohup ./experiments/sweep.sh > sweep.log 2>&1 &
-tail -f sweep.log
+tmux new -s sweep
+./experiments/sweep.sh 2>&1 | tee sweep.log
+# detach with Ctrl-b then d — the sweep keeps running
 ```
+
+Reattach any time, from any machine:
+
+```bash
+ssh you@vps
+tmux attach -t sweep          # or: tmux ls  to list sessions
+```
+
+Check progress without attaching:
+
+```bash
+tail -20 ~/mod/sweep.log
+ls ~/mod/results/sweep/*/*/metrics.json | wc -l    # runs completed so far
+pgrep -fa sumo                                     # is a simulation running
+```
+
+If tmux is unavailable: `setsid nohup ./experiments/sweep.sh > sweep.log 2>&1 <
+/dev/null &` detaches from the login session entirely. Plain
+`nohup ... &` works only if `KillUserProcesses=no` on that host (check with
+`loginctl show-user "$USER" -p KillUserProcesses` or
+`grep KillUserProcesses /etc/systemd/logind.conf`).
+
+Nothing is lost if the machine reboots mid-sweep: re-running the script skips
+completed runs.
 
 Profiles (pick with `PROFILE=`):
 
