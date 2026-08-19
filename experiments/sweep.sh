@@ -27,18 +27,23 @@ log "MOD sweep starting: profile=$PROFILE mode=$MODE"
 # --- 1. environment -----------------------------------------------------
 command -v uv >/dev/null || { echo "uv not found: https://docs.astral.sh/uv/"; exit 1; }
 uv sync --quiet
+NETCONVERT=$(uv run python -c 'from pipeline.common import sumo_tool; print(sumo_tool("netconvert"))') \
+  || { echo "no working netconvert; install SUMO system-wide: sudo add-apt-repository ppa:sumo/stable && sudo apt install sumo"; exit 1; }
+SUMO_TOOLS=$(uv run python -c 'import sumolib, os; print(os.path.join(os.path.dirname(os.path.dirname(sumolib.__file__)), "sumo", "tools"))')
+[ -f "$SUMO_TOOLS/routeSampler.py" ] || SUMO_TOOLS=${SUMO_HOME:-/usr/share/sumo}/tools
+[ -f "$SUMO_TOOLS/routeSampler.py" ] || { echo "SUMO tools not found; set SUMO_HOME"; exit 1; }
 log "dependencies ready ($(uv run python -c 'import sumolib; print("sumo", sumolib.version.gitDescribe())' 2>/dev/null || echo 'sumo via eclipse-sumo'))"
 
 # --- 2. network (rebuilt from the committed OSM extract) ----------------
 NET=sim/net/corridor-calibrated.net.xml
 if [ ! -f "$NET" ]; then
   log "building network from data/raw/corridor.osm"
-  uv run netconvert --osm-files data/raw/corridor.osm -o sim/net/corridor.net.xml \
+  "$NETCONVERT" --osm-files data/raw/corridor.osm -o sim/net/corridor.net.xml \
     --geometry.remove --ramps.guess --junctions.join --tls.discard-simple \
     --remove-edges.by-vclass pedestrian,bicycle
-  uv run netconvert -s sim/net/corridor.net.xml -o sim/net/corridor-filtered.net.xml \
+  "$NETCONVERT" -s sim/net/corridor.net.xml -o sim/net/corridor-filtered.net.xml \
     --keep-edges.by-vclass passenger --keep-edges.components 1
-  uv run netconvert -s sim/net/corridor-filtered.net.xml -n sim/net/tls-patch.nod.xml \
+  "$NETCONVERT" -s sim/net/corridor-filtered.net.xml -n sim/net/tls-patch.nod.xml \
     -o "$NET"
   log "network built"
 else
@@ -51,11 +56,11 @@ if [ ! -f sim/demand/sampled_sorted.rou.xml ]; then
   [ -f sim/demand/baseline.rou.xml ] || uv run python -m pipeline.cordon
   log "generating count-matched demand (routeSampler)"
   uv run python -m pipeline.count_targets
-  uv run python .venv/lib/python*/site-packages/sumo/tools/routeSampler.py \
+  uv run python "$SUMO_TOOLS/routeSampler.py" \
       -r sim/demand/baseline.rou.xml -d data/processed/count_targets.xml \
       -o sim/demand/sampled.rou.xml --keep-attributes --seed 20260818
   # SUMO discards vehicles that are out of departure order, silently
-  uv run python .venv/lib/python*/site-packages/sumo/tools/route/sort_routes.py \
+  uv run python "$SUMO_TOOLS/route/sort_routes.py" \
       sim/demand/sampled.rou.xml -o sim/demand/sampled_sorted.rou.xml
   log "calibrated demand built"
 else

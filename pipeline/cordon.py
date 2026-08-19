@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import sumolib
 
-from pipeline.common import REPO
+from pipeline.common import REPO, sumo_tool
 
 NET = REPO / "sim/net/corridor-filtered.net.xml"
 OSM = REPO / "data/raw/corridor.osm"
@@ -34,7 +34,7 @@ JUNCTION_MAP = REPO / "sim/net/junction_map.csv"
 OUT_OD = REPO / "data/processed/corridor_od.parquet"
 DEMAND = REPO / "sim/demand"
 TAZ_FILE = DEMAND / "zones.taz.xml"
-DUAROUTER = REPO / ".venv/bin/duarouter"
+DUAROUTER = None  # resolved lazily by sumo_tool (wheel binary or system install)
 
 # A3: growth from DoR SSRN station 64 (Manohara Bridge, road link H0303), the
 # only valley station on the corridor's own road — Arniko Hwy at the Jadibuti
@@ -260,7 +260,7 @@ def build_taz(net, to_xy):
 
 
 def run_duarouter(trips, out, taz=None):
-    cmd = [str(DUAROUTER), "-n", str(NET), "-r", str(trips), "-o", str(out),
+    cmd = [sumo_tool("duarouter"), "-n", str(NET), "-r", str(trips), "-o", str(out),
            "--ignore-errors", "--no-warnings", "--no-step-log",
            "--routing-threads", "8"]
     if taz:

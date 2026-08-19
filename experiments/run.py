@@ -16,7 +16,7 @@ from pathlib import Path
 
 from experiments import transforms
 from pipeline.baseline_eval import s7_metrics
-from pipeline.common import REPO
+from pipeline.common import REPO, sumo_tool
 from pipeline.cordon import run_duarouter
 
 # Count-matched demand (pipeline/count_targets.py + routeSampler): reproduces
@@ -25,7 +25,7 @@ from pipeline.cordon import run_duarouter
 # change types without altering paths.
 BASELINE_TRIPS = REPO / "sim/demand/sampled_sorted.rou.xml"
 ADD = REPO / "sim/baseline.add.xml"
-SUMO = REPO / ".venv/bin/sumo"
+SUMO = None  # resolved lazily by sumo_tool (wheel binary or system install)
 SCENARIO_DIR = REPO / "experiments/scenarios"
 
 # Scenarios must run under identical physics to the baseline they are compared
@@ -71,7 +71,7 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
     # copy redirects them into outdir (files then match s7_metrics prefix="")
     add = outdir / "run.add.xml"
     add.write_text(ADD.read_text().replace("../results/baseline_", f"{outdir}/"))
-    cmd = [str(SUMO), "-n", str(SIM_NET), "-r", str(rou), "-a", str(add),
+    cmd = [sumo_tool("sumo"), "-n", str(SIM_NET), "-r", str(rou), "-a", str(add),
            "--begin", "21600", "--end", "43200",
            "--statistic-output", str(outdir / "stats.xml"),
            "--queue-output", str(outdir / "queues.xml"),
