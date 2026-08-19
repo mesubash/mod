@@ -20,3 +20,5 @@ COORDINATION.md
 sim/dua/
 !data/processed/*.parquet
 !data/processed/*.csv
+results/figures/
+results/tables/
