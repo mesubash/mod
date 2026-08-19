@@ -60,7 +60,9 @@ def expand(tf_cfg):
 
 
 def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
-    outdir = (outbase or REPO / "results" / scenario) / run_id
+    # Absolute: SUMO resolves the additional file's output paths relative to
+    # that file's own directory, so a relative --out doubles the path.
+    outdir = ((outbase or REPO / "results" / scenario) / run_id).resolve()
     outdir.mkdir(parents=True, exist_ok=True)
     if trips_path.suffix == ".xml" and trips_path.name.endswith(".rou.xml"):
         rou = trips_path          # routes already embedded
