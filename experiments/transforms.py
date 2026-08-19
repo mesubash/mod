@@ -16,6 +16,11 @@ ANALYSIS = (28800, 39600)  # 08:00-11:00, spec §4
 MC_OCC = 1.1               # persons/motorcycle, spec §3
 BUS_OCC = 15               # persons/bus, spec §3
 NET_DEFAULT = REPO / "sim/net/corridor-calibrated.net.xml"
+# Permitted connections differ by class, so an alternative must be searched with
+# the vehicle's own vClass: a path a car may take can be illegal for a bus ("no
+# connection between X and Y"), which SUMO rejects at load time.
+VCLASS = {"motorcycle": "motorcycle", "car": "passenger",
+          "bus": "bus", "truck": "truck"}
 
 
 def _depart(t):
@@ -168,7 +173,7 @@ def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
             out.append(trip)
             continue
         edges = trip["route"].split()
-        alt = _alternative(net, edges)
+        alt = _alternative(net, edges, VCLASS.get(trip.get("type"), "passenger"))
         if alt:
             out.append({**trip, "route": " ".join(alt)})
             diverted += 1
@@ -179,7 +184,7 @@ def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
                  "no_alternative": no_alternative}
 
 
-def _alternative(net, edges):
+def _alternative(net, edges, vclass="passenger"):
     """Shortest path from origin to destination that avoids the route's
     mid-section edge. None when no such path exists — the informative case,
     since "this trip has no alternative" is what the scenario measures.
@@ -198,7 +203,7 @@ def _alternative(net, edges):
     original = avoid._speed
     avoid._speed = 1e-6                       # cost = length/speed -> effectively closed
     try:
-        path, _ = net.getShortestPath(start, end, vClass="passenger")
+        path, _ = net.getShortestPath(start, end, vClass=vclass)
     finally:
         avoid._speed = original
     if path is None:
@@ -237,7 +242,9 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
         if i not in guided:
             out.append(trip)
             continue
-        options = _alternatives(net, trip["route"].split(), closed, k_alternatives)
+        options = _alternatives(net, trip["route"].split(), closed,
+                                k_alternatives,
+                                VCLASS.get(trip.get("type"), "passenger"))
         if not options:
             out.append(trip)
             no_alternative += 1
@@ -254,7 +261,7 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
     }
 
 
-def _alternatives(net, edges, closed, k):
+def _alternatives(net, edges, closed, k, vclass="passenger"):
     """Up to k distinct paths from origin to destination avoiding closed edges.
 
     Each successive alternative additionally avoids the previous one's own
@@ -272,7 +279,7 @@ def _alternatives(net, edges, closed, k):
         for edge, _speed in original:
             edge._speed = 1e-6
         try:
-            path, _ = net.getShortestPath(start, end, vClass="passenger")
+            path, _ = net.getShortestPath(start, end, vClass=vclass)
         finally:
             for edge, speed in original:
                 edge._speed = speed

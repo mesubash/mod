@@ -82,7 +82,13 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
         # re-run microscopically.
         cmd = [c for c in cmd if c not in ("--lateral-resolution", "0.8")]
         cmd.append("--mesosim")
-    subprocess.run(cmd, check=True, capture_output=True, text=True)
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    if done.returncode:
+        # capture_output hides SUMO's reason for failing, which turns a one-line
+        # diagnosis into a round trip; surface the tail of stderr with the error.
+        tail = "\n".join(done.stderr.strip().splitlines()[-15:])
+        raise RuntimeError(
+            f"sumo failed for {scenario}/{run_id} (exit {done.returncode}):\n{tail}")
     (outdir / "metrics.json").write_text(
         json.dumps(s7_metrics(outdir, prefix=""), indent=2))
     print(f"{scenario}/{run_id}: metrics.json written", flush=True)

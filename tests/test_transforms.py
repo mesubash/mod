@@ -148,7 +148,8 @@ def test_reroute_preserves_trips_and_reports_no_alternative(tmp_path):
     ]
     calls = {"n": 0}
 
-    def fake_alternative(net, edges):      # every other trip has an alternative
+    def fake_alternative(net, edges, vclass="passenger"):
+        # every other trip has an alternative
         calls["n"] += 1
         return ["e1", "x9", "e3"] if calls["n"] % 2 else None
 
@@ -181,3 +182,24 @@ def test_mode_shift_on_route_carrying_demand():
     buses = [t for t in out if t["type"] == "bus"]
     assert buses, "expected at least one added bus"
     assert all("route" in b for b in buses), "added buses must carry a route"
+
+
+def test_reroute_searches_with_the_vehicles_own_class():
+    # A path a car may legally take can be illegal for a bus, and SUMO rejects
+    # the whole route file at load time ("no valid route"). Each search must
+    # use the vehicle's own vClass.
+    seen = []
+
+    def fake_alternative(net, edges, vclass="passenger"):
+        seen.append(vclass)
+        return None
+
+    trips = [{"id": "b", "depart": "33000.0", "type": "bus", "route": "a b c"},
+             {"id": "m", "depart": "33001.0", "type": "motorcycle", "route": "a b c"}]
+    original = transforms._alternative
+    transforms._alternative = fake_alternative
+    try:
+        transforms.reroute(trips, 1.0, seed=1, net_path=_ANY_NET)
+    finally:
+        transforms._alternative = original
+    assert sorted(seen) == ["bus", "motorcycle"]
