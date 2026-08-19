@@ -1,0 +1,11 @@
+# S5 - mode shift isolated, three seeds. The 66-run sweep used one seed per
+# grid point, so the headline result (-7.91% network delay at m=15%, 1.33x
+# amplification) has no variance estimate. This config re-runs just the
+# mode-shift curve across seeds, which is the number the paper leans on
+# hardest. Nine runs, no retiming, so the lever acts alone.
+name = "s5-modeshift"
+seeds = [101, 202, 303]
+notes = "mode shift alone, three seeds, for variance on the headline result"
+
+[transforms.mode_shift]
+m = [0.05, 0.10, 0.15]
