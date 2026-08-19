@@ -1,0 +1,20 @@
+# S4 - corridor closure with coordinated rerouting. The project's PRIMARY
+# module: non-recurring congestion (VIP movement, accident, flooded underpass)
+# is the regime where rerouting is the only available lever - a trip already
+# underway cannot be retimed or mode-shifted.
+#
+# The closure is enforced in the network (pipeline/disruption.py writes a
+# rerouter with closingReroute), so un-guided vehicles reroute reactively on
+# arrival, which is today's behaviour and the comparison baseline. p_r = 0 is
+# therefore the uncoordinated control, not a null run.
+#
+# k_alternatives > 1 is the point of the module: sending every diverted vehicle
+# down the single best parallel road recreates the jam elsewhere.
+name = "s4-closure"
+seeds = [101, 202, 303]
+notes = "closure enforced in-network; p_r=0 is the uncoordinated control"
+
+[transforms.spread_reroute]
+closed_edges = ["170533894"]
+p_r = [0.0, 0.1, 0.25, 0.5]
+k_alternatives = [1, 3]
