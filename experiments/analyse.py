@@ -95,9 +95,11 @@ def lever_comparison(df, out):
     for label, d, xcol, colour, marker, dash in series:
         if d.empty or xcol not in d:
             continue
-        d = d.sort_values(xcol)
-        ax.plot(d[xcol] * 100, -d["delta_pct_D_net_veh_h"], marker=marker,
-                linestyle=dash, color=colour, label=label)
+        agg = (d.groupby(xcol)["delta_pct_D_net_veh_h"]
+                 .agg(["mean", "std"]).reset_index())
+        ax.errorbar(agg[xcol] * 100, -agg["mean"], yerr=agg["std"].fillna(0),
+                    marker=marker, linestyle=dash, color=colour, capsize=3,
+                    label=label)
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xlabel("share of peak demand treated (%)")
     ax.set_ylabel("network delay reduction (%)")
