@@ -291,12 +291,26 @@ removed, by a factor of about 1.3 that holds within the seed spread from
 2% to 6% of vehicles removed (§6.2). But it is reached by motorcycle→bus mode shift, which
 removes vehicles from the window, not by retiming, which moves them within
 it. Retiming raises network delay at every share and both shift magnitudes
-tested, monotonically in both (§6.3), so the departure-time instrument the
+tested, monotonically in both (§6.4), so the departure-time instrument the
 pivot named as its lever is falsified on this corridor under this model.
-The spatial control S0 reproduces the §4.2 documentary falsification inside
-the model (§6.4), and RQ3's school-timing proposal is the largest
-degradation measured (§6.5). RQ2 has no compliance threshold to report for
-retiming, because no retiming share produces a benefit to threshold.
+RQ3's school-timing proposal is the largest degradation measured (§6.6).
+RQ2 has no compliance threshold to report for retiming, because no retiming
+share produces a benefit to threshold.
+
+**The original spatial hypothesis is now falsified in both regimes it was
+tested in.** §4.2 falsified it from JICA's screenline and saturation data,
+and the model then falsified it twice more, in the two congestion regimes
+rerouting could work in. Under recurring peak congestion the spatial
+control S0 moves network delay by at most 0.17% while costing corridor
+throughput (§6.5). Under non-recurring disruption, the regime where
+rerouting is the only lever left because a trip already underway cannot be
+retimed or mode-shifted, S4 diverts trips off a closed corridor link and
+raises network delay by about 1% at the two shares where the effect
+separates from the seed spread, while corridor throughput falls by 1.3 to
+2.5% at every share tested (§6.7). The two regimes share one measured
+mechanism: on this network the trips that need an alternative path mostly
+do not have one, and the few that do have exactly one, so there is nothing
+to spread guided traffic across (§6.5, §6.7).
 
 **Explicit non-goals.** No intra-Ring-Road spatial rerouting (falsified,
 §4.2); no interventions requiring authority/operator cooperation to function
@@ -604,6 +618,10 @@ Named scenarios run on the surface:
 - **S0 — Falsification control**: spatial-rerouting-only scenario, expected
   to fail per §4.2 — run to demonstrate the negative result in simulation,
   closing the loop on the original hypothesis.
+- **S4 — Disruption**: a corridor link closes and a share p_r of the trips
+  routed through it is guided onto up to k distinct alternatives. This is
+  the regime S0 does not cover: non-recurring congestion, where a trip
+  already underway can be re-routed but not retimed or mode-shifted.
 
 Outputs per run: intersection delay and queue lengths at the nine junctions,
 corridor travel time, throughput, time-to-queue-dissipation; compliance
@@ -683,18 +701,20 @@ RQ2 survive that; a claimed number of seconds saved per vehicle would not.
 
 ### 6.1 What was run
 
-The sweep is 197 runs: one baseline, 195 scenario runs over S0–S3 at the
-full profile of `experiments/sweep.sh`, and one duplicate mode-shift run
-(S5, `m0.05_seed101`) that reproduces its S3 counterpart to the digit.
-Every grid point ran at three transform seeds, 101, 202 and 303. Every run
+The sweep is 221 runs: one baseline, 195 scenario runs over S0–S3 at the
+full profile of `experiments/sweep.sh`, 24 disruption runs (S4, §6.7), and
+one duplicate mode-shift run (S5, `m0.05_seed101`) that reproduces its S3
+counterpart to the digit. Every grid point ran at three transform seeds,
+101, 202 and 303. Every run
 uses the mesoscopic solver, the calibrated network of §5.2, and the
 count-matched demand of §5.3 (182,251 vehicles in the route file, 176,370
-loaded inside the 06:00–12:00 simulation window). Routes are fixed: a
-scenario transform moves departure times and converts vehicle types, and
-never re-routes, so a scenario run differs from the baseline only by the
-demand change under test (§5.3, §5.6). The seed sets which trips a
-transform selects, not which trips exist; the demand itself was sampled
-once (§8, limitation 15).
+loaded inside the 06:00–12:00 simulation window). In S1, S2, S3 and S5 the
+routes are fixed: the transform moves departure times and converts vehicle
+types, and never re-routes, so the run differs from the baseline only by
+the demand change under test (§5.3, §5.6). S0 and S4 are the two route
+scenarios, and they change paths while leaving departure times alone. The
+seed sets which trips a transform selects, not which trips exist; the
+demand itself was sampled once (§8, limitation 15).
 
 Metrics are the model spec §7 set over the 08:00–11:00 analysis window.
 The headline outcome is D_net, total network delay against free flow; the
@@ -870,6 +890,77 @@ retiming magnitude in the S2 grid, applied to a larger share of demand,
 landing in the same 08:00–09:00 shoulder. S1 is the retiming lever at its
 extreme, and it fails in the same direction, harder.
 
+### 6.7 Under disruption, the diverted traffic has nowhere to go
+
+S0 tested spatial redistribution against recurring peak congestion, where a
+traveller has other instruments available and the network is loaded the same
+way every weekday. S4 tests it in the regime where rerouting is the only
+instrument left. A corridor link fails without warning — VIP movement, a
+crash, a flooded underpass — and a trip already underway can be re-routed
+but cannot be retimed or mode-shifted. That is the case the original
+spatial hypothesis is strongest in, and the S0 result does not settle it.
+
+The scenario (`experiments/scenarios/s4-closure.toml`) closes one corridor
+edge, 170533894, which carries 25,896 of the 182,288 routed trips in the
+count-matched demand, 14.2%. The affected set is those trips; a seeded
+share p_r of them is guided onto an alternative path, and the rest keep the
+route they had. The grid is
+p_r ∈ {0, 10, 25, 50}% crossed with k_alternatives ∈ {1, 3} and the three
+transform seeds, 24 mesoscopic runs. The k dial is the point of the design:
+guided trips are assigned round-robin across up to k distinct alternatives,
+and each successive alternative is searched with the previous one's
+mid-section blocked as well as the closed edge, so that the search returns
+different corridors rather than variations of one
+(`experiments/transforms.py`, `spread_reroute` and `_alternatives`).
+
+Part of the intended design did not reach these runs, and it bounds what
+they measure. `pipeline/disruption.py` writes the closure as a SUMO
+rerouter with `<closingReroute>`, which blocks the edge for the interval
+and makes un-guided vehicles divert reactively on arrival, which is today's
+behaviour and the intended comparison baseline. `experiments/run.py` never
+passes that file to SUMO, so in these runs the closed edge stayed open in
+the network. The p_r = 0 arm is therefore a baseline replay, returning
+exactly 0.00% on both metrics rather than measuring the uncoordinated
+response, and what the grid compares is guided diversion against no
+diversion (§8, limitation 18).
+
+Guided diversion raises network delay and lowers corridor throughput.
+At p_r = 10% network delay moves +1.00 ± 0.46% and corridor throughput
+−1.59 ± 1.27%; at p_r = 25%, +1.13 ± 0.39% and −2.48 ± 1.38%; at
+p_r = 50%, +0.07 ± 1.93% and −1.25 ± 1.72%. The spread here is across the
+three seeds at a grid point, not across the six runs sharing a p_r: the
+k = 1 and k = 3 runs are exact duplicates of each other (below), so pooling
+them would report a spread narrower than the runs support. Throughput falls
+at every share tested and in eight of the nine non-zero-p_r seed runs. The
+delay effect is 2.2 and 2.9 times its own seed spread at p_r = 10% and 25%.
+At p_r = 50% it is not: +0.07% sits far inside its own ±1.93%, so that row
+is indistinguishable from zero and no trend should be read through it.
+
+The k dial changed nothing. At every p_r, the k = 1 and k = 3 runs return
+identical means and identical standard deviations on both metrics, seed by
+seed and to every digit in `results/sweep/summary.csv`. A direct census of
+the affected trips explains why, and the census is the finding rather than
+an implementation note: run on the closure edge at k = 3, `_alternatives`
+returned no alternative at all for 15,833 of the 25,896 affected trips
+(61%) and exactly one for the remaining 10,063 (39%); no trip had two or
+more. Offering three alternatives is identical to offering one when at most
+one exists, so the two arms of the grid ran the same demand. The mechanism
+the scenario was built to test — spreading diverted traffic over several
+parallel roads so that no single road absorbs the whole diversion — has
+nothing to spread onto here. The census re-runs `_alternatives` over every
+affected trip in a route file rebuilt from steps 2 and 3 of
+`experiments/sweep.sh`; that rebuild reaches the same 90.5% GEH < 5 share
+as the sweep's own file and carries 182,288 routed trips against its
+182,251, a difference of 0.02%. The census covers one closure edge and the
+trips through it, so it does not establish that every link in the valley is
+like this one (§8, limitation 19). ★
+
+The result S4 returns is therefore the same shape as S0's, reached in the
+regime that was supposed to be different. Diverting traffic during a
+disruption raises network delay and measurably reduces corridor throughput,
+and the census gives the reason: on this link the alternatives to spread it
+across do not exist.
+
 ## 7. Development Plan
 
 Internal definitions live in the model spec (M2); technology beyond the
@@ -881,7 +972,7 @@ simulation platform is deliberately undecided.
 | M1 — Data extraction | Digitize OD matrices [8]; filter DoR growth factors [12]; extract 2019 counts [10] into machine-readable form | QA: matrix totals match printed totals; growth factors pass sanity filter |
 | M2 — Model spec | Written internal definitions: zone system, cordon, time slices, vehicle classes/PCU [49], metrics, calibration tolerance (A7), scenario parameterization | spec reviewed against this paper's §5 |
 | M3 — Network + baseline | OSM build, corridor audit, calibration, baseline validation | done with a documented limitation (§5.6): demand calibrated to the counts at GEH < 5 on 90.5% of count locations; network throughput limitation recorded, scenario claims restricted to relative effects |
-| M4 — Experiments | Surface + S0–S3 + robustness | main surface done (§6): 197 runs, S0–S3 at three transform seeds per grid point, reproducible from `experiments/sweep.sh` + the scenario TOMLs. Outstanding: variance across demand realisations (§8, limitation 15), the B_cap sweep (limitation 17), and the RQ4 robustness runs |
+| M4 — Experiments | Surface + S0–S4 + robustness | main surface done (§6): 221 runs, S0–S4 at three transform seeds per grid point, reproducible from `experiments/sweep.sh` + the scenario TOMLs. Outstanding: the S4 closure enforced in-network (§8, limitation 18), variance across demand realisations (limitation 15), the B_cap sweep (limitation 17), and the RQ4 robustness runs |
 | M5 — (Optional) local behavior | Small SP survey on corridor departure-time flexibility (replaces transferred parameters) | n, instrument TBD |
 | M6 — Writeup | Results paper; testbed + digitized data released (license permitting) | — |
 
@@ -1038,6 +1129,29 @@ principle.
     where 75% of PT users already report peak overcrowding [45b]. The
     −8.25% is an upper bound; the B_cap sweep is the registered path to a
     bounded figure.
+18. **The S4 closure was not enforced inside the simulation.**
+    `pipeline/disruption.py` writes the closure as a SUMO rerouter with
+    `<closingReroute>`, which would block the edge for the interval and make
+    un-guided vehicles divert reactively on arrival. `experiments/run.py`
+    passes SUMO one additional file, the per-run copy of
+    `sim/baseline.add.xml` that carries the detectors and output paths, and
+    never adds the closure file, so in these 24 runs the closed edge stayed
+    open. Two consequences. The p_r = 0 arm is a plain baseline replay
+    rather than the uncoordinated response, which is why it returns exactly
+    zero on both metrics, and the comparison S4 measures is guided diversion
+    against no diversion, not coordinated guidance against the jam the
+    network organises for itself. The scenario's own TOML comment still
+    describes the intended enforced-closure design and is ahead of the code.
+    Wiring the closure file into the SUMO command and re-running the grid is
+    the registered path, and it is the run that would answer the primary
+    module's question.
+19. **The alternatives census covers one closure edge.** The finding that
+    guided trips have at most one alternative (§6.7) is measured on the
+    trips routed through edge 170533894 at k = 3. It is a property of that
+    location in this network and this route set, not a proven property of
+    the corridor: a closure on a different link, or one with more parallel
+    capacity nearby, could return more alternatives, and no second edge was
+    censused. ★
 
 ## 9. Conclusion
 
@@ -1045,10 +1159,20 @@ Kathmandu's congestion problem, at its saturated core, is a *what-mode*
 problem before it is a *when* problem, and it is neither a route-choice
 problem. The study falsified two of its own hypotheses to get there. The
 original spatial-redistribution hypothesis fell first to the city's own
-survey data (§4.2) and then again inside the project's calibrated model,
-where diverting up to 20% of peak trips moved network delay by 0.17% at
-most, at or below its own spread across seeds, and cost 1.60 ± 0.36% of
-corridor throughput (§6.5). The retiming hypothesis
+survey data (§4.2) and then again inside the project's calibrated model, in
+both of the congestion regimes rerouting was tested in. Under recurring
+peak congestion, diverting up to 20% of peak trips moved network delay by
+0.17% at most, at or below its own spread across seeds, and cost
+1.60 ± 0.36% of corridor throughput (§6.5). Under non-recurring disruption,
+the regime the hypothesis was strongest in because a trip already underway
+can be re-routed but not retimed or mode-shifted, guiding trips off a
+closed corridor link raised network delay by about 1% and cost 1.3 to 2.5%
+of corridor throughput (§6.7). The mechanism behind both is measured rather
+than inferred: of the trips routed through the closed link, most had no
+alternative path at all and the rest had exactly one, so guidance had
+nothing to spread traffic across, and offering three alternatives instead
+of one changed no result in the grid (§6.7, and §8 limitations 18–19 on
+what the disruption runs did and did not enforce). The retiming hypothesis
 the project pivoted to, H1, fell in the simulation it was built for:
 retiming raises network delay at every share and both shift magnitudes
 tested, up to +3.56 ± 0.37% at 25% retimed by 30 minutes, and the
