@@ -1,7 +1,7 @@
 # Temporal and Mode-Shift Travel-Demand Distribution for a Saturated Urban Network: A Feasibility Study for Kathmandu Valley
 
 **Project MOD — feasibility and research-design paper**
-Draft v1.4 · 2026-08-19 · status: working draft for supervisor/committee review; §5.1, §5.3, §5.6 and §8 report the M3 calibration outcome (count-based demand generation, and the network-throughput limitation that follows from it); §6 reports the M4 scenario sweep
+Draft v1.5 · 2026-08-20 · status: working draft for supervisor/committee review; §5.1, §5.3, §5.6 and §8 report the M3 calibration outcome (count-based demand generation, and the network-throughput limitation that follows from it); §6 reports the M4 scenario sweep at three transform seeds per grid point
 
 All claims cite numbered references (§References); bracketed numbers [n]
 throughout. Sources marked **[local]** are held in
@@ -44,22 +44,27 @@ INSTANT [22], Singapore INSINC [23] and Dutch Spitsmijden [21], within
 honest bounds: shifts ≤ ~30 minutes [26], 5–10% corridor-level peak
 reduction as an upper bound [23,25], and an arithmetic ceiling of 6.8% from
 levelling the measured 08:00–11:00 window outright. A simulation study was
-built on that basis and run: 66 mesoscopic runs over a sensitivity surface in
+built on that basis and run: 197 mesoscopic runs, three transform seeds at
+every grid point, over a sensitivity surface in
 retiming share, shift magnitude and motorcycle→bus mode shift, plus the
 government's own unquantified 2020 school-timing proposal [29,30] and a
 spatial-redistribution control, all evaluated at the verified binding
 intersections (§6). Mode shift is the only lever that reduces network
 delay: shifting 5%, 10% and 15% of corridor motorcycle trips to bus cuts
-network delay by 2.73%, 5.17% and 7.91% while removing 1.98%, 3.97% and
-5.94% of vehicles, an amplification of 1.33× stable across the range, and
-departure retiming instead raises network delay monotonically, from +0.49%
-at 5% retimed to +1.70% at 25% (Δt = −15 min) and +3.56% at Δt = −30, while
+network delay by 2.57 ± 0.31%, 5.16 ± 0.03% and 8.25 ± 0.34% (mean ± sd
+across the three seeds) while removing 1.98%, 3.97% and 5.94% of vehicles,
+an amplification of about 1.3× across the range, and
+departure retiming instead raises network delay monotonically, from
++0.37 ± 0.17% at 5% retimed to +1.67 ± 0.06% at 25% (Δt = −15 min) and
++3.56 ± 0.37% at Δt = −30, while
 spatial redistribution moves network delay by under 0.2% at every share
-tested and costs up to 1.87% of corridor throughput. The superlinear regime
+tested, below its own seed spread, and costs 1.60 ± 0.36% of corridor
+throughput at 20% diverted. The superlinear regime
 H1 predicted is therefore real but reaches the network through demand
 reduction, not through the retiming lever the pivot was built on; the
-school-timing proposal is the worst intervention tested, at +10.5% network
-delay. The methodological contribution is
+school-timing proposal is the worst intervention tested, at +10.08 ± 0.54%
+network delay at the conservative school-share value and +19.28 ± 0.78% at
+the derived one. The methodological contribution is
 a reusable sparse-data corridor demand pipeline and an open corridor testbed
 for a motorcycle-dominant city, delivered with its demand calibrated to the
 2019 counts (GEH < 5 at 90.5% of 42 count locations) and with one measured
@@ -126,9 +131,10 @@ built on a premise the data contradicts.
    [8,10,12].
 4. **A research design and its outcome**: a falsifiable simulation study of
    temporal + mode-shift demand distribution with named, locally-legitimized
-   policy scenarios (§5.3–5.5), run over 66 scenario runs, of which the
-   retiming lever and the spatial control both return negative results and
-   mode shift returns a 1.33× amplified delay reduction (§6).
+   policy scenarios (§5.3–5.5), run over 197 scenario runs at three
+   transform seeds per grid point, of which the retiming lever and the
+   spatial control both return negative results and mode shift returns a
+   delay reduction about 1.3× the demand it removes (§6).
 
 ## 2. Background and Related Work
 
@@ -281,8 +287,8 @@ is impractical (§RQ2), the hypothesis fails and the negative result stands.
 **H1 outcome: partially supported, and the half that fails is the half the
 pivot was built on (§6).** The superlinear regime exists. Removing demand
 from the analysis window returns delay relief larger than the demand
-removed, by a factor of 1.33 that is stable from 2% to 6% of vehicles
-removed (§6.2). But it is reached by motorcycle→bus mode shift, which
+removed, by a factor of about 1.3 that holds within the seed spread from
+2% to 6% of vehicles removed (§6.2). But it is reached by motorcycle→bus mode shift, which
 removes vehicles from the window, not by retiming, which moves them within
 it. Retiming raises network delay at every share and both shift magnitudes
 tested, monotonically in both (§6.3), so the departure-time instrument the
@@ -677,24 +683,29 @@ RQ2 survive that; a claimed number of seconds saved per vehicle would not.
 
 ### 6.1 What was run
 
-The sweep is 66 runs: one baseline and 65 scenario runs over S0–S3,
-executed by `experiments/sweep.sh` at its trimmed profile. Every run uses
-the mesoscopic solver, the calibrated network of §5.2, and the
+The sweep is 197 runs: one baseline, 195 scenario runs over S0–S3 at the
+full profile of `experiments/sweep.sh`, and one duplicate mode-shift run
+(S5, `m0.05_seed101`) that reproduces its S3 counterpart to the digit.
+Every grid point ran at three transform seeds, 101, 202 and 303. Every run
+uses the mesoscopic solver, the calibrated network of §5.2, and the
 count-matched demand of §5.3 (182,251 vehicles in the route file, 176,370
 loaded inside the 06:00–12:00 simulation window). Routes are fixed: a
 scenario transform moves departure times and converts vehicle types, and
 never re-routes, so a scenario run differs from the baseline only by the
-demand change under test (§5.3, §5.6). Each grid point ran once, at
-transform seed 101 (§8, limitation 15).
+demand change under test (§5.3, §5.6). The seed sets which trips a
+transform selects, not which trips exist; the demand itself was sampled
+once (§8, limitation 15).
 
 Metrics are the model spec §7 set over the 08:00–11:00 analysis window.
 The headline outcome is D_net, total network delay against free flow; the
 secondary outcome is H, corridor throughput across the cordon. Both are
 reported as percentage change against the baseline under identical
-settings, per the §5.6 relative-effects restriction. The baseline is
-D_net = 69,923 veh·h and H = 110,242 PCU. Q_i and t_diss are in the metric
-set but empty in these runs: the mesoscopic solver has no queue
-representation to read them from (§8, limitation 16).
+settings, per the §5.6 relative-effects restriction, and every effect below
+is the mean ± standard deviation of the three seed runs at that grid point.
+The baseline is D_net = 69,923 veh·h and H = 110,242 PCU; it is one run,
+because the baseline applies no transform and has no seed to vary. Q_i and
+t_diss are in the metric set but empty in these runs: the mesoscopic solver
+has no queue representation to read them from (§8, limitation 16).
 
 The grid is S0 at p_r ∈ {5, 10, 20}%; S1 at school_share ∈ {0.25, 0.46}
 (A9); S2 at p_t ∈ {0, 5, 10, 15, 20, 25}% × Δt ∈ {−15, −30} min; S3 at
@@ -706,60 +717,72 @@ in that isolated form.
 | Lever (isolated) | Setting | D_net (veh·h) | ΔD_net (%) | ΔH (%) |
 | --- | --- | ---: | ---: | ---: |
 | — | baseline | 69,923 | 0 | 0 |
-| Mode shift, motorcycle→bus | m = 5% | 68,017 | −2.73 | −0.07 |
-| | m = 10% | 66,308 | −5.17 | −0.61 |
-| | m = 15% | 64,392 | −7.91 | +0.59 |
-| Departure retiming, Δt = −15 min | p_t = 5% | 70,269 | +0.49 | −0.19 |
-| | p_t = 10% | 70,520 | +0.85 | +0.88 |
-| | p_t = 15% | 70,597 | +0.96 | +0.25 |
-| | p_t = 20% | 70,812 | +1.27 | +0.97 |
-| | p_t = 25% | 71,115 | +1.70 | +0.76 |
-| Departure retiming, Δt = −30 min | p_t = 5% | 70,262 | +0.48 | +0.74 |
-| | p_t = 10% | 70,732 | +1.16 | +1.79 |
-| | p_t = 15% | 71,268 | +1.92 | +0.65 |
-| | p_t = 20% | 71,830 | +2.73 | +0.94 |
-| | p_t = 25% | 72,410 | +3.56 | +1.49 |
-| Spatial redistribution (S0) | p_r = 5% | 69,947 | +0.03 | −0.05 |
-| | p_r = 10% | 70,052 | +0.18 | −1.32 |
-| | p_r = 20% | 69,982 | +0.08 | −1.87 |
-| School-timing shift (S1) | school_share = 0.25 | 77,279 | +10.52 | −0.95 |
-| | school_share = 0.46 | 84,002 | +20.14 | −1.41 |
+| Mode shift, motorcycle→bus | m = 5% | 68,123 | −2.57 ± 0.31 | +0.31 ± 0.53 |
+| | m = 10% | 66,313 | −5.16 ± 0.03 | +0.25 ± 0.77 |
+| | m = 15% | 64,152 | −8.25 ± 0.34 | +0.87 ± 0.28 |
+| Departure retiming, Δt = −15 min | p_t = 5% | 70,182 | +0.37 ± 0.17 | +0.20 ± 0.34 |
+| | p_t = 10% | 70,467 | +0.78 ± 0.07 | +0.39 ± 0.66 |
+| | p_t = 15% | 70,703 | +1.12 ± 0.18 | +0.51 ± 0.54 |
+| | p_t = 20% | 70,903 | +1.40 ± 0.12 | +0.88 ± 0.53 |
+| | p_t = 25% | 71,089 | +1.67 ± 0.06 | +0.78 ± 0.65 |
+| Departure retiming, Δt = −30 min | p_t = 5% | 70,280 | +0.51 ± 0.07 | +0.72 ± 0.07 |
+| | p_t = 10% | 70,770 | +1.21 ± 0.05 | +1.59 ± 0.40 |
+| | p_t = 15% | 71,278 | +1.94 ± 0.14 | +0.58 ± 0.15 |
+| | p_t = 20% | 71,796 | +2.68 ± 0.23 | +1.03 ± 1.09 |
+| | p_t = 25% | 72,412 | +3.56 ± 0.37 | +1.43 ± 0.64 |
+| Spatial redistribution (S0) | p_r = 5% | 69,981 | +0.08 ± 0.10 | −0.38 ± 0.29 |
+| | p_r = 10% | 70,044 | +0.17 ± 0.06 | −0.77 ± 0.65 |
+| | p_r = 20% | 70,024 | +0.14 ± 0.06 | −1.60 ± 0.36 |
+| School-timing shift (S1) | school_share = 0.25 | 76,972 | +10.08 ± 0.54 | −0.72 ± 0.30 |
+| | school_share = 0.46 | 83,402 | +19.28 ± 0.78 | −0.85 ± 0.74 |
 
-Full surface in `results/sweep/summary.csv`; figures from
-`experiments/analyse.py`.
+Each non-baseline row is three runs; D_net is their mean. At every setting
+whose effect on network delay exceeds one percent, the standard deviation
+across seeds is between 6 and 191 times smaller than the effect, so the
+sign, the magnitude and the ordering of the levers are not seed artefacts.
+The one place the spread is comparable to the effect is S0's delay column,
+where the deltas sit at or below their own seed spread; that is the S0
+result rather than a limit on reading it (§6.5). Full surface in
+`results/sweep/summary.csv`; figures from `experiments/analyse.py`, plotted
+with the seed standard deviation as error bars.
 
 ### 6.2 Mode shift is the only lever that reduces network delay
 
 Isolated at p_t = 0, converting corridor motorcycle trips in the analysis
 window to bus passengers reduces network delay at every share tested:
-−2.73% at m = 5%, −5.17% at m = 10%, −7.91% at m = 15%. The response is
-close to linear in m over that range. Corridor throughput moves between
-−0.61% and +0.59% and is not ordered by m, so the delay reduction is not
+−2.57 ± 0.31% at m = 5%, −5.16 ± 0.03% at m = 10%, −8.25 ± 0.34% at
+m = 15%. No individual seed run reverses the sign or the ordering, and the
+response is close to linear in m over that range. Corridor throughput moves
++0.25% to +0.87%, upward at all three shares, so the delay reduction is not
 bought by moving less traffic.
 
 This is the only lever in the sweep with a negative sign on D_net.
 `results/figures/lever_comparison.png` plots all three levers on one axis
-of share treated against delay reduction; mode shift is the only curve
-above zero.
+of share treated against delay reduction, with seed error bars; mode shift
+is the only curve above zero.
 
 Two properties of the mechanism bound what the result means. The transform
 removes motorcycles and adds a bus per 15 accumulated passengers on the
 same OD pair (spec §3 occupancy bridge, 1.1 → 15). At m = 15% that is
-10,850 motorcycles removed and 24 buses added, because within a
+10,850 motorcycles removed and 24 buses added at seed 101, because within a
 three-hour window few single OD pairs accumulate a busload; the intervention
 is therefore close to pure demand removal in this model, and B_cap was left
 uncapped in these runs (§8, limitation 17). The result is an upper bound on
 what a bus-capacity-constrained mode shift would deliver, not a forecast of
 one.
 
-### 6.3 The amplification is about 1.33× and stable
+### 6.3 The amplification is about 1.3× and stable
 
 Net of the buses added, the three mode-shift settings remove 1.98%, 3.97%
-and 5.94% of the 182,251 vehicles in the demand file and return 2.73%,
-5.17% and 7.91% of network delay, giving amplification factors of 1.37,
-1.30 and 1.33. The factor does not grow as the demand cut grows, which is
-what a queue-collapse regime would show; it holds flat across a threefold
-range of cut sizes.
+and 5.94% of the 182,251 vehicles in the demand file and return
+2.57 ± 0.31%, 5.16 ± 0.03% and 8.25 ± 0.34% of network delay, giving
+amplification factors of 1.30 ± 0.16, 1.30 ± 0.01 and 1.39 ± 0.06. The
+spread is the delay spread: m fixes how many motorcycles the transform
+removes, so the removal share carries no seed variance, and only the buses
+added can vary with the seed, at 24 vehicles out of 182,251 at m = 15%.
+The factor does not grow as the demand cut grows, which is what a
+queue-collapse regime would show; it holds flat to within the seed spread
+across a threefold range of cut sizes.
 
 So the superlinear response H1 predicted is present and measurable, and it
 is modest. It is also the smaller half of the finding: the amplification
@@ -769,13 +792,15 @@ nonlinear regime exists; RQ1's stated instrument does not reach it.
 
 ### 6.4 Departure retiming increases network delay, monotonically
 
-Retiming raises D_net at every share tested, and the increase grows with
-the share: +0.49% at p_t = 5% to +1.70% at p_t = 25% for Δt = −15 min.
-Doubling the shift magnitude doubles the penalty rather than the benefit:
-at Δt = −30 min the same grid runs +0.48% to +3.56%.
+Retiming raises D_net at every share tested, in every seed run, and the
+increase grows with the share: +0.37 ± 0.17% at p_t = 5% to
++1.67 ± 0.06% at p_t = 25% for Δt = −15 min. Doubling the shift magnitude
+roughly doubles the penalty rather than buying a benefit: at Δt = −30 min
+the same grid runs +0.51 ± 0.07% to +3.56 ± 0.37%.
 `results/figures/retiming_response.png` shows both series, and
 `results/figures/compliance.png` shows the RQ2 reading, which is that no
-participation level in the evidence-bounded range crosses zero.
+participation level in the evidence-bounded range crosses zero, and none
+comes within a seed spread of it.
 
 The measured departure profile explains the sign. Shifting departures
 earlier moves load into the 08:00–09:00 shoulder, which already carries
@@ -786,11 +811,13 @@ This is the same arithmetic as §4.4, where levelling 08:00–11:00 outright
 was shown to remove at most 6.8% of peak-hour traffic, now with a sign
 attached to the residual.
 
-Retiming also does not interact with mode shift. Across the S3 grid the
-two effects are additive to within about 0.1 percentage point: at
-p_t = 10%, Δt = −15 min, m = 10% the joint run gives −4.32%, against
-−5.17% for mode shift alone and +0.85% for retiming alone. Adding retiming
-to a mode-shift program subtracts from it.
+Retiming also does not interact with mode shift. Across the 30 joint cells
+of the S3 grid the difference between the joint effect and the sum of the
+two isolated effects has a median of 0.11 and a maximum of 0.30 percentage
+points: at p_t = 10%, Δt = −15 min, m = 10% the joint run gives
+−4.50 ± 0.18%, against −5.16% for mode shift alone plus +0.78% for
+retiming alone, a sum of −4.39%. Adding retiming to a mode-shift program
+subtracts from it.
 `results/figures/pareto.png` puts the S2 and S3 runs on schedule cost
 against delay reduction: the points that reduce delay are the ones carrying
 mode shift, and schedule cost buys nothing on its own axis.
@@ -798,14 +825,19 @@ mode shift, and schedule cost buys nothing on its own axis.
 ### 6.5 Spatial redistribution changes nothing and costs throughput
 
 S0 diverts a share of peak trips onto the best alternative path avoiding
-their mid-corridor edge. Network delay moves +0.03%, +0.18% and +0.08% at
-p_r = 5%, 10% and 20%, which is flat and not ordered by p_r. Corridor
-throughput falls with the share diverted: −0.05%, −1.32%, −1.87%.
+their mid-corridor edge. Network delay moves +0.08 ± 0.10%, +0.17 ± 0.06%
+and +0.14 ± 0.06% at p_r = 5%, 10% and 20%, which is flat, not ordered by
+p_r, and at p_r = 5% smaller than its own seed spread. Corridor throughput
+falls with the share diverted and is ordered by it: −0.38 ± 0.29%,
+−0.77 ± 0.65%, −1.60 ± 0.36%. At p_r = 20% the loss is more than four
+times its seed spread and every seed run is negative, so the throughput
+cost is a measured effect: diverting traffic reduces corridor throughput,
+rather than merely failing to help.
 
 The mechanism is visible in the transform's own accounting. At p_r = 20%,
 8,280 peak trips were selected for diversion; 4,954 had an alternative
 path avoiding their mid-corridor edge and 3,326, two in five, had none at
-all (run provenance in
+all (seed 101 run provenance in
 `sim/demand/s0-spatial-control/p_r0.2_seed101.rou.xml`; the same 60/40
 split holds at p_r = 5% and 10%). Of the trips that could divert, the
 diverted flow lands on links that carry it more slowly, which is where the
@@ -820,20 +852,23 @@ demand.
 S1 moves the school-linked component of peak demand 60 minutes earlier,
 the 2020 traffic-police and PM's Office proposal [29,30] (RQ3). At the
 conservative A9 sensitivity value, school_share = 0.25, network delay
-rises 10.52% and corridor throughput falls 0.95%. At the derived
-school_share of 0.46 the degradation roughly doubles, to +20.14% delay and
-−1.41% throughput.
+rises 10.08 ± 0.54% and corridor throughput falls 0.72 ± 0.30%. At the
+derived school_share of 0.46 the degradation roughly doubles, to
++19.28 ± 0.78% delay and −0.85 ± 0.74% throughput. That +19.28% is the
+largest effect measured anywhere in the sweep, in either direction, and at
+25 times its seed spread it is the most separable one.
 
 That is the first quantification of the proposal, and three caveats travel
 with it. It is a corridor-scale simulation result under the §5.6
 relative-effects restriction, not a valley-wide or field prediction. The
 school_share itself is an estimate (A9): 0.46 is derived from JICA
 person-trip purpose shares and skews high because school trips skew to
-walking, and 0.25 is the registered sensitivity value. And the direction
-of the result is the same one §6.4 explains: a −60 minute shift is twice
-the largest retiming magnitude in the S2 grid, applied to a larger share of
-demand, landing in the same 08:00–09:00 shoulder. S1 is the retiming lever
-at its extreme, and it fails in the same direction, harder.
+walking, and 0.25 is the registered sensitivity value, so the pair is a
+range and neither end is a measured share. And the direction of the result
+is the same one §6.4 explains: a −60 minute shift is twice the largest
+retiming magnitude in the S2 grid, applied to a larger share of demand,
+landing in the same 08:00–09:00 shoulder. S1 is the retiming lever at its
+extreme, and it fails in the same direction, harder.
 
 ## 7. Development Plan
 
@@ -846,7 +881,7 @@ simulation platform is deliberately undecided.
 | M1 — Data extraction | Digitize OD matrices [8]; filter DoR growth factors [12]; extract 2019 counts [10] into machine-readable form | QA: matrix totals match printed totals; growth factors pass sanity filter |
 | M2 — Model spec | Written internal definitions: zone system, cordon, time slices, vehicle classes/PCU [49], metrics, calibration tolerance (A7), scenario parameterization | spec reviewed against this paper's §5 |
 | M3 — Network + baseline | OSM build, corridor audit, calibration, baseline validation | done with a documented limitation (§5.6): demand calibrated to the counts at GEH < 5 on 90.5% of count locations; network throughput limitation recorded, scenario claims restricted to relative effects |
-| M4 — Experiments | Surface + S0–S3 + robustness | main surface done (§6): 66 runs, S0–S3, reproducible from `experiments/sweep.sh` + the scenario TOMLs. Outstanding: the three-seed profile (§8, limitation 15), the B_cap sweep (limitation 17), and the RQ4 robustness runs |
+| M4 — Experiments | Surface + S0–S3 + robustness | main surface done (§6): 197 runs, S0–S3 at three transform seeds per grid point, reproducible from `experiments/sweep.sh` + the scenario TOMLs. Outstanding: variance across demand realisations (§8, limitation 15), the B_cap sweep (limitation 17), and the RQ4 robustness runs |
 | M5 — (Optional) local behavior | Small SP survey on corridor departure-time flexibility (replaces transferred parameters) | n, instrument TBD |
 | M6 — Writeup | Results paper; testbed + digitized data released (license permitting) | — |
 
@@ -966,17 +1001,22 @@ principle.
     [`research/library/`](../library/README.md), so the attribution is ★
     until the citation is obtained. The measured GEH distribution stands
     regardless of which threshold is applied to it.
-15. **One seed per grid point, so the sweep carries no variance estimate.**
-    The 66 runs of §6 are the trimmed profile of `experiments/sweep.sh`:
-    every grid point ran once, at transform seed 101. Nothing in §6 is an
-    average, and no confidence interval can be attached to any number there.
-    The differences the paper leans on are large relative to that gap
-    (mode shift −2.73% to −7.91%, school shift +10.52%) and the levers are
-    monotone in their own parameter across five or six grid points, which is
-    harder to produce from sampling noise than a single point difference.
-    But the small values are not separable from noise: the S0 deltas of
-    +0.03% to +0.18% support "no effect", not an ordering. The full profile
-    (three seeds per point) is the registered path.
+15. **The three seeds vary which trips are treated, not which demand
+    exists.** Every grid point in §6 ran at transform seeds 101, 202 and
+    303, and every effect there is reported as a mean ± standard deviation
+    across those three runs. What the seed controls is the transform's
+    selection: which trips are retimed, which motorcycles convert to bus,
+    which trips are offered a diversion. It does not control the demand
+    those trips are drawn from. The count-matched route file was sampled
+    once, by `routeSampler` at seed 20260818 (`experiments/sweep.sh`,
+    step 3), and every run in the sweep, baseline and scenario alike, reads
+    that one file. The spread reported throughout §6 is therefore variance
+    across treatment sampling, not variance across demand realisations. A
+    different `routeSampler` draw would redistribute which OD paths carry
+    the counted volumes while still matching the same counts, and the sweep
+    does not test that. Re-sampling the demand at several seeds and
+    re-running the grid on each is the registered path, at a runtime cost
+    multiplied by the number of demand draws.
 16. **Mesoscopic runs cannot measure queues or dissipation.** The sweep ran
     in SUMO's mesoscopic mode for tractability, which models links as
     queues with aggregate flow rather than resolving vehicle positions, so
@@ -996,7 +1036,7 @@ principle.
     vehicles, and §6.3's amplification is the network's response to that
     deletion. A real motorcycle→bus shift adds bus vehicles to a corridor
     where 75% of PT users already report peak overcrowding [45b]. The
-    −7.91% is an upper bound; the B_cap sweep is the registered path to a
+    −8.25% is an upper bound; the B_cap sweep is the registered path to a
     bounded figure.
 
 ## 9. Conclusion
@@ -1006,21 +1046,25 @@ problem before it is a *when* problem, and it is neither a route-choice
 problem. The study falsified two of its own hypotheses to get there. The
 original spatial-redistribution hypothesis fell first to the city's own
 survey data (§4.2) and then again inside the project's calibrated model,
-where diverting up to 20% of peak trips moved network delay by 0.18% at
-most and cost 1.87% of corridor throughput (§6.5). The retiming hypothesis
+where diverting up to 20% of peak trips moved network delay by 0.17% at
+most, at or below its own spread across seeds, and cost 1.60 ± 0.36% of
+corridor throughput (§6.5). The retiming hypothesis
 the project pivoted to, H1, fell in the simulation it was built for:
 retiming raises network delay at every share and both shift magnitudes
-tested, up to +3.56% at 25% retimed by 30 minutes, and the government's own
-2020 school-timing proposal, quantified here for the first time, is the
-worst intervention in the sweep at +10.52% (§6.4, §6.6). The measured
+tested, up to +3.56 ± 0.37% at 25% retimed by 30 minutes, and the
+government's own 2020 school-timing proposal, quantified here for the first
+time, is the worst intervention in the sweep at +10.08 ± 0.54% network
+delay on the conservative school-share estimate and +19.28 ± 0.78% on the
+derived one (§6.4, §6.6). The measured
 departure profile had already predicted this. A peak carrying 6.8% of daily
 traffic against a 5.5% shoulder is not a peak with room to be flattened,
 and a demand plateau running 09:00 to 18:00 leaves a retiming instrument
 nowhere to move demand to.
 
 H1 survives in one half. The superlinear regime it predicted is real:
-motorcycle→bus mode shift returns delay relief 1.33× the demand it removes,
-stably across a threefold range of cut sizes, reaching −7.91% network delay
+motorcycle→bus mode shift returns delay relief about 1.3× the demand it
+removes, stable to within the seed spread across a threefold range of cut
+sizes, reaching −8.25 ± 0.34% network delay
 at 15% of corridor motorcycle trips shifted (§6.2, §6.3). That relief comes
 from taking vehicles out of the window, not from moving them within it, and
 with B_cap uncapped in these runs it is an upper bound rather than a
@@ -1035,7 +1079,8 @@ at GEH < 5 on 90.5% of count locations, a demand-management gap that no
 deployed or planned system occupies, and an open corridor testbed for a
 motorcycle-dominant city whose own throughput limitation is measured and
 stated (§5.6). The results it produced are corridor-scale relative effects
-from a single-seed sweep in mesoscopic mode (§8, limitations 15–17), and
+from a three-seed sweep in mesoscopic mode, run on a demand realisation
+that was itself sampled once (§8, limitations 15–17), and
 they are negative on two of three levers. That is what the study set out to
 be able to report.
 
