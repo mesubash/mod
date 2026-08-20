@@ -46,9 +46,16 @@ ABBR = {"p_t": "pt", "dt_minutes": "dt", "school_share": "sch", "b_cap": "bcap"}
 
 
 def expand(tf_cfg):
-    """[(tag, [(transform, params)])]: product over every list-valued param."""
+    """[(tag, [(transform, params)])]: product over every swept param.
+
+    Only numeric lists are sweep axes. A list of strings is a value in its own
+    right — closed_edges=["170533894"] is one closure, not a one-point grid —
+    and expanding it passed the bare string to the transform, where set() split
+    it into characters and matched no edge, so every S4 run silently returned
+    the baseline."""
     axes = [(tn, p, v) for tn, params in tf_cfg.items()
-            for p, v in params.items() if isinstance(v, list)]
+            for p, v in params.items()
+            if isinstance(v, list) and all(isinstance(x, (int, float)) for x in v)]
     combos = []
     for values in itertools.product(*[a[2] for a in axes]):
         point = dict(zip([(tn, p) for tn, p, _ in axes], values))

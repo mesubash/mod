@@ -4,6 +4,13 @@ from experiments import transforms
 from pipeline.common import REPO
 
 _ANY_NET = REPO / "sim/net/corridor-calibrated.net.xml"
+
+
+def _needs_net():
+    # The net is a rebuildable artifact and is gitignored; these tests stub the
+    # path search but reroute still loads the net first.
+    if not _ANY_NET.exists():
+        pytest.skip("corridor-calibrated.net.xml not built (run experiments/sweep.sh)")
 from experiments.transforms import PEAK, mode_shift, retime, s1_school_shift
 
 
@@ -146,6 +153,7 @@ def test_reroute_preserves_trips_and_reports_no_alternative(tmp_path):
         {"id": "b", "depart": "32600.0", "type": "car", "route": "e1 e2 e3"},
         {"id": "outside", "depart": "20000.0", "type": "car", "route": "e1 e2 e3"},
     ]
+    _needs_net()
     calls = {"n": 0}
 
     def fake_alternative(net, edges, vclass="passenger"):
@@ -188,6 +196,7 @@ def test_reroute_searches_with_the_vehicles_own_class():
     # A path a car may legally take can be illegal for a bus, and SUMO rejects
     # the whole route file at load time ("no valid route"). Each search must
     # use the vehicle's own vClass.
+    _needs_net()
     seen = []
 
     def fake_alternative(net, edges, vclass="passenger"):
@@ -203,3 +212,18 @@ def test_reroute_searches_with_the_vehicles_own_class():
     finally:
         transforms._alternative = original
     assert sorted(seen) == ["bus", "motorcycle"]
+
+
+def test_expand_does_not_sweep_string_lists():
+    # closed_edges is a value, not a grid axis: expanding it passed the bare
+    # string to the transform, set() split it into characters, and all 24 S4
+    # runs silently returned the baseline.
+    from experiments.run import expand
+
+    combos = expand({"spread_reroute": {"closed_edges": ["e1", "e2"],
+                                        "p_r": [0.1, 0.5]}})
+    assert len(combos) == 2, "p_r sweeps, closed_edges does not"
+    for _, tfs in combos:
+        params = dict(tfs)["spread_reroute"]
+        assert params["closed_edges"] == ["e1", "e2"]
+        assert params["p_r"] in (0.1, 0.5)
