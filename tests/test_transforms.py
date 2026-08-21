@@ -227,3 +227,30 @@ def test_expand_does_not_sweep_string_lists():
         params = dict(tfs)["spread_reroute"]
         assert params["closed_edges"] == ["e1", "e2"]
         assert params["p_r"] in (0.1, 0.5)
+
+
+def test_spread_reroute_exists_and_spreads_across_alternatives():
+    # spread_reroute was silently lost in a refactor and S4 failed at run time;
+    # this pins both its presence and the round-robin behaviour that is the
+    # whole point of the scenario.
+    trips = [{"id": f"v{i}", "depart": f"{33000 + i}.0", "type": "car",
+              "route": "a closed b"} for i in range(6)]
+    trips.append({"id": "untouched", "depart": "33100.0", "type": "car",
+                  "route": "x y z"})
+
+    def fake_alternatives(net, edges, closed, k, vclass="passenger"):
+        return [["a", "alt1", "b"], ["a", "alt2", "b"]][:k]
+
+    original_alts, original_net = transforms._alternatives, transforms._net
+    transforms._alternatives = fake_alternatives
+    transforms._net = lambda p=None: None
+    try:
+        out, summary = transforms.spread_reroute(
+            trips, ["closed"], p_r=1.0, k_alternatives=2, seed=1)
+    finally:
+        transforms._alternatives, transforms._net = original_alts, original_net
+
+    assert summary["affected"] == 6 and summary["rerouted"] == 6
+    routes = {t["route"] for t in out if t["id"] != "untouched"}
+    assert len(routes) == 2, "guided trips must be split across both options"
+    assert next(t for t in out if t["id"] == "untouched")["route"] == "x y z"

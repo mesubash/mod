@@ -278,3 +278,42 @@ def _alternatives(net, edges, closed, k, vclass="passenger"):
         found.append(path)
         banned.add(path[len(path) // 2])
     return found
+
+
+def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
+                   net_path=None, window=None):
+    """S4: coordinated rerouting under disruption.
+
+    Trips whose route uses a closed edge are the affected set. A seeded p_r
+    share receives guidance; the rest keep their route, which is what happens
+    when no one is told anything. Guided trips are spread round-robin across up
+    to k distinct alternatives rather than all sent to the single best one,
+    because sending every diverted vehicle down the same parallel road recreates
+    the jam elsewhere (Braess, paper [42]).
+
+    Returns (trips, summary); the summary reports how many affected trips had no
+    alternative at all.
+    """
+    net = _net(net_path)
+    closed = set(closed_edges)
+    affected = [i for i, t in enumerate(trips)
+                if t.get("route") and closed.intersection(t["route"].split())
+                and (window is None or _in(t, window))]
+    guided = set(random.Random(seed).sample(affected, round(p_r * len(affected))))
+
+    out, spread, no_alternative = [], 0, 0
+    for i, trip in enumerate(trips):
+        if i not in guided:
+            out.append(trip)
+            continue
+        options = _alternatives(net, trip["route"].split(), closed,
+                                k_alternatives,
+                                VCLASS.get(trip.get("type"), "passenger"))
+        if not options:
+            out.append(trip)
+            no_alternative += 1
+            continue
+        out.append({**trip, "route": " ".join(options[spread % len(options)])})
+        spread += 1
+    return out, {"affected": len(affected), "guided": len(guided),
+                 "rerouted": spread, "no_alternative": no_alternative}
