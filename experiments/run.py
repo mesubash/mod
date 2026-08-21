@@ -66,7 +66,8 @@ def expand(tf_cfg):
     return combos
 
 
-def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
+def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
+             extra_add=None):
     # Absolute: SUMO resolves the additional file's output paths relative to
     # that file's own directory, so a relative --out doubles the path.
     outdir = ((outbase or REPO / "results" / scenario) / run_id).resolve()
@@ -80,7 +81,10 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro"):
     # copy redirects them into outdir (files then match s7_metrics prefix="")
     add = outdir / "run.add.xml"
     add.write_text(ADD.read_text().replace("../results/baseline_", f"{outdir}/"))
-    cmd = [sumo_tool("sumo"), "-n", str(SIM_NET), "-r", str(rou), "-a", str(add),
+    # A closure has to be real in the network, or p_r=0 is just ordinary
+    # traffic instead of the uncoordinated disruption response it stands for.
+    add_files = str(add) if not extra_add else f"{add},{extra_add}"
+    cmd = [sumo_tool("sumo"), "-n", str(SIM_NET), "-r", str(rou), "-a", add_files,
            "--begin", "21600", "--end", "43200",
            "--statistic-output", str(outdir / "stats.xml"),
            "--queue-output", str(outdir / "queues.xml"),
@@ -147,6 +151,20 @@ def main():
     demand_dir = REPO / "sim/demand" / cfg["name"]
     demand_dir.mkdir(parents=True, exist_ok=True)
 
+    # A scenario that closes edges writes the rerouter SUMO needs to enforce
+    # it, so the un-guided vehicles reroute reactively on arrival — today's
+    # behaviour, and the control the guided runs are compared against.
+    closure_file = None
+    if closure := cfg.get("closure"):
+        from pipeline.disruption import closure as closure_xml
+
+        closure_file = REPO / "sim/incidents" / f"{cfg['name']}.add.xml"
+        closure_file.parent.mkdir(parents=True, exist_ok=True)
+        closure_file.write_text(closure_xml(closure["edges"], closure["begin"],
+                                            closure["end"]))
+        print(f"{cfg['name']}: closure on {len(closure['edges'])} edge(s), "
+              f"{closure['begin']}-{closure['end']}s -> {closure_file}", flush=True)
+
     seeds = cfg["seeds"][:args.seeds] if args.seeds else cfg["seeds"]
     outbase = args.out or REPO / "results" / cfg["name"]
 
@@ -173,7 +191,8 @@ def main():
             print(f"{cfg['name']}/{run_id}: {len(trips)} trips -> {trips_path}",
                   flush=True)
             if not args.dry_run:
-                simulate(cfg["name"], run_id, trips_path, outbase, args.mode)
+                simulate(cfg["name"], run_id, trips_path, outbase,
+                         args.mode, closure_file)
 
 
 if __name__ == "__main__":

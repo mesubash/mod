@@ -254,3 +254,22 @@ def test_spread_reroute_exists_and_spreads_across_alternatives():
     routes = {t["route"] for t in out if t["id"] != "untouched"}
     assert len(routes) == 2, "guided trips must be split across both options"
     assert next(t for t in out if t["id"] == "untouched")["route"] == "x y z"
+
+
+def test_scenario_closure_block_generates_a_rerouter(tmp_path):
+    # A closure has to be enforced in the network, or p_r=0 is ordinary traffic
+    # rather than the uncoordinated disruption response it is meant to be.
+    import tomllib
+
+    from pipeline.disruption import closure
+
+    cfg = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    block = cfg["closure"]
+    assert block["begin"] < block["end"], "closure window must be non-empty"
+    assert block["edges"] == cfg["transforms"]["spread_reroute"]["closed_edges"], \
+        "the enforced closure and the transform's closed_edges must agree"
+
+    xml = closure(block["edges"], block["begin"], block["end"])
+    for edge in block["edges"]:
+        assert f'<closingReroute id="{edge}"/>' in xml
+    assert f'begin="{block["begin"]}"' in xml

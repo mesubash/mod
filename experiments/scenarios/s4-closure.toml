@@ -1,18 +1,26 @@
-# S4 - corridor closure with coordinated rerouting. The project's PRIMARY
+# S4 - corridor closure with coordinated rerouting. The project's primary
 # module: non-recurring congestion (VIP movement, accident, flooded underpass)
-# is the regime where rerouting is the only available lever - a trip already
-# underway cannot be retimed or mode-shifted.
+# is the regime where rerouting is the only available lever, since a trip
+# already underway cannot be retimed or mode-shifted.
 #
-# The closure is enforced in the network (pipeline/disruption.py writes a
-# rerouter with closingReroute), so un-guided vehicles reroute reactively on
-# arrival, which is today's behaviour and the comparison baseline. p_r = 0 is
-# therefore the uncoordinated control, not a null run.
+# The closure is enforced in the network: the [closure] block below makes
+# run.py write a SUMO rerouter (pipeline/disruption.py) that shuts the edge for
+# the window, so un-guided vehicles meet the block and reroute reactively on
+# arrival. That is today's behaviour, which makes p_r = 0 the uncoordinated
+# control rather than an untouched run.
 #
-# k_alternatives > 1 is the point of the module: sending every diverted vehicle
-# down the single best parallel road recreates the jam elsewhere.
+# k_alternatives is the point of the scenario: k=1 sends every diverted vehicle
+# to the single best alternative, which is what a conventional navigation app
+# does; k=3 splits them across three, so no one parallel road absorbs the whole
+# diversion.
 name = "s4-closure"
 seeds = [101, 202, 303]
 notes = "closure enforced in-network; p_r=0 is the uncoordinated control"
+
+[closure]
+edges = ["170533894"]
+begin = 32400   # 09:00, the measured AM peak hour (spec §4)
+end = 36000     # 10:00
 
 [transforms.spread_reroute]
 closed_edges = ["170533894"]
