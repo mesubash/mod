@@ -6,6 +6,7 @@ Sign convention: dt_minutes is the spec's Δt — negative shifts earlier
 (Δt ∈ {-15, -30}; S1 uses -60).
 """
 
+import heapq
 import random
 import xml.etree.ElementTree as ET
 
@@ -184,110 +185,64 @@ def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
                  "no_alternative": no_alternative}
 
 
-def _alternative(net, edges, vclass="passenger"):
-    """Shortest path from origin to destination that avoids the route's
-    mid-section edge. None when no such path exists — the informative case,
-    since "this trip has no alternative" is what the scenario measures.
+def _shortest(net, start, end, vclass, banned=frozenset()):
+    """Dijkstra by edge length with a hard exclusion set.
 
-    sumolib has no edge-exclusion argument, so the avoided edge is made
-    prohibitively slow for the duration of the search and restored after."""
+    Written out rather than calling sumolib's getShortestPath because that
+    method caches routing internally: mutating an edge's speed or length to
+    "block" it has no effect on the returned path. The earlier implementation
+    did exactly that, so every alternative search returned the original path,
+    which of course still contained the blocked edge — and the transform
+    reported "no alternative" for every trip in the network. Excluding edges
+    from the search is the only reliable way to force a detour.
+    """
+    if start is end:
+        return [start.getID()]
+    queue, seen = [(0.0, start.getID(), [start])], set()
+    while queue:
+        cost, _, path = heapq.heappop(queue)
+        edge = path[-1]
+        if edge is end:
+            return [e.getID() for e in path]
+        if edge.getID() in seen:
+            continue
+        seen.add(edge.getID())
+        for nxt in edge.getOutgoing():
+            if (nxt.getID() in seen or nxt.getID() in banned
+                    or not nxt.allows(vclass)):
+                continue
+            heapq.heappush(queue,
+                           (cost + nxt.getLength(), nxt.getID(), path + [nxt]))
+    return None
+
+
+def _alternative(net, edges, vclass="passenger"):
+    """Shortest path avoiding the route's mid-section edge, or None when the
+    origin and destination are genuinely cut apart without it."""
     if len(edges) < 3:
         return None
-    blocked = edges[len(edges) // 2]          # mid-route edge stands for the corridor
+    blocked = edges[len(edges) // 2]
     try:
         start, end = net.getEdge(edges[0]), net.getEdge(edges[-1])
-        avoid = net.getEdge(blocked)
     except KeyError:
         return None
-
-    original = avoid._speed
-    avoid._speed = 1e-6                       # cost = length/speed -> effectively closed
-    try:
-        path, _ = net.getShortestPath(start, end, vClass=vclass)
-    finally:
-        avoid._speed = original
-    if path is None:
-        return None
-    ids = [e.getID() for e in path]
-    return ids if blocked not in ids else None
-
-
-def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
-                   net_path=None, window=None):
-    """Coordinated rerouting under disruption — the project's primary module.
-
-    Trips whose route uses a closed or degraded edge are the affected set. A
-    seeded p_r share of them receives guidance; the rest keep their route and
-    reroute reactively in the simulation, which is what happens today. Guided
-    trips are spread round-robin across up to k distinct alternatives rather
-    than all sent to the single best one, because sending every diverted
-    vehicle down the same parallel road recreates the jam elsewhere (Braess,
-    paper [42]; the failure mode the Google experiments avoid, paper [1]).
-
-    Returns (trips, summary) where the summary reports how many affected trips
-    had no alternative at all — under disruption that share is the finding.
-    """
-    import sumolib
-
-    net = sumolib.net.readNet(str(net_path or NET_DEFAULT))
-    closed = set(closed_edges)
-
-    affected = [i for i, t in enumerate(trips)
-                if t.get("route") and closed.intersection(t["route"].split())
-                and (window is None or _in(t, window))]
-    guided = set(random.Random(seed).sample(affected, round(p_r * len(affected))))
-
-    out, spread_counts, no_alternative = [], {}, 0
-    for i, trip in enumerate(trips):
-        if i not in guided:
-            out.append(trip)
-            continue
-        options = _alternatives(net, trip["route"].split(), closed,
-                                k_alternatives,
-                                VCLASS.get(trip.get("type"), "passenger"))
-        if not options:
-            out.append(trip)
-            no_alternative += 1
-            continue
-        # round-robin over this trip's options keeps the diverted flow split
-        pick = options[len(spread_counts) % len(options)]
-        spread_counts[len(spread_counts)] = None
-        out.append({**trip, "route": " ".join(pick)})
-    return out, {
-        "affected": len(affected),
-        "guided": len(guided),
-        "rerouted": len(guided) - no_alternative,
-        "no_alternative": no_alternative,
-    }
+    return _shortest(net, start, end, vclass, banned={blocked})
 
 
 def _alternatives(net, edges, closed, k, vclass="passenger"):
-    """Up to k distinct paths from origin to destination avoiding closed edges.
+    """Up to k distinct paths avoiding the closed edges.
 
-    Each successive alternative additionally avoids the previous one's own
-    mid-section, so the returned paths are genuinely different corridors rather
-    than k variations of the same one."""
+    Each successive alternative also avoids the previous one's mid-section, so
+    the paths are different corridors rather than variations of one."""
     try:
         start, end = net.getEdge(edges[0]), net.getEdge(edges[-1])
     except KeyError:
         return []
-
-    avoid, found = set(closed), []
+    banned, found = set(closed), []
     for _ in range(k):
-        blocked = [net.getEdge(e) for e in avoid if e in net._id2edge]
-        original = [(e, e._speed) for e in blocked]
-        for edge, _speed in original:
-            edge._speed = 1e-6
-        try:
-            path, _ = net.getShortestPath(start, end, vClass=vclass)
-        finally:
-            for edge, speed in original:
-                edge._speed = speed
-        if path is None:
+        path = _shortest(net, start, end, vclass, banned=banned)
+        if path is None or path in found:
             break
-        ids = [e.getID() for e in path]
-        if avoid.intersection(ids) or ids in found:
-            break
-        found.append(ids)
-        avoid.add(ids[len(ids) // 2])       # push the next search off this corridor
+        found.append(path)
+        banned.add(path[len(path) // 2])
     return found
