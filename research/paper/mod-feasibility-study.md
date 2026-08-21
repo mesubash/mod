@@ -49,10 +49,11 @@ every grid point, over a sensitivity surface in
 retiming share, shift magnitude and motorcycle→bus mode shift, plus the
 government's own unquantified 2020 school-timing proposal [29,30], a
 spatial-redistribution control and a link-closure disruption grid, all
-evaluated at the verified binding intersections (§6). Mode shift is the only lever that reduces network
-delay: shifting 5%, 10% and 15% of corridor motorcycle trips to bus cuts
-network delay by 2.57 ± 0.31%, 5.16 ± 0.03% and 8.25 ± 0.34% (mean ± sd
-across the three seeds) while removing 1.98%, 3.97% and 5.94% of vehicles,
+evaluated at the verified binding intersections (§6). Mode shift is the
+only lever that reduces network delay: shifting 5%, 10% and 15% of corridor
+motorcycle trips to bus cuts network delay by 2.57 ± 0.31%, 5.16 ± 0.03%
+and 8.25 ± 0.34% (mean ± sd across the three seeds) while removing 1.98%,
+3.97% and 5.94% of vehicles,
 an amplification of about 1.3× across the range, and
 departure retiming instead raises network delay monotonically, from
 +0.37 ± 0.17% at 5% retimed to +1.67 ± 0.06% at 25% (Δt = −15 min) and
@@ -932,7 +933,9 @@ spatial hypothesis is strongest in, and the S0 result does not settle it.
 
 The scenario (`experiments/scenarios/s4-closure.toml`) closes one corridor
 edge, 170533894, which carries 25,896 of the 182,288 routed trips in the
-count-matched demand, 14.2%. The affected set is those trips; a seeded
+count-matched demand, 14.2% (`sim/demand/sampled_sorted.rou.xml`; the
+sweep's own baseline route file carries 182,251, 0.02% fewer). The
+affected set is those trips; a seeded
 share p_r of them is guided onto an alternative path, and the rest keep the
 route they had. The grid is
 p_r ∈ {0, 10, 25, 50}% crossed with k_alternatives ∈ {1, 3} and the three
@@ -947,10 +950,11 @@ Part of the intended design did not reach these runs, and it bounds what
 they measure. `pipeline/disruption.py` writes the closure as a SUMO
 rerouter with `<closingReroute>`, which blocks the edge for the interval
 and makes un-guided vehicles divert reactively on arrival, which is today's
-behaviour and the intended comparison baseline. `experiments/run.py` never
-passes that file to SUMO, so in these runs the closed edge stayed open in
-the network. The p_r = 0 arm is therefore a baseline replay, returning
-exactly 0.00% on both metrics rather than measuring the uncoordinated
+behaviour and the intended comparison baseline. `experiments/run.py` did
+not pass that file to SUMO when this grid was run, so in these runs the
+closed edge stayed open in the network; commit `f88281f` wires it in, after
+the runs reported here. The p_r = 0 arm is therefore a baseline replay,
+returning exactly 0.00% on both metrics rather than measuring the uncoordinated
 response, and what the grid compares is guided diversion against no
 diversion (§8, limitation 18).
 
@@ -1168,16 +1172,16 @@ principle.
     un-guided vehicles divert reactively on arrival. `experiments/run.py`
     passes SUMO one additional file, the per-run copy of
     `sim/baseline.add.xml` that carries the detectors and output paths, and
-    never adds the closure file, so in these 24 runs the closed edge stayed
-    open. Two consequences. The p_r = 0 arm is a plain baseline replay
-    rather than the uncoordinated response, which is why it returns exactly
-    zero on both metrics, and the comparison S4 measures is guided diversion
-    against no diversion, not coordinated guidance against the jam the
-    network organises for itself. The scenario's own TOML comment still
-    describes the intended enforced-closure design and is ahead of the code.
-    Wiring the closure file into the SUMO command and re-running the grid is
-    the registered path, and it is the run that would answer the primary
-    module's question.
+    did not add the closure file, so in these 24 runs the closed edge stayed
+    open. Commit `f88281f` wires the closure file into the SUMO command;
+    the grid has not been re-run under it, so every S4 number reported here
+    is from the unenforced runs. Two consequences. The p_r = 0 arm is a
+    plain baseline replay rather than the uncoordinated response, which is
+    why it returns exactly zero on both metrics, and the comparison S4
+    measures is guided diversion against no diversion, not coordinated
+    guidance against the jam the network organises for itself. Re-running
+    the grid under the enforced closure is the registered path, and it is
+    the run that would answer the primary module's question.
 19. **The k effect is directional, not a measured margin.** Spreading
     guided trips across three alternatives instead of one beats k = 1 on
     delay at p_r = 10% and 50% and on throughput at p_r = 50%, but at
@@ -1185,10 +1189,10 @@ principle.
     shares the two arms' seed spreads overlap. Three transform seeds is
     thin for a difference of this size, and nothing beyond those three runs
     per grid point bounds it. A wider seed set is the registered path to a
-    figure that can carry a margin. The closure is also still not enforced
-    inside the network (limitation 18), so both k arms are compared against
-    no diversion rather than against the uncoordinated response the network
-    would produce for itself. ★
+    figure that can carry a margin. The closure was also not enforced inside
+    the network in these runs (limitation 18), so both k arms are compared
+    against no diversion rather than against the uncoordinated response the
+    network would produce for itself. ★
 
 ## 9. Conclusion
 

@@ -4,8 +4,8 @@
 # evidence says this fails inside the Ring Road (all river crossings over
 # capacity in 2012; the parallel bridges are the most oversaturated links at
 # V/C 2.70-2.76; ~80% of corridor traffic is through-traffic) — this scenario
-# tests that in our own model instead of citing it. The share of selected trips
-# with no alternative at all is part of the result, reported in the run summary.
+# tests that in our own model instead of citing it. Alternatives are abundant
+# on this network; what they cost is capacity, which is what the run measures.
 name = "s0-spatial-control"
 seeds = [101, 202, 303]
 notes = "original hypothesis: spatial redistribution at unchanged departure times"
