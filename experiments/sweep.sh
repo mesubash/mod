@@ -11,6 +11,9 @@
 # Nohup it and walk away:
 #   nohup ./experiments/sweep.sh > sweep.log 2>&1 &
 #   tail -f sweep.log
+#
+# BUILD_ONLY=1 stops after the network, demand and baseline are built, for
+# re-running individual scenarios against results that already exist.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -75,6 +78,11 @@ if [ ! -f "$RESULTS/baseline/metrics.json" ]; then
     --out "$RESULTS/baseline" || log "WARNING: baseline run returned nonzero"
 else
   log "baseline metrics present, skipping"
+fi
+
+if [ -n "${BUILD_ONLY:-}" ]; then
+  log "build complete (BUILD_ONLY): network, calibrated demand, baseline"
+  exit 0
 fi
 
 # --- 5. scenario grid ---------------------------------------------------
