@@ -162,9 +162,7 @@ def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
     Operates on route-carrying demand (<vehicle> with embedded edges); trips
     without a route are returned unchanged.
     """
-    import sumolib
-
-    net = sumolib.net.readNet(str(net_path or NET_DEFAULT))
+    net = _net(net_path)
     idx = [i for i, t in enumerate(trips) if _in(t, window) and t.get("route")]
     chosen = set(random.Random(seed).sample(idx, round(p_r * len(idx))))
 
@@ -185,35 +183,69 @@ def reroute(trips, p_r, *, seed, net_path=None, window=PEAK):
                  "no_alternative": no_alternative}
 
 
+_PATH_CACHE = {}
+_NET_CACHE = {}
+
+
+def _net(net_path=None):
+    """Read the network once per process: reroute is called per grid point and
+    the calibrated net is ~86 MB, so re-reading it dominated scenario runtime."""
+    import sumolib
+
+    key = str(net_path or NET_DEFAULT)
+    if key not in _NET_CACHE:
+        _NET_CACHE[key] = sumolib.net.readNet(key)
+    return _NET_CACHE[key]
+
+
 def _shortest(net, start, end, vclass, banned=frozenset()):
-    """Dijkstra by edge length with a hard exclusion set.
+    """A* by edge length with a hard exclusion set, memoised.
 
     Written out rather than calling sumolib's getShortestPath because that
     method caches routing internally: mutating an edge's speed or length to
     "block" it has no effect on the returned path. The earlier implementation
     did exactly that, so every alternative search returned the original path,
-    which of course still contained the blocked edge — and the transform
-    reported "no alternative" for every trip in the network. Excluding edges
-    from the search is the only reliable way to force a detour.
+    which still contained the blocked edge, and the transform reported "no
+    alternative" for essentially every trip in the network.
+
+    Straight-line distance to the destination is an admissible heuristic on a
+    road graph and cuts the explored frontier sharply; the cache matters
+    because routeSampler draws many trips from the same distinct routes, so
+    the same (origin, destination, exclusion) query repeats thousands of times.
     """
+    key = (start.getID(), end.getID(), frozenset(banned), vclass)
+    if key in _PATH_CACHE:
+        return _PATH_CACHE[key]
     if start is end:
         return [start.getID()]
-    queue, seen = [(0.0, start.getID(), [start])], set()
+
+    target = end.getShape()[-1]
+
+    def heuristic(edge):
+        x, y = edge.getShape()[-1]
+        return ((x - target[0]) ** 2 + (y - target[1]) ** 2) ** 0.5
+
+    queue = [(heuristic(start), 0.0, start.getID(), [start])]
+    best = {}
+    result = None
     while queue:
-        cost, _, path = heapq.heappop(queue)
+        _, cost, _, path = heapq.heappop(queue)
         edge = path[-1]
         if edge is end:
-            return [e.getID() for e in path]
-        if edge.getID() in seen:
+            result = [e.getID() for e in path]
+            break
+        if cost > best.get(edge.getID(), float("inf")):
             continue
-        seen.add(edge.getID())
         for nxt in edge.getOutgoing():
-            if (nxt.getID() in seen or nxt.getID() in banned
-                    or not nxt.allows(vclass)):
+            eid = nxt.getID()
+            if eid in banned or not nxt.allows(vclass):
                 continue
-            heapq.heappush(queue,
-                           (cost + nxt.getLength(), nxt.getID(), path + [nxt]))
-    return None
+            step = cost + nxt.getLength()
+            if step < best.get(eid, float("inf")):
+                best[eid] = step
+                heapq.heappush(queue, (step + heuristic(nxt), step, eid, path + [nxt]))
+    _PATH_CACHE[key] = result
+    return result
 
 
 def _alternative(net, edges, vclass="passenger"):
