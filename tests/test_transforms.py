@@ -273,3 +273,23 @@ def test_scenario_closure_block_generates_a_rerouter(tmp_path):
     for edge in block["edges"]:
         assert f'<closingReroute id="{edge}"/>' in xml
     assert f'begin="{block["begin"]}"' in xml
+
+
+def test_closure_edge_is_a_real_corridor_link():
+    # The first closure edge was a 0.2 m junction connector: enforcing it
+    # changed nothing, and the enforced and unenforced grids came back
+    # identical. A closure has to shut a length of road someone drives along.
+    import tomllib
+
+    import sumolib
+
+    net_path = REPO / "sim/net/corridor-calibrated.net.xml"
+    if not net_path.exists():
+        pytest.skip("corridor-calibrated.net.xml not built")
+    cfg = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    net = sumolib.net.readNet(str(net_path))
+    for edge_id in cfg["closure"]["edges"]:
+        edge = net.getEdge(edge_id)
+        assert edge.getLength() >= 100, \
+            f"{edge_id} is {edge.getLength():.1f} m — too short to be a closure"
+        assert edge.allows("passenger")

@@ -17,12 +17,16 @@ name = "s4-closure"
 seeds = [101, 202, 303]
 notes = "closure enforced in-network; p_r=0 is the uncoordinated control"
 
+# Koteshwor leg 3 inbound: a 991 m two-lane trunk approach to the corridor's
+# busiest junction. The earlier choice, 170533894, was a 0.2 m junction
+# connector — closing it changed nothing, which is why the enforced and
+# unenforced grids returned identical numbers.
 [closure]
-edges = ["170533894"]
+edges = ["670112945"]
 begin = 32400   # 09:00, the measured AM peak hour (spec §4)
 end = 36000     # 10:00
 
 [transforms.spread_reroute]
-closed_edges = ["170533894"]
+closed_edges = ["670112945"]
 p_r = [0.0, 0.1, 0.25, 0.5]
 k_alternatives = [1, 3]

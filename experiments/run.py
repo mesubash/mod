@@ -89,6 +89,13 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
            "--statistic-output", str(outdir / "stats.xml"),
            "--queue-output", str(outdir / "queues.xml"),
            "--queue-output.period", "60", *SUMO_OPTS]
+    if extra_add:
+        # A closed edge only diverts vehicles that can recompute a route.
+        # Without a rerouting device they hold their fixed route and the
+        # closure has no effect, so the un-guided control would be no control
+        # at all. Reactive recomputation on arrival is today's behaviour.
+        cmd += ["--device.rerouting.probability", "1",
+                "--device.rerouting.period", "300"]
     if mode == "meso":
         # Mesoscopic ignores sublane laterals and falls back to static signals;
         # it is the sweep mode (order-of-magnitude faster), with headline points
