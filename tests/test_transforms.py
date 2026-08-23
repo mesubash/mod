@@ -309,3 +309,35 @@ def test_closure_edge_is_used_by_the_demand():
     for edge in cfg["closure"]["edges"]:
         assert text.count(f" {edge} ") + text.count(f'"{edge} ') > 1000, \
             f"{edge} carries too little demand to be a meaningful closure"
+
+
+def test_only_unguided_vehicles_get_a_rerouting_device(tmp_path):
+    # A global rerouting device re-plans guided vehicles too, overwriting the
+    # spread routes and making k=1 and k=3 identical. Guided vehicles must
+    # carry has.rerouting.device=0, un-guided affected ones 1.
+    trips = [{"id": f"v{i}", "depart": f"{33000 + i}.0", "type": "car",
+              "route": "a closed b"} for i in range(4)]
+
+    def fake_alternatives(net, edges, closed, k, vclass="passenger"):
+        return [["a", "alt1", "b"], ["a", "alt2", "b"]][:k]
+
+    orig_alts, orig_net = transforms._alternatives, transforms._net
+    transforms._alternatives = fake_alternatives
+    transforms._net = lambda p=None: None
+    try:
+        out, summary = transforms.spread_reroute(
+            trips, ["closed"], p_r=0.5, k_alternatives=2, seed=1)
+    finally:
+        transforms._alternatives, transforms._net = orig_alts, orig_net
+
+    guided = [t for t in out if t.get("reroute") == "0"]
+    unguided = [t for t in out if t.get("reroute") == "1"]
+    assert len(guided) == summary["rerouted"] == 2
+    assert len(unguided) == 2, "affected but un-guided vehicles re-plan reactively"
+
+    path = tmp_path / "o.rou.xml"
+    transforms.write_trips(path, [], out, "t")
+    xml = path.read_text()
+    assert '<param key="has.rerouting.device" value="1"/>' in xml
+    assert '<param key="has.rerouting.device" value="0"/>' in xml
+    assert "reroute=" not in xml, "the flag is a param, not an attribute"

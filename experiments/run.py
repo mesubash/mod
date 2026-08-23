@@ -94,7 +94,10 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
         # Without a rerouting device they hold their fixed route and the
         # closure has no effect, so the un-guided control would be no control
         # at all. Reactive recomputation on arrival is today's behaviour.
-        cmd += ["--device.rerouting.probability", "1",
+        # probability 0: the demand file decides per vehicle which ones may
+        # re-plan (has.rerouting.device), so guidance stays a real treatment
+        # instead of being overwritten for everyone a few minutes later.
+        cmd += ["--device.rerouting.probability", "0",
                 "--device.rerouting.period", "600",
                 "--device.rerouting.adaptation-interval", "180"]
     if mode == "meso":

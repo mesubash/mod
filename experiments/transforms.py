@@ -71,10 +71,17 @@ def write_trips(path, vtypes, trips, comment):
         for v in vtypes:
             f.write("    " + tag("vType", v) + "\n")
         for t in sorted(trips, key=_depart):
+            reroute = t.get("reroute")
             if "route" in t:
-                attrs = {k: v for k, v in t.items() if k != "route"}
-                f.write(f"    {tag('vehicle', attrs)[:-2]}>\n"
-                        f'        <route edges="{t["route"]}"/>\n'
+                attrs = {k: v for k, v in t.items()
+                         if k not in ("route", "reroute")}
+                f.write(f"    {tag('vehicle', attrs)[:-2]}>\n")
+                if reroute is not None:
+                    # per-vehicle device: guidance is only a treatment if the
+                    # guided vehicle keeps the route it was given
+                    f.write('        <param key="has.rerouting.device" '
+                            f'value="{reroute}"/>\n')
+                f.write(f'        <route edges="{t["route"]}"/>\n'
                         "    </vehicle>\n")
             else:
                 f.write("    " + tag("trip", t) + "\n")
@@ -300,10 +307,18 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
                 if t.get("route") and closed.intersection(t["route"].split())
                 and (window is None or _in(t, window))]
     guided = set(random.Random(seed).sample(affected, round(p_r * len(affected))))
+    affected_set = set(affected)
 
+    # A global rerouting device re-plans every vehicle periodically, which
+    # overwrites the routes guidance just assigned and makes k=1 and k=3
+    # identical. Devices are therefore assigned per vehicle: affected but
+    # un-guided vehicles reroute reactively when they meet the closure, which
+    # is today's behaviour; guided vehicles keep the route they were given.
     out, spread, no_alternative = [], 0, 0
     for i, trip in enumerate(trips):
         if i not in guided:
+            if i in affected_set:
+                trip = {**trip, "reroute": "1"}
             out.append(trip)
             continue
         options = _alternatives(net, trip["route"].split(), closed,
@@ -313,7 +328,8 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
             out.append(trip)
             no_alternative += 1
             continue
-        out.append({**trip, "route": " ".join(options[spread % len(options)])})
+        out.append({**trip, "route": " ".join(options[spread % len(options)]),
+                    "reroute": "0"})
         spread += 1
     return out, {"affected": len(affected), "guided": len(guided),
                  "rerouted": spread, "no_alternative": no_alternative}
