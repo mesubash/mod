@@ -293,3 +293,19 @@ def test_closure_edge_is_a_real_corridor_link():
         assert edge.getLength() >= 100, \
             f"{edge_id} is {edge.getLength():.1f} m — too short to be a closure"
         assert edge.allows("passenger")
+
+
+def test_closure_edge_is_used_by_the_demand():
+    # Two closures in a row shut roads the demand never touches: a 0.2 m
+    # junction connector, then a 991 m trunk link with zero routes through it.
+    # Both produced 24 identical runs. Verify usage before spending compute.
+    import tomllib
+
+    demand = REPO / "sim/demand/sampled_sorted.rou.xml"
+    if not demand.exists():
+        pytest.skip("count-matched demand not built")
+    cfg = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    text = demand.read_text()
+    for edge in cfg["closure"]["edges"]:
+        assert text.count(f" {edge} ") + text.count(f'"{edge} ') > 1000, \
+            f"{edge} carries too little demand to be a meaningful closure"

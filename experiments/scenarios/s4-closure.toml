@@ -3,30 +3,34 @@
 # is the regime where rerouting is the only available lever, since a trip
 # already underway cannot be retimed or mode-shifted.
 #
-# The closure is enforced in the network: the [closure] block below makes
-# run.py write a SUMO rerouter (pipeline/disruption.py) that shuts the edge for
-# the window, so un-guided vehicles meet the block and reroute reactively on
-# arrival. That is today's behaviour, which makes p_r = 0 the uncoordinated
-# control rather than an untouched run.
+# The closure is enforced in the network: the [closure] block makes run.py
+# write a SUMO rerouter (pipeline/disruption.py) that shuts the edge for the
+# window, and closure runs give every vehicle a rerouting device so un-guided
+# traffic meets the block and re-plans on arrival. That is today's behaviour.
+#
+# READ THE DELTAS AGAINST p_r = 0, NOT THE GLOBAL BASELINE. The rerouting
+# device changes routing for every vehicle, so a closure run and the
+# device-free baseline differ for reasons that have nothing to do with the
+# closure. p_r = 0 is the uncoordinated control; the guided rows are measured
+# against it.
 #
 # k_alternatives is the point of the scenario: k=1 sends every diverted vehicle
 # to the single best alternative, which is what a conventional navigation app
-# does; k=3 splits them across three, so no one parallel road absorbs the whole
-# diversion.
+# does; k=3 splits them across three.
 name = "s4-closure"
-seeds = [101, 202, 303]
-notes = "closure enforced in-network; p_r=0 is the uncoordinated control"
+seeds = [101]
+notes = "closure enforced; compare guided rows against p_r=0, not the baseline"
 
-# Koteshwor leg 3 inbound: a 991 m two-lane trunk approach to the corridor's
-# busiest junction. The earlier choice, 170533894, was a 0.2 m junction
-# connector — closing it changed nothing, which is why the enforced and
-# unenforced grids returned identical numbers.
+# Maitighar leg 1 inbound: 370 m of primary road carrying 20,196 of the
+# 182,288 routed trips. Verified against the demand before use - the previous
+# two choices were a 0.2 m junction connector and a 991 m trunk link that no
+# route touched, and both produced 24 identical runs.
 [closure]
-edges = ["670112945"]
+edges = ["171203196#0"]
 begin = 32400   # 09:00, the measured AM peak hour (spec §4)
 end = 36000     # 10:00
 
 [transforms.spread_reroute]
-closed_edges = ["670112945"]
-p_r = [0.0, 0.1, 0.25, 0.5]
+closed_edges = ["171203196#0"]
+p_r = [0.0, 0.5]
 k_alternatives = [1, 3]

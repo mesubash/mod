@@ -95,7 +95,8 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
         # closure has no effect, so the un-guided control would be no control
         # at all. Reactive recomputation on arrival is today's behaviour.
         cmd += ["--device.rerouting.probability", "1",
-                "--device.rerouting.period", "300"]
+                "--device.rerouting.period", "600",
+                "--device.rerouting.adaptation-interval", "180"]
     if mode == "meso":
         # Mesoscopic ignores sublane laterals and falls back to static signals;
         # it is the sweep mode (order-of-magnitude faster), with headline points
