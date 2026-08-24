@@ -259,10 +259,28 @@ def build_taz(net, to_xy):
             for tid, (src, snk) in taz.items()}
 
 
-def run_duarouter(trips, out, taz=None):
+# Free-flow shortest paths, computed once, give every vehicle on an origin-
+# destination pair the identical route: of 51,612 OD pairs in the demand, 0 had
+# more than one, and 5% of the used edges carried 45.5% of all traversals. The
+# busiest edge was asked to move 37,547 vehicles in six hours, 6,258 veh/h,
+# roughly twice what a two-lane urban arterial delivers at saturation. It
+# jammed, the jam propagated upstream, and the network delivered 6.6% of the
+# counted volume at the peak hour while holding 19.5% of its jam storage - the
+# corridors were full and the rest of the city was empty.
+#
+# Randomising edge weights per routing query spreads an OD pair's vehicles over
+# the parallel roads a real driver population uses (stochastic route choice: a
+# driver acts on perceived cost, not the network's true shortest path). The
+# factor is the upper bound of the multiplier drawn for each query.
+ROUTE_RANDOM_FACTOR = 3.0
+
+
+def run_duarouter(trips, out, taz=None, random_factor=ROUTE_RANDOM_FACTOR):
     cmd = [sumo_tool("duarouter"), "-n", str(NET), "-r", str(trips), "-o", str(out),
            "--ignore-errors", "--no-warnings", "--no-step-log",
            "--routing-threads", "8"]
+    if random_factor > 1.0:
+        cmd += ["--weights.random-factor", str(random_factor)]
     if taz:
         cmd += ["--additional-files", str(taz)]
     subprocess.run(cmd, check=True, capture_output=True, text=True)
@@ -281,7 +299,7 @@ def probe_keep(zedge, cordon, tmp):
             f.write(f'  <trip id="{i}" depart="0" from="{s}" to="{t}"/>\n')
         f.write("</routes>\n")
     out = tmp / "probe.rou.xml"
-    run_duarouter(trips, out)
+    run_duarouter(trips, out, random_factor=1.0)
     keep = set()
     for veh in ET.parse(out).getroot().iter("vehicle"):
         if cordon.intersection(veh.find("route").get("edges").split()):
