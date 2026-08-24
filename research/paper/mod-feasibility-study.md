@@ -1194,6 +1194,28 @@ principle.
     against no diversion rather than against the uncoordinated response the
     network would produce for itself. ★
 
+20. **The enforced closure was itself only half-enforced, and the fix
+    postdates every S4 run reported here.** Limitation 18 registers
+    re-running the S4 grid with the closure file passed to SUMO. Those
+    re-runs were made, and they were also defective. `pipeline/disruption.py`
+    wrote the rerouter onto the closed edge itself, but SUMO diverts a
+    vehicle only when it "reach[es] one of the edges given in the
+    edges-attribute of the rerouter's declaration" [SUMO Rerouter docs], and
+    a vehicle cannot reach a closed edge. The rerouter never fired. The only
+    vehicles that responded to the closure were those carrying a rerouting
+    device, which re-plan on a 600 s timer and eventually observe the changed
+    permissions; every other vehicle drove through the shut road. The defect
+    was found by a knowledge-share sweep added afterwards: its p_r = 0,
+    κ = 0 cell — a closure with no devices anywhere — returned D_net
+    69,923 veh·h and H_cordon 110,242 PCU, the baseline values exactly.
+    Commit `7ed158b` places the rerouter on the approach edges within two
+    hops of the closure and makes the network a required argument of
+    `closure()`, so the placement cannot silently regress; a test asserts the
+    rerouter never names an edge it closes. The 30 affected runs are retained
+    at `results/invalid-rerouter-on-closed-edge/` and are excluded from every
+    figure. The grid is being re-run under the corrected rerouter, and no S4
+    result in this paper should be read until that re-run replaces it. ★
+
 ## 9. Conclusion
 
 Kathmandu's congestion problem, at its saturated core, is a *what-mode*
