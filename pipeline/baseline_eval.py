@@ -96,18 +96,28 @@ def queue_series(path, lanes_by_int):
     return series
 
 
-def s7_metrics(results_dir, prefix="baseline_"):
+def s7_metrics(results_dir, prefix="baseline_", window=None):
     """Spec §7 metrics from one run's outputs: {prefix}edgedata_{vtype}.xml,
     {prefix}edgedata_net.xml, {prefix}queues.xml in results_dir. Shared by the
-    baseline evaluation and experiments/run.py scenario runs."""
+    baseline evaluation and experiments/run.py scenario runs.
+
+    window overrides the spec §4 analysis window. A scenario whose disruption
+    falls outside 08:00-11:00 has to be measured where it happens: S4 closes a
+    link at 07:00, when the corridor is still moving, and the default window
+    would score an hour the closure never touched. The returned "window" field
+    records what was used; the metric keys keep their names so that collected
+    summaries stay comparable, and the field is what says which hours they
+    cover."""
     import sumolib
+
+    window = window or ANALYSIS
 
     jmap = list(csv.DictReader(open(ROOT / "sim/net/junction_map.csv")))
     counts = edge_counts(
         {vt: results_dir / f"{prefix}edgedata_{vt}.xml" for vt in PCU}
     )
     nh = net_hourly(results_dir / f"{prefix}edgedata_net.xml")
-    win_bins = [b for b in COMPARE_HOURS if ANALYSIS[0] <= b < ANALYSIS[1]]
+    win_bins = [b for b in COMPARE_HOURS if window[0] <= b < window[1]]
 
     in_edges = {}
     for r in jmap:
@@ -173,14 +183,15 @@ def s7_metrics(results_dir, prefix="baseline_"):
     has_queues = any(v for s in qs.values() for v in s.values())
     Q_i = {
         i: (round(max((v for t, v in s.items()
-                       if ANALYSIS[0] <= t < ANALYSIS[1]), default=0.0), 1)
+                       if window[0] <= t < window[1]), default=0.0), 1)
             if has_queues else None)
         for i, s in qs.items()
     }
 
-    # t_diss: total mapped-approach queue, 5-min means; pre-peak ref = 08:00-09:00
-    # mean; dissipated when a 5-min mean after 10:00 drops to <= ref and stays
-    # there for 15 min; censored at 12:00.
+    # t_diss: total mapped-approach queue, 5-min means; the reference is the
+    # window's first hour, dissipation is measured from two hours in, and the
+    # count is censored an hour past the window. On the default window those
+    # are 08:00-09:00, 10:00 and 12:00, as the spec states them.
     total = {}
     for s in qs.values():
         for t, v in s.items():
@@ -188,11 +199,14 @@ def s7_metrics(results_dir, prefix="baseline_"):
     def mean5(t0):
         vals = [total.get(t0 + 60 * k, 0.0) for k in range(5)]
         return sum(vals) / 5
-    ref = sum(total.get(t, 0.0) for t in range(28800, 32400, 60)) / 60
+    ref_end = window[0] + 3600
+    diss_from = window[0] + 7200
+    censor = window[1] + 3600
+    ref = sum(total.get(t, 0.0) for t in range(window[0], ref_end, 60)) / 60
     t_diss = ">120 min (censored)" if has_queues else None
-    for t0 in range(36000, 43200 - 900, 300) if has_queues else []:
+    for t0 in range(diss_from, censor - 900, 300) if has_queues else []:
         if all(mean5(t0 + 300 * j) <= ref for j in range(3)):
-            t_diss = round((t0 - 36000) / 60, 1)
+            t_diss = round((t0 - diss_from) / 60, 1)
             break
 
     return {
@@ -205,6 +219,7 @@ def s7_metrics(results_dir, prefix="baseline_"):
         "t_diss_min_after_1000": t_diss,
         "t_diss_prepeak_ref_m": round(ref, 1),
         "D_net_veh_h": round(D_net, 0),
+        "window": list(window),
     }
 
 

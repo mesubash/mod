@@ -416,3 +416,34 @@ def test_kappa_grid_closes_the_same_edge_as_the_main_s4_grid():
     assert kappa["closure"] == main["closure"]
     assert (kappa["transforms"]["spread_reroute"]["closed_edges"]
             == kappa["closure"]["edges"])
+
+
+def test_closure_edge_still_flows_during_the_closure_window():
+    # A link already at a standstill cannot be disrupted: closing it removes
+    # nothing, and the measured effect is whatever else the scenario changed.
+    # The 09:00 window shut an edge running at 0.03 m/s with 84 vehicles
+    # through it, and the resulting "+9% closure cost" was the rerouting
+    # device, not the closure. Check the baseline before spending compute.
+    import tomllib
+    import xml.etree.ElementTree as ET
+
+    edgedata = REPO / "results/sweep/baseline/baseline/edgedata_net.xml"
+    if not edgedata.exists():
+        pytest.skip("baseline edgedata not present")
+    cfg = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    closed = set(cfg["closure"]["edges"])
+    begin = cfg["closure"]["begin"]
+
+    root = ET.parse(edgedata).getroot()
+    for iv in root.findall("interval"):
+        if int(float(iv.get("begin"))) != begin:
+            continue
+        for e in iv.findall("edge"):
+            if e.get("id") in closed:
+                assert float(e.get("speed") or 0) > 1.0, \
+                    f"{e.get('id')} is at a standstill at {begin}s"
+                assert int(e.get("entered") or 0) > 500, \
+                    f"{e.get('id')} carries too little traffic at {begin}s"
+        break
+    else:
+        pytest.fail(f"no edgedata interval starting at {begin}s")

@@ -67,7 +67,7 @@ def expand(tf_cfg):
 
 
 def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
-             extra_add=None):
+             extra_add=None, window=None):
     # Absolute: SUMO resolves the additional file's output paths relative to
     # that file's own directory, so a relative --out doubles the path.
     outdir = ((outbase or REPO / "results" / scenario) / run_id).resolve()
@@ -113,7 +113,7 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
         raise RuntimeError(
             f"sumo failed for {scenario}/{run_id} (exit {done.returncode}):\n{tail}")
     (outdir / "metrics.json").write_text(
-        json.dumps(s7_metrics(outdir, prefix=""), indent=2))
+        json.dumps(s7_metrics(outdir, prefix="", window=window), indent=2))
     print(f"{scenario}/{run_id}: metrics.json written", flush=True)
 
 
@@ -175,6 +175,11 @@ def main():
         print(f"{cfg['name']}: closure on {len(closure['edges'])} edge(s), "
               f"{closure['begin']}-{closure['end']}s -> {closure_file}", flush=True)
 
+    # A scenario may declare its own analysis window: the spec's 08:00-11:00
+    # scores hours a 07:00 closure never reaches (see s7_metrics).
+    win = cfg.get("analysis")
+    window = (win["begin"], win["end"]) if win else None
+
     seeds = cfg["seeds"][:args.seeds] if args.seeds else cfg["seeds"]
     outbase = args.out or REPO / "results" / cfg["name"]
 
@@ -202,7 +207,7 @@ def main():
                   flush=True)
             if not args.dry_run:
                 simulate(cfg["name"], run_id, trips_path, outbase,
-                         args.mode, closure_file)
+                         args.mode, closure_file, window)
 
 
 if __name__ == "__main__":

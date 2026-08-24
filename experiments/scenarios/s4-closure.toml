@@ -27,7 +27,19 @@ notes = "closure enforced; compare guided rows against p_r=0, not the baseline"
 # route touched, and both produced 24 identical runs.
 [closure]
 edges = ["171203196#0"]
-begin = 32400   # 09:00, the measured AM peak hour (spec §4)
+begin = 25200   # 07:00 - see [analysis]
+end = 28800     # 08:00
+
+# The spec's 08:00-11:00 window cannot score this closure. In the baseline the
+# closed edge runs at 0.03 m/s during 09:00-10:00 with 84 vehicles through it
+# and 74.5% occupancy: it is already delivering nothing, so shutting it removes
+# nothing. Network-wide, 31% of edges are below 1 m/s at 09:00 and 44% at
+# 10:00. At 07:00 the corridor still moves (median 14.4 m/s, 0.2% of edges
+# below 1 m/s) and that edge carries 1,689 vehicles, so a closure there
+# disrupts traffic that was actually flowing. The window covers the closure
+# hour and two hours of aftermath.
+[analysis]
+begin = 25200   # 07:00
 end = 36000     # 10:00
 
 [transforms.spread_reroute]
