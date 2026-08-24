@@ -269,10 +269,45 @@ def test_scenario_closure_block_generates_a_rerouter(tmp_path):
     assert block["edges"] == cfg["transforms"]["spread_reroute"]["closed_edges"], \
         "the enforced closure and the transform's closed_edges must agree"
 
-    xml = closure(block["edges"], block["begin"], block["end"])
+    net_path = REPO / "sim/net/corridor-calibrated.net.xml"
+    if not net_path.exists():
+        pytest.skip("corridor-calibrated.net.xml not built")
+    xml = closure(block["edges"], block["begin"], block["end"], net_path)
     for edge in block["edges"]:
         assert f'<closingReroute id="{edge}"/>' in xml
     assert f'begin="{block["begin"]}"' in xml
+
+
+def test_closure_rerouter_sits_upstream_not_on_the_closed_edge():
+    # SUMO diverts a vehicle when it reaches an edge named in the rerouter's
+    # edges attribute, and a vehicle can never reach a closed edge. With the
+    # rerouter on the closed edge it never fired: only vehicles carrying a
+    # rerouting device noticed the closure, and a run with no devices returned
+    # the baseline metrics exactly (D_net 69923, H 110242 — identical).
+    import re
+    import tomllib
+
+    import sumolib
+
+    from pipeline.disruption import closure
+
+    net_path = REPO / "sim/net/corridor-calibrated.net.xml"
+    if not net_path.exists():
+        pytest.skip("corridor-calibrated.net.xml not built")
+    cfg = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    edges = cfg["closure"]["edges"]
+    net = sumolib.net.readNet(str(net_path))
+
+    xml = closure(edges, 32400, 36000, net)
+    trigger = re.search(r'<rerouter [^>]*edges="([^"]+)"', xml).group(1).split()
+    assert trigger, "rerouter must name at least one approach edge"
+    assert not set(trigger) & set(edges), \
+        "the rerouter must not sit on the edge it closes"
+    for t in trigger:
+        assert any(o.getID() in edges or
+                   any(oo.getID() in edges for oo in o.getOutgoing())
+                   for o in net.getEdge(t).getOutgoing()), \
+            f"{t} is not an approach to {edges}"
 
 
 def test_closure_edge_is_a_real_corridor_link():

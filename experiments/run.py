@@ -90,13 +90,12 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
            "--queue-output", str(outdir / "queues.xml"),
            "--queue-output.period", "60", *SUMO_OPTS]
     if extra_add:
-        # A closed edge only diverts vehicles that can recompute a route.
-        # Without a rerouting device they hold their fixed route and the
-        # closure has no effect, so the un-guided control would be no control
-        # at all. Reactive recomputation on arrival is today's behaviour.
-        # probability 0: the demand file decides per vehicle which ones may
-        # re-plan (has.rerouting.device), so guidance stays a real treatment
-        # instead of being overwritten for everyone a few minutes later.
+        # probability 0: the demand file decides per vehicle which ones carry a
+        # rerouting device (has.rerouting.device), so guidance stays a real
+        # treatment instead of being overwritten for everyone a few minutes
+        # later. The device is not what makes the closure bite — the rerouter
+        # on the approaches diverts every vehicle. It buys live travel times,
+        # which is the knowledge share kappa in transforms.spread_reroute.
         cmd += ["--device.rerouting.probability", "0",
                 "--device.rerouting.period", "600",
                 "--device.rerouting.adaptation-interval", "180"]
@@ -172,7 +171,7 @@ def main():
         closure_file = REPO / "sim/incidents" / f"{cfg['name']}.add.xml"
         closure_file.parent.mkdir(parents=True, exist_ok=True)
         closure_file.write_text(closure_xml(closure["edges"], closure["begin"],
-                                            closure["end"]))
+                                            closure["end"], SIM_NET))
         print(f"{cfg['name']}: closure on {len(closure['edges'])} edge(s), "
               f"{closure['begin']}-{closure['end']}s -> {closure_file}", flush=True)
 
