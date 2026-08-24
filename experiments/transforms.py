@@ -288,7 +288,7 @@ def _alternatives(net, edges, closed, k, vclass="passenger"):
 
 
 def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
-                   net_path=None, window=None):
+                   kappa=1.0, net_path=None, window=None):
     """S4: coordinated rerouting under disruption.
 
     Trips whose route uses a closed edge are the affected set. A seeded p_r
@@ -298,6 +298,15 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
     because sending every diverted vehicle down the same parallel road recreates
     the jam elsewhere (Braess, paper [42]).
 
+    kappa is the share of un-guided affected drivers who know the network well
+    enough to divert usefully on their own. They get a rerouting device, which
+    reads live travel times — a local who knows both the shortcuts and which of
+    them is moving. The remaining 1 - kappa meet the closure with no device and
+    take whatever the rerouter hands them on arrival. kappa = 1 makes every
+    un-guided driver an omniscient rerouter, which is the control the first S4
+    grid used and the reason guidance appeared to add nothing; no Kathmandu
+    measurement of route knowledge exists, so kappa is swept, not assumed.
+
     Returns (trips, summary); the summary reports how many affected trips had no
     alternative at all.
     """
@@ -306,8 +315,10 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
     affected = [i for i, t in enumerate(trips)
                 if t.get("route") and closed.intersection(t["route"].split())
                 and (window is None or _in(t, window))]
-    guided = set(random.Random(seed).sample(affected, round(p_r * len(affected))))
-    affected_set = set(affected)
+    rng = random.Random(seed)
+    guided = set(rng.sample(affected, round(p_r * len(affected))))
+    unguided = [i for i in affected if i not in guided]
+    knowing = set(rng.sample(unguided, round(kappa * len(unguided))))
 
     # A global rerouting device re-plans every vehicle periodically, which
     # overwrites the routes guidance just assigned and makes k=1 and k=3
@@ -317,7 +328,7 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
     out, spread, no_alternative = [], 0, 0
     for i, trip in enumerate(trips):
         if i not in guided:
-            if i in affected_set:
+            if i in knowing:
                 trip = {**trip, "reroute": "1"}
             out.append(trip)
             continue
@@ -332,4 +343,5 @@ def spread_reroute(trips, closed_edges, p_r, k_alternatives=3, *, seed,
                     "reroute": "0"})
         spread += 1
     return out, {"affected": len(affected), "guided": len(guided),
-                 "rerouted": spread, "no_alternative": no_alternative}
+                 "knowing": len(knowing), "rerouted": spread,
+                 "no_alternative": no_alternative}

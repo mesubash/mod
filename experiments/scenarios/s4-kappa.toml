@@ -1,0 +1,32 @@
+# S4b - what guidance is worth when un-guided drivers do NOT already know the
+# network. The first S4 grid gave every un-guided vehicle a SUMO rerouting
+# device: perfect live travel times and an instant optimal recomputation, which
+# is better than any navigation app and unlike any real driver. Against that
+# control guidance can only ever look worthless, because the control already
+# had the product.
+#
+# kappa is the share of un-guided affected drivers who keep that device. The
+# rest hit the closure with no device and take the rerouter's on-arrival
+# diversion. kappa = 1 reproduces the s4-closure grid; the value of guidance
+# should grow as kappa falls.
+#
+# READ THE DELTAS WITHIN A kappa LEVEL: p_r = 0.5 against p_r = 0 at the same
+# kappa. Comparing across kappa levels also changes the control.
+#
+# k_alternatives is fixed at 1: the s4-closure grid showed k = 3 is worse than
+# no guidance at all (+1.5 pp delay), because alternatives 2 and 3 are
+# lower-capacity roads. One best detour, not a menu.
+name = "s4-kappa"
+seeds = [101, 102, 103]
+notes = "compare p_r=0.5 against p_r=0 within each kappa level"
+
+[closure]
+edges = ["171203196#0"]
+begin = 32400   # 09:00, the measured AM peak hour (spec §4)
+end = 36000     # 10:00
+
+[transforms.spread_reroute]
+closed_edges = ["171203196#0"]
+p_r = [0.0, 0.5]
+k_alternatives = 1
+kappa = [0.0, 0.2, 0.5]

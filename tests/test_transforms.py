@@ -341,3 +341,43 @@ def test_only_unguided_vehicles_get_a_rerouting_device(tmp_path):
     assert '<param key="has.rerouting.device" value="1"/>' in xml
     assert '<param key="has.rerouting.device" value="0"/>' in xml
     assert "reroute=" not in xml, "the flag is a param, not an attribute"
+
+
+def test_kappa_controls_how_many_unguided_drivers_can_reroute():
+    # The first S4 grid gave every un-guided vehicle a rerouting device, so the
+    # control group already had live travel times and an optimal recomputation.
+    # kappa is the share that keeps it; the rest take the closure's on-arrival
+    # diversion.
+    trips = [{"id": f"v{i}", "depart": f"{33000 + i}.0", "type": "car",
+              "route": "a closed b"} for i in range(10)]
+
+    def fake_alternatives(net, edges, closed, k, vclass="passenger"):
+        return [["a", "alt1", "b"]]
+
+    orig_alts, orig_net = transforms._alternatives, transforms._net
+    transforms._alternatives = fake_alternatives
+    transforms._net = lambda p=None: None
+    try:
+        runs = {kappa: transforms.spread_reroute(
+            trips, ["closed"], p_r=0.0, k_alternatives=1, seed=1, kappa=kappa)
+            for kappa in (0.0, 0.5, 1.0)}
+    finally:
+        transforms._alternatives, transforms._net = orig_alts, orig_net
+
+    for kappa, (out, summary) in runs.items():
+        devices = [t for t in out if t.get("reroute") == "1"]
+        assert len(devices) == summary["knowing"] == round(kappa * 10), \
+            f"kappa={kappa} must give exactly that share a rerouting device"
+
+
+def test_kappa_grid_closes_the_same_edge_as_the_main_s4_grid():
+    # s4-kappa is s4-closure with the control relaxed, so it must shut the same
+    # link — otherwise the two grids are not comparable and the closure-edge
+    # checks above (length, permissions, demand usage) do not cover it.
+    import tomllib
+
+    main = tomllib.load(open(REPO / "experiments/scenarios/s4-closure.toml", "rb"))
+    kappa = tomllib.load(open(REPO / "experiments/scenarios/s4-kappa.toml", "rb"))
+    assert kappa["closure"] == main["closure"]
+    assert (kappa["transforms"]["spread_reroute"]["closed_edges"]
+            == kappa["closure"]["edges"])

@@ -18,7 +18,7 @@
 # to the single best alternative, which is what a conventional navigation app
 # does; k=3 splits them across three.
 name = "s4-closure"
-seeds = [101]
+seeds = [101, 102, 103]
 notes = "closure enforced; compare guided rows against p_r=0, not the baseline"
 
 # Maitighar leg 1 inbound: 370 m of primary road carrying 20,196 of the
@@ -34,3 +34,7 @@ end = 36000     # 10:00
 closed_edges = ["171203196#0"]
 p_r = [0.0, 0.5]
 k_alternatives = [1, 3]
+# Scalar, so it stays out of the run id and the seed-101 runs already on disk
+# are reused. kappa = 1 is the omniscient control: every un-guided driver
+# reroutes on live travel times. s4-kappa relaxes it.
+kappa = 1.0
