@@ -27,3 +27,32 @@ def test_audit_ratio_matches_the_reported_collapse():
     assert all(0.0 <= r <= 2.0 for _, _, _, r in rows)
     # The collapse is the finding: delivery must fall across the morning.
     assert rows[0][3] > rows[-1][3]
+
+
+def test_demand_gives_an_od_pair_more_than_one_route():
+    # The baseline gridlocked because duarouter ran once on free-flow weights:
+    # all 51,612 OD pairs had exactly one route, 5% of edges carried 45.5% of
+    # traversals, and the busiest was asked to move 6,258 veh/h. Nothing pinned
+    # route diversity, so the concentration was invisible until the network was
+    # audited hour by hour.
+    import collections
+    import xml.etree.ElementTree as ET
+
+    demand = REPO / "sim/demand/sampled_sorted.rou.xml"
+    if not demand.exists():
+        pytest.skip("count-matched demand not built")
+
+    routes = collections.defaultdict(set)
+    for _, el in ET.iterparse(demand, events=("end",)):
+        if el.tag == "vehicle":
+            r = el.find("route")
+            if r is not None:
+                edges = r.get("edges").split()
+                routes[(edges[0], edges[-1])].add(r.get("edges"))
+            el.clear()
+
+    assert routes, "no embedded routes in the demand"
+    multi = sum(1 for v in routes.values() if len(v) > 1)
+    assert multi / len(routes) > 0.05, (
+        f"only {multi}/{len(routes)} OD pairs have more than one route: "
+        "the demand routes every vehicle down the same path")
