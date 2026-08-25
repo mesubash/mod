@@ -57,6 +57,17 @@ corridor-filtered.net.xml and documents the gridlocked baseline as run).
 
 ## junction_map.csv
 
+**Thapathali leg 3 in, remapped 2026-08-25.** Deriving lane counts from
+carriageway width (pipeline/lane_width.py) changed the geometry
+`--ramps.guess` works on, and way 52916461 (169 m, 3 lanes, primary) was
+consumed into `52799481#1-AddedOffRampEdge` (95 m, 4 lanes). The junction node
+1273357431 is unchanged, at the same coordinate, and that ramp edge is its
+only incoming edge, so the counted approach is the same piece of road under a
+new name. The rebuild's guard caught it: 86 of 87 mapped edges resolved, and
+netconvert would otherwise have produced a network the calibration silently
+mismapped.
+
+
 Maps every 2019 count leg-direction to net edges. Columns: intersection,
 leg, edge_id, direction. intersection and leg match
 `data/processed/counts_2019.parquet` (77 leg-direction records, all
