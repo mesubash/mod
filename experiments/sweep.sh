@@ -40,8 +40,10 @@ log "dependencies ready ($(uv run python -c 'import sumolib; print("sumo", sumol
 # --- 2. network (rebuilt from the committed OSM extract) ----------------
 NET=sim/net/corridor-calibrated.net.xml
 if [ ! -f "$NET" ]; then
-  log "building network from data/raw/corridor.osm"
-  "$NETCONVERT" --osm-files data/raw/corridor.osm -o sim/net/corridor.net.xml \
+  log "deriving lane counts from carriageway width"
+  uv run python -m pipeline.lane_width
+  log "building network from data/processed/corridor-laned.osm"
+  "$NETCONVERT" --osm-files data/processed/corridor-laned.osm -o sim/net/corridor.net.xml \
     --geometry.remove --ramps.guess --junctions.join --tls.discard-simple \
     --remove-edges.by-vclass pedestrian,bicycle
   "$NETCONVERT" -s sim/net/corridor.net.xml -o sim/net/corridor-filtered.net.xml \
