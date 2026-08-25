@@ -48,8 +48,12 @@ if [ ! -f "$NET" ]; then
     --remove-edges.by-vclass pedestrian,bicycle
   "$NETCONVERT" -s sim/net/corridor.net.xml -o sim/net/corridor-filtered.net.xml \
     --keep-edges.by-vclass passenger --keep-edges.components 1
-  "$NETCONVERT" -s sim/net/corridor-filtered.net.xml -n sim/net/tls-patch.nod.xml \
-    -o "$NET"
+  # netconvert renames joined junctions, so the A10 patch is matched to this
+  # network by cluster membership before it is applied.
+  uv run python -m pipeline.tls_patch -n sim/net/corridor-filtered.net.xml \
+    -o sim/net/tls-patch-resolved.nod.xml
+  "$NETCONVERT" -s sim/net/corridor-filtered.net.xml \
+    -n sim/net/tls-patch-resolved.nod.xml -o "$NET"
   log "network built"
 else
   log "network present, skipping build"
