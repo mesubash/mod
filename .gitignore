@@ -29,3 +29,6 @@ paper-tex/
 
 # AI working docs, same rule as AI-GUARDRAILS.md and UI-PROMPT.md
 .claude/
+
+# Phone build prompt, same rule as UI-PROMPT.md
+UI-PROMPT-PHONE.md
