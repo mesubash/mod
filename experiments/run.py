@@ -67,7 +67,7 @@ def expand(tf_cfg):
 
 
 def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
-             extra_add=None, window=None):
+             extra_add=None, window=None, scale=1.0):
     # Absolute: SUMO resolves the additional file's output paths relative to
     # that file's own directory, so a relative --out doubles the path.
     outdir = ((outbase or REPO / "results" / scenario) / run_id).resolve()
@@ -89,6 +89,13 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
            "--statistic-output", str(outdir / "stats.xml"),
            "--queue-output", str(outdir / "queues.xml"),
            "--queue-output.period", "60", *SUMO_OPTS]
+    # Loading. The network carries about 44,000 veh/h through the cordon and
+    # collapses above it: at full counted demand the peak hour delivers 9,710
+    # vehicles, at half demand it delivers 44,094. Scenarios run inside the
+    # stable regime so a measured change is the intervention and not a nudge to
+    # a gridlock spiral (paper §5.6, §8 limitation 12).
+    if scale != 1.0:
+        cmd += ["--scale", str(scale)]
     if extra_add:
         # probability 0: the demand file decides per vehicle which ones carry a
         # rerouting device (has.rerouting.device), so guidance stays a real
@@ -112,19 +119,21 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
         tail = "\n".join(done.stderr.strip().splitlines()[-15:])
         raise RuntimeError(
             f"sumo failed for {scenario}/{run_id} (exit {done.returncode}):\n{tail}")
-    (outdir / "metrics.json").write_text(
-        json.dumps(s7_metrics(outdir, prefix="", window=window), indent=2))
+    metrics = s7_metrics(outdir, prefix="", window=window)
+    metrics["scale"] = scale
+    (outdir / "metrics.json").write_text(json.dumps(metrics, indent=2))
     print(f"{scenario}/{run_id}: metrics.json written", flush=True)
 
 
-def run_baseline(outbase, mode):
+def run_baseline(outbase, mode, scale=1.0):
     """Unmodified baseline under the same options as every scenario.
 
     Writes to <outbase>/baseline/ so the result sits at the same depth as every
     scenario run; experiments.collect globs */*/metrics.json, and a baseline one
     level shallower is silently missed, which drops every delta column."""
     outbase.mkdir(parents=True, exist_ok=True)
-    simulate("baseline", "baseline", BASELINE_TRIPS, outbase, mode)
+    simulate("baseline", "baseline", BASELINE_TRIPS, outbase, mode,
+             scale=scale)
 
 
 def main():
@@ -140,6 +149,9 @@ def main():
                     help="use only the first N seeds from the config")
     ap.add_argument("--out", type=Path,
                     help="output base directory (default results/<scenario>)")
+    ap.add_argument("--scale", type=float, default=1.0,
+                    help="demand loading passed to SUMO; the network collapses "
+                         "above ~44,000 veh/h, so scenarios run at 0.5")
     ap.add_argument("--skip-completed", action="store_true",
                     help="skip runs whose metrics.json already exists")
     ap.add_argument("--dry-run", action="store_true",
@@ -147,7 +159,8 @@ def main():
     args = ap.parse_args()
 
     if args.scenario == "baseline":
-        run_baseline(args.out or REPO / "results/sweep/baseline", args.mode)
+        run_baseline(args.out or REPO / "results/sweep/baseline", args.mode,
+                     args.scale)
         return
 
     config = args.config or SCENARIO_DIR / f"{args.scenario}.toml"
@@ -207,7 +220,7 @@ def main():
                   flush=True)
             if not args.dry_run:
                 simulate(cfg["name"], run_id, trips_path, outbase,
-                         args.mode, closure_file, window)
+                         args.mode, closure_file, window, args.scale)
 
 
 if __name__ == "__main__":

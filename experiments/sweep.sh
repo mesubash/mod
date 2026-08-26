@@ -19,6 +19,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=$PWD
 PROFILE=${PROFILE:-trimmed}
+# Demand loading. The network collapses above ~44,000 veh/h through the cordon;
+# at full counted demand the peak hour delivers 9,710 vehicles and at half it
+# delivers 44,094. Scenarios run inside the stable regime.
+SCALE=${SCALE:-0.5}
 MODE=${MODE:-meso}
 RESULTS=$REPO/results/sweep
 mkdir -p "$RESULTS"
@@ -81,7 +85,7 @@ if [ ! -f "$RESULTS/baseline/metrics.json" ]; then
   log "running baseline"
   mkdir -p "$RESULTS/baseline"
   uv run python -m experiments.run --scenario baseline --mode "$MODE" \
-    --out "$RESULTS/baseline" || log "WARNING: baseline run returned nonzero"
+    --scale "$SCALE" --out "$RESULTS/baseline" || log "WARNING: baseline run returned nonzero"
 else
   log "baseline metrics present, skipping"
 fi
@@ -105,6 +109,7 @@ for scenario in "${SCENARIOS[@]}"; do
       --scenario "$scenario" \
       --mode "$MODE" \
       --seeds "$SEEDS" \
+      --scale "$SCALE" \
       --out "$RESULTS/$scenario" \
       --skip-completed \
     || log "WARNING: $scenario returned nonzero; continuing"

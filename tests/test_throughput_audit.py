@@ -56,3 +56,18 @@ def test_demand_gives_an_od_pair_more_than_one_route():
     assert multi / len(routes) > 0.05, (
         f"only {multi}/{len(routes)} OD pairs have more than one route: "
         "the demand routes every vehicle down the same path")
+
+
+def test_scenarios_run_inside_the_stable_regime():
+    # The network carries about 44,000 veh/h through the cordon and collapses
+    # above it: at full counted demand the peak hour delivered 9,710 vehicles,
+    # at half demand 44,094. Every M4 result before this ran in the collapse,
+    # where a delay change reflects the gridlock spiral rather than the
+    # intervention. The sweep's default loading must stay inside the ceiling.
+    import re
+
+    sweep = (REPO / "experiments/sweep.sh").read_text()
+    m = re.search(r"^SCALE=\$\{SCALE:-([\d.]+)\}", sweep, re.M)
+    assert m, "sweep.sh must set a default demand loading"
+    assert float(m.group(1)) <= 0.7, \
+        "loading above 0.7 puts the sweep back in the collapse regime"
