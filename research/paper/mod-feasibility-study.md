@@ -1391,7 +1391,6 @@ principle.
     sensitivity; the spec's locally estimated set (motorcycle 0.25, bus 2.19,
     truck 2.65, from IOE 2014 [49]) is a third point for it.
 
-
 ## 9. Conclusion
 
 Kathmandu's congestion problem, at its saturated core, is a *what-mode*
