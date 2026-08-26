@@ -680,7 +680,20 @@ carries about half the counted throughput", and separating them changes what
 
 The first is a ceiling. Run at a loading it can carry, the corridor network
 moves about 44,000 veh/h through the 42 count locations against a counted
-peak-hour 92,073 — roughly half, which is the figure v1.7 reported. This is
+peak-hour 92,073 — roughly half, which is the figure v1.7 reported.
+
+**Part of that gap is not the model.** The counted volumes exceed the capacity
+the national standard assigns to the carriageways carrying them. The busiest
+counted link, a 6 m one-way arterial, carries a peak demand of 4,563 veh/h,
+about 4,300 PCU/h at the standard's own equivalency factors. Nepal Urban Road
+Standard 2076 Table 5 [54] gives a two-lane one-way urban carriageway a
+practical capacity of 2,400 PCU/h with no frontage access and little cross
+traffic, 1,500 with frontage access and no standing vehicles, and 1,200 with
+free frontage access, parked vehicles and heavy cross traffic. The counted
+flow is two to four times the standard's figure for a road of that width, so a
+model delivering about half of it sits closer to the design standard than the
+counts do. Whether the counts, the standard's capacities, or both need
+revision for a motorcycle-dominant fleet is outside what this study settles. ★ This is
 the lane-based-simulator gap, and it persists with every capacity-side
 correction the model spec registers: actuated signal proxies (A10), the
 sublane model (A11), physical vehicle geometry and forced-gap behaviour
@@ -757,7 +770,12 @@ the 42 count locations needed more than 2,000 veh/h/lane and two more than
 3,000. Width covers 1,578 road ways in the extract against 635 for lanes, so
 `pipeline/lane_width.py` derives the lane count from the carriageway at
 3.0 m per traffic stream (A14), halving a two-way width between the
-directions and never reducing a surveyed count. Peak-hour delivery went from
+directions and never reducing a surveyed count. The 3.0 m sits between the
+national standard's own values: Nepal Urban Road Standard 2076 Table 17 [54]
+gives 3.5 m per lane on arterial and sub-arterial roads, 7 m for a two-lane
+carriageway without a raised kerb, and 3 m per lane on local streets. For the
+corridor's binding link the choice is immaterial — a 6 m one-way carriageway
+gives two lanes at either value. Peak-hour delivery went from
 6.7% to 10.5% of counted flow, the 08:00 hour from 29.4% to 56.0%, insertion
 from 51.6% to 57.5%, and edges below 1 m/s at 08:00 from 11.4% to 2.4%.
 
@@ -1361,6 +1379,19 @@ principle.
     class median, so the derivation is weakest exactly where OSM coverage is
     thinnest. ★
 
+24. **The project's PCU factors and the urban standard's disagree.** The
+    primary set follows JICA 2012 Table 6.2.7 [8], which derives from Nepal
+    Road Standards 2027 BS: motorcycle 0.3, bus and truck 4.0. Nepal Urban
+    Road Standard 2076 Table 4 [54] gives motorcycle 0.5 and bus and truck
+    3.0 for urban roads, and is both newer and specific to the road type
+    studied here. The two were not reconciled. The corridor fleet is
+    motorcycle-dominant, so the newer factors raise the PCU equivalent of the
+    same vehicle stream, and every count comparison in this paper is stated in
+    the older set. Re-running the comparison under Table 4 is the registered
+    sensitivity; the spec's locally estimated set (motorcycle 0.25, bus 2.19,
+    truck 2.65, from IOE 2014 [49]) is a third point for it.
+
+
 ## 9. Conclusion
 
 Kathmandu's congestion problem, at its saturated core, is a *what-mode*
@@ -1450,6 +1481,7 @@ Format: [n] Author/Institution (year). *Title*. Source. — **[local]**
 - [48] SUMO 2020 conf. *MATSim–SUMO coupling*. — [local] `pivot-matsim-sumo-coupling.pdf`; The MATSim Book <https://matsim.org/the-book/>
 - [50] Alvarez Lopez, P. et al. (2018). *Microscopic Traffic Simulation using SUMO*. IEEE ITSC. <https://elib.dlr.de/124092/>
 - [51] Eclipse SUMO documentation (used at v1.27.1): sublane model, actuated traffic lights, duaIterate assignment. <https://sumo.dlr.de/docs/>
+- [54] Government of Nepal, Ministry of Urban Development (2076 BS / 2019-20). *Nepal Urban Road Standard, 2076*. <https://giwmscdntwo.gov.np/media/pdf_upload/Nepal%20Urban%20Road%20standard%202076-2076-final_0gdmh3p.pdf> — [local] `standard-nepal-urban-road-standard-2076.pdf`. Scanned, no text layer; read visually 2026-08-26. Table 5 traffic capacity (p.9), Table 17 recommended carriage width (p.24), §3.4 peak-hour share (p.8), Table 4 urban PCU factors (p.8)
 - [53] Eclipse SUMO calibration tools (used at v1.27.1): `routeSampler.py`, which samples a route set to match counted edge/turn volumes and reports per-interval GEH — <https://sumo.dlr.de/docs/Tools/Turns.html>; `route/sort_routes.py`, which writes a route file in departure order — <https://sumo.dlr.de/docs/Tools/Routes.html>
 - Supporting compendia: FHWA HOP-18-071 — [local] `pivot-fhwa-incentives-compendium.pdf`; Berkeley incentives comparison — [local] `pivot-incentives-comparison-berkeley.pdf`
 
