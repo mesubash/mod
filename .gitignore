@@ -22,3 +22,7 @@ sim/dua/
 !data/processed/*.csv
 results/figures/
 results/tables/
+
+# Paper LaTeX. Written and kept in Overleaf, not here; the repo holds the
+# research, data and testbed that the paper is written from.
+paper-tex/
