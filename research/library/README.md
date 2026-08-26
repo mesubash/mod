@@ -153,3 +153,33 @@ Recovery trick for future nepjol outages: `https://web.archive.org/web/<ts>id_/<
 3. openjicareport.jica.go.jp — final report publication (likely 2027+; repository lags years)
 4. nepjol.info recovery (down globally as of 2026-08-14, Wayback origin-523) — fetch INJET 95704 + 82531
 5. April 2026 government office-hours change (10:00→9:00, 5-day week, per myrepublica) — verify implementation; if real, it is a natural experiment (see [../08-option-space.md](../08-option-space.md) A3)
+
+### standard-nepal-urban-road-standard-2076.pdf
+
+Government of Nepal, Ministry of Urban Development. *Nepal Urban Road
+Standard, 2076* (2019/20 CE). Retrieved 2026-08-26 from
+<https://giwmscdntwo.gov.np/media/pdf_upload/Nepal%20Urban%20Road%20standard%202076-2076-final_0gdmh3p.pdf>
+(also hosted at <https://download.hermes.com.np/wp-content/uploads/sites/12/2023/07/Urban-Road-standard-2076.pdf>,
+which returns 403 to automated fetches). Scanned, no text layer; read
+visually, pages cited below are document pages.
+
+Used for three things:
+
+- **Table 17, Recommended Carriage Width (p.24).** Arterial and sub-arterial:
+  single lane 3.5 m, 2-lane without raised kerb 7 m, 2-lane with raised kerb
+  7.5 m, multi-lane 3.5 m per lane. Local street 3 m per lane. This is the
+  source for A14's lane-from-width derivation.
+- **Table 5, Traffic Capacity (p.9).** 2-lane (7-7.5 m) one way: 2,400 PCU/h
+  with no frontage access and little cross traffic, 1,500 with frontage access
+  and no standing vehicles, 1,200 with free frontage access, parked vehicles
+  and heavy cross traffic. 1-lane (3.5-4.0 m) one way: 750/700/650.
+- **Section 3.4 (p.8).** "For rough estimate, the peak hour flow may be taken
+  as 10-12 percent of the daily flow" - the standard's own peak-share rule of
+  thumb, against the 6.8% measured on this corridor.
+
+Also **Table 4, PCU (p.8)**: motorcycle/bicycle 0.5, car/auto-rickshaw/SUV
+1.0, light truck/tractor/rickshaw 1.5, truck/bus/minibus 3.0, non-motorised
+cart 6.0. These differ from the project's primary set (motorcycle 0.3, bus and
+truck 4.0), which comes from JICA 2012 Table 6.2.7 on the basis of Nepal Road
+Standards 2027 BS. The urban standard is newer and specific to urban roads;
+the discrepancy is recorded in the paper rather than silently resolved.
