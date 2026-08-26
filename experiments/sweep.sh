@@ -19,10 +19,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=$PWD
 PROFILE=${PROFILE:-trimmed}
-# Demand loading. The network collapses above ~44,000 veh/h through the cordon;
-# at full counted demand the peak hour delivers 9,710 vehicles and at half it
-# delivers 44,094. Scenarios run inside the stable regime.
-SCALE=${SCALE:-0.5}
+# Demand loading. The model has almost no stable congested regime: total
+# morning throughput peaks at 50% loading and falls as demand is added, and
+# every loading at or above 60% gridlocks by 10:00. 0.55 is the most congested
+# loading whose analysis-window hours (08:00/09:00/10:00) all hold - delivered
+# 47.2/50.5/32.5% of counted flow, D_net 7,577 veh-h against 3,054 at 50% and
+# 65,592 at full demand, and peak-hour delivery the highest of any loading
+# tested. Chosen on that criterion, not on maximum throughput: 50% maximises
+# throughput precisely by being nearly free-flowing, which is not the regime a
+# demand-management study is about.
+SCALE=${SCALE:-0.55}
 MODE=${MODE:-meso}
 RESULTS=$REPO/results/sweep
 mkdir -p "$RESULTS"

@@ -708,6 +708,45 @@ peak hour. Every scenario run reported in v1.7 sat in the 100% row, where a
 measured delay change reflects the gridlock spiral at least as much as the
 intervention under test.
 
+**The model has almost no stable congested regime, and that is the sharper
+limitation.** Sweeping the loading in five-point steps, over the three
+analysis-window hours:
+
+| loading | 08:00 | 09:00 | 10:00 | D_net (veh·h) | edges < 1 m/s |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 50% | 43.3% | 47.9% | 42.2% | 3,054 | 0.6% |
+| 55% | 47.2% | 50.5% | 32.5% | 7,577 | 1.8% |
+| 60% | 51.4% | 46.6% | 16.5% | 15,542 | 4.6% |
+| 65% | 55.6% | 48.1% | 13.8% | 18,479 | 5.3% |
+| 70% | 59.8% | 43.3% | 8.5% | 24,582 | 7.2% |
+| 100% | 56.0% | 10.5% | 8.3% | 65,592 | 19.5% |
+
+Total delivered across the morning peaks at 50% loading (152,907 crossings)
+and falls as demand is added (125,684 at 60%, 130,060 at 65%, 126,185 at
+70%). Below the tipping point the network is close to free-flowing; at and
+above 60% it gridlocks by 10:00. There is no broad congested-but-flowing band
+between the two.
+
+Real urban networks have exactly that band, and it is wide: it is where a
+Kathmandu trip takes forty minutes and still completes. It is also precisely
+the regime travel-demand management acts on — retiming, mode shift and
+rerouting all assume a network that is heavily loaded and still moving. A
+model that offers free flow or gridlock and little in between cannot measure
+the effect of moving demand around inside that band. This is a stronger claim
+than "the network carries about half the counted throughput", and it
+subsumes it: the ceiling bounds the level, the missing regime bounds what can
+be asked of the model at all. ★
+
+**Operating point.** Scenarios run at 0.55 loading, the most congested
+setting whose three analysis-window hours all hold. Delay there is 2.5 times
+the 50% case and peak-hour delivery is the highest of any loading tested. The
+criterion is stated because the alternative is worse: 50% maximises
+throughput by being nearly free-flowing, and a first re-run at that loading
+produced changes of −91% and +506% off a delay base of 3,054 veh·h, which
+are a small denominator rather than a result. The loading is recorded in each
+run's metrics.json, and its own sensitivity (0.5 against 0.55) is the
+registered robustness check.
+
 **One defect made it worse, and is fixed.** The corridor's arterials carry
 no lane markings, so OpenStreetMap tags them `lanes=1` and records the
 carriageway in a separate `width` tag: Ram Shah Path is `highway=primary,

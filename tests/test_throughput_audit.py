@@ -69,5 +69,7 @@ def test_scenarios_run_inside_the_stable_regime():
     sweep = (REPO / "experiments/sweep.sh").read_text()
     m = re.search(r"^SCALE=\$\{SCALE:-([\d.]+)\}", sweep, re.M)
     assert m, "sweep.sh must set a default demand loading"
-    assert float(m.group(1)) <= 0.7, \
-        "loading above 0.7 puts the sweep back in the collapse regime"
+    assert 0.5 <= float(m.group(1)) <= 0.55, (
+        "loading must stay in the band that is congested but does not collapse "
+        "inside the analysis window: 0.6 and above gridlock by 10:00, and 0.5 "
+        "is nearly free-flowing (D_net 3,054 veh-h against 7,577 at 0.55)")
