@@ -26,3 +26,6 @@ results/tables/
 # Paper LaTeX. Written and kept in Overleaf, not here; the repo holds the
 # research, data and testbed that the paper is written from.
 paper-tex/
+
+# AI working docs, same rule as AI-GUARDRAILS.md and UI-PROMPT.md
+.claude/
