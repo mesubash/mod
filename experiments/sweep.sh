@@ -3,9 +3,14 @@
 # the full experiment grid unattended. Safe to interrupt and re-run: completed
 # runs are skipped.
 #
-#   ./experiments/sweep.sh              # trimmed grid (default, ~8h)
-#   PROFILE=full ./experiments/sweep.sh # complete surface (~22h)
-#   PROFILE=min ./experiments/sweep.sh  # headline points only (~3h)
+#   ./experiments/sweep.sh              # trimmed grid, 1 seed (~30 min)
+#   PROFILE=full ./experiments/sweep.sh # complete surface, 24 seeds (~13h)
+#   PROFILE=min ./experiments/sweep.sh  # headline points, 1 seed (~15 min)
+#
+# Timings are for 0.55 loading, where the network is not fighting itself; the
+# same grid took many hours when scenarios ran at full demand in collapse.
+# 24 seeds is not thoroughness for its own sake: at 3 seeds the spread across
+# treatment assignments was as large as the effects being measured.
 #   MODE=micro ./experiments/sweep.sh   # microscopic (slow; default meso)
 #
 # Nohup it and walk away:
@@ -103,7 +108,7 @@ fi
 
 # --- 5. scenario grid ---------------------------------------------------
 case "$PROFILE" in
-  full)    SCENARIOS=(s0-spatial-control s1-school s2-retime-grid s3-joint); SEEDS=3 ;;
+  full)    SCENARIOS=(s0-spatial-control s1-school s2-retime-grid s3-joint); SEEDS=24 ;;
   trimmed) SCENARIOS=(s0-spatial-control s1-school s2-retime-grid s3-joint); SEEDS=1 ;;
   min)     SCENARIOS=(s0-spatial-control s1-school s2-retime-grid);          SEEDS=1 ;;
   *) echo "unknown PROFILE=$PROFILE (full|trimmed|min)"; exit 1 ;;

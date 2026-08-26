@@ -3,7 +3,15 @@
 # values) — kept so the response surface includes its origin; skip those
 # runs if baseline results substitute.
 name = "s2-retime-grid"
-seeds = [101, 202, 303]
+# Transform seeds. The simulation itself is reproducible - the untouched
+# baseline varies by 2.4% across SUMO seeds (7,039/6,761/6,744 veh-h) - so the
+# spread across these is treatment-assignment variance: which trips comply.
+# At three seeds that spread was as large as the effects (sd 11-15 points on
+# mode shift, 89 on the 25% school shift) and the dose-responses came out
+# non-monotone. Twenty-four seeds put the standard error near 3 points, and the
+# spread is reported rather than hidden: the effect genuinely depends on which
+# travellers comply.
+seeds = [101, 108, 115, 122, 129, 136, 143, 150, 157, 164, 171, 178, 185, 192, 199, 206, 213, 220, 227, 234, 241, 248, 255, 262]
 notes = "peak-hour retiming surface, p_t x dt full grid"
 
 [transforms.retime]
