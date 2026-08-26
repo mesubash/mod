@@ -1,7 +1,7 @@
 # Temporal and Mode-Shift Travel-Demand Distribution for a Saturated Urban Network: A Feasibility Study for Kathmandu Valley
 
 **Project MOD — feasibility and research-design paper**
-Draft v1.7 · 2026-08-21 · status: working draft for supervisor/committee review; §5.1, §5.3, §5.6 and §8 report the M3 calibration outcome (count-based demand generation, and the network-throughput limitation that follows from it); §6 reports the M4 scenario sweep at three transform seeds per grid point, and opens with a retraction of the v1.6 "no alternative route" finding
+Draft v1.8 · 2026-08-26 · status: working draft for supervisor/committee review. **§6's scenario magnitudes are withdrawn pending re-run.** The baseline they were measured against was in congestion collapse, not congestion: the network's stable ceiling is ~44,000 veh/h through the cordon and the runs sat above it, where the peak hour delivered 9,710 vehicles against 44,094 at half the loading. §5.6 reports the defect that caused it (lane counts built from lane markings rather than carriageway width) and the collapse curve that measures it; §8 limitations 12 and 20-23 record what that voids. §6's method, and its retraction of the v1.6 "no alternative route" finding, stand.
 
 All claims cite numbered references (§References); bracketed numbers [n]
 throughout. Sources marked **[local]** are held in
@@ -673,21 +673,65 @@ because the hourly tier was unavailable; the count-derived targets are
 hourly by construction, which is the scale GEH is defined at, and GEH < 5
 is a tighter test at these flow levels than ±15%.
 
-**The network carries about half the counted throughput.** Loading the
-count-matched demand (176,370 vehicles) into the corridor network inserts
-roughly 49% of it (`results/sampled_meso.log`). This persists with every
-capacity-side correction the model spec registers in place: actuated signal
-proxies for police-metered junctions (A10), the sublane model with
-motorcycle lateral parameters (A11), physical vehicle geometry and
-forced-gap driving behaviour (A12), and collision logging rather than
-vehicle removal (A13). SUMO's junction and car-following model delivers
-roughly half the throughput Kathmandu's real junctions achieve at the same
-demand. The behaviours that make those junctions work (continuous filtering
+**The network has a throughput ceiling, and the baseline was run above
+it.** Two facts were conflated in v1.7 under the single heading "the network
+carries about half the counted throughput", and separating them changes what
+§6 measured.
+
+The first is a ceiling. Run at a loading it can carry, the corridor network
+moves about 44,000 veh/h through the 42 count locations against a counted
+peak-hour 92,073 — roughly half, which is the figure v1.7 reported. This is
+the lane-based-simulator gap, and it persists with every capacity-side
+correction the model spec registers: actuated signal proxies (A10), the
+sublane model (A11), physical vehicle geometry and forced-gap behaviour
+(A12), and collision logging rather than vehicle removal (A13). The
+behaviours that make Kathmandu's junctions work — continuous filtering
 through gaps, right-of-way negotiated rather than assigned, several vehicles
-abreast in a nominal lane) have no representation in a model built on lanes
-and rectangular vehicles. That reading of the measurement, as a limitation
-of lane-based microsimulation rather than a residual calibration error, is
-marked ★ in §8: no alternative simulator was tested here.
+abreast in a nominal lane — have no representation in a model built on lanes
+and rectangular vehicles. That reading, as a limitation of lane-based
+microsimulation rather than residual calibration error, is marked ★ (§8,
+limitation 12): no alternative simulator was tested.
+
+The second is that the model does not settle at that ceiling when demand
+exceeds it. It collapses. Delivered through the cordon at the 09:00 peak
+hour, on one network and one demand, varying only the loading passed to
+SUMO:
+
+| loading | 07:00 | 08:00 | 09:00 | 10:00 | 11:00 | jam teleports |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100% | 39,497 | 41,707 | 9,710 | 7,558 | 9,028 | 18,800 |
+| 70% | 27,839 | 44,537 | 39,903 | 7,753 | 6,153 | 8,977 |
+| 50% | 19,774 | 32,241 | 44,094 | 38,239 | 18,559 | 1,715 |
+
+Asking for half the traffic delivers four and a half times more of it at the
+peak hour. Every scenario run reported in v1.7 sat in the 100% row, where a
+measured delay change reflects the gridlock spiral at least as much as the
+intervention under test.
+
+**One defect made it worse, and is fixed.** The corridor's arterials carry
+no lane markings, so OpenStreetMap tags them `lanes=1` and records the
+carriageway in a separate `width` tag: Ram Shah Path is `highway=primary,
+lanes=1, width=6, oneway=yes`. netconvert reads the lane tag and builds one
+3.2 m lane out of six metres of road, and the count-matched demand then asks
+that lane for 4,563 veh/h against a physical ceiling near 2,000. Seven of
+the 42 count locations needed more than 2,000 veh/h/lane and two more than
+3,000. Width covers 1,578 road ways in the extract against 635 for lanes, so
+`pipeline/lane_width.py` derives the lane count from the carriageway at
+3.0 m per traffic stream (A14), halving a two-way width between the
+directions and never reducing a surveyed count. Peak-hour delivery went from
+6.7% to 10.5% of counted flow, the 08:00 hour from 29.4% to 56.0%, insertion
+from 51.6% to 57.5%, and edges below 1 m/s at 08:00 from 11.4% to 2.4%.
+
+This is also why A11 never paid off. The sublane model gives vehicles
+lateral freedom inside a lane, and the lane was 3.2 m wide — there was
+nothing to filter into. It is the reason the microscopic baseline came out
+*worse* than the mesoscopic one (14.4% against 58.9% delivered at 07:00)
+rather than better, which is the opposite of what a motorcycle-dominant
+fleet should show.
+
+Signals, mesoscopic junction control, network storage, route concentration
+and simulation mode were each tested and each ruled out before the lane
+counts were found; the eliminations are recorded in §8, limitation 21.
 
 **What this study therefore claims.** Scenario results are reported as
 relative effects: each scenario against the baseline run under identical
@@ -705,6 +749,21 @@ part of the response. Directional findings and the compliance thresholds of
 RQ2 survive that; a claimed number of seconds saved per vehicle would not.
 
 ## 6. Results
+
+> **Withdrawn pending re-run (v1.8).** Every magnitude in this section was
+> measured against a baseline in congestion collapse. The network's stable
+> ceiling is ~44,000 veh/h through the cordon; these runs were loaded above it,
+> where the peak hour delivered 9,710 vehicles against 44,094 at half the
+> loading (§5.6). In that regime a delay change reflects the gridlock spiral at
+> least as much as the intervention, and small demand reductions produce large
+> throughput gains for reasons that have nothing to do with the lever under
+> test — which is the most likely explanation for why mode shift, the only
+> intervention that removes vehicles, is also the only one that "worked".
+> The runs are retained in `archive/pre-lane-width-results/`. The scenarios are
+> being re-run at a loading inside the ceiling, on the network built from
+> carriageway width. What stands here: the method, the scenario definitions,
+> and the retraction of the v1.6 "no alternative route" finding, which was a
+> routing-code defect and is independent of the loading.
 
 **Retracted: the "no alternative route" finding of draft v1.6.** That draft
 reported, in §6.5 and §6.7, that the alternative-route search found no
@@ -1089,21 +1148,23 @@ principle.
     derived from the demand profile itself, so target and demand cannot
     drift apart again. Both were found by arithmetic on intermediate
     outputs, not by anything the simulator reported.
-12. **Network throughput is about half the counted throughput, and this
-    bounds what the study reports.** With count-matched demand loaded
-    (176,370 vehicles) the simulation inserts roughly 49% (§5.6), with the
-    A10–A13 capacity corrections all in place. The measured claim is that
-    this configuration of SUMO moves about half the traffic Kathmandu's
-    junctions move at the same demand. The wider reading — that this is a
-    general limitation of lane-based open-source microsimulation applied to
-    non-lane-based heterogeneous traffic, rather than residual calibration
-    error specific to this build — is an interpretation and is marked ★: no
-    alternative simulator was tested, and no ablation isolates the junction
-    model from the car-following model. The consequence for the research
-    design is stated in §5.6 and holds either way: scenario results are
-    reported as relative effects against a baseline under identical model
-    settings, and absolute delay levels from this model are not offered as
-    field predictions.
+12. **The network's ceiling is about half the counted throughput, and the
+    baseline was run above it.** Two separate facts were reported as one in
+    v1.7. Run at a loading it can carry, the network moves about 44,000 veh/h
+    through the 42 count locations against a counted peak of 92,073 — the
+    lane-based-simulator gap, roughly half, measured with the A10-A13
+    corrections in place. That the gap is a limitation of lane-based
+    microsimulation applied to non-lane-based heterogeneous traffic, rather
+    than residual calibration error specific to this build, remains an
+    interpretation and is marked ★: no alternative simulator was tested, and
+    no ablation isolates the junction model from the car-following model. The
+    second fact is that the model does not settle at the ceiling — above it,
+    delivered flow falls to about a fifth of it (9,710 vehicles at the peak
+    hour against 44,094 at half the loading, jam teleports 18,800 against
+    1,715). Every scenario in v1.7 ran in that regime. Scenarios now run at
+    0.5 loading (`experiments/sweep.sh`, `SCALE`), which is inside the
+    ceiling; the loading is recorded in each run's metrics.json. Absolute
+    delay levels are still not offered as field predictions.
 13. **The peak-shape evidence is not corridor-interior.** The measured
     departure profile (A1, §5.1) comes from three DoR stations that are
     highway and Ring-Road cross-sections [52], and the counts used are
@@ -1215,6 +1276,51 @@ principle.
     at `results/invalid-rerouter-on-closed-edge/` and are excluded from every
     figure. The grid is being re-run under the corrected rerouter, and no S4
     result in this paper should be read until that re-run replaces it. ★
+
+21. **Five explanations for the gridlock were tested and rejected before
+    the lane counts were found.** Recorded so the eliminations are not
+    repeated. Traffic signals: `--tls.all-off` reproduced the baseline to the
+    vehicle (92,319 inserted, 54,881 running, 89,959 waiting), because
+    mesoscopic junction control is off by default and the A10 actuated
+    programs never applied — SUMO falls back to static and warns. Mesoscopic
+    junction control enabled: worse, 23.8% delivered at 07:00 against 56.8%.
+    Network storage: the network holds 281,248 vehicles at jam density and
+    peaked at 19.5%, so it was never globally full. Route concentration: all
+    51,612 origin-destination pairs had exactly one route, and giving
+    duarouter a random weight factor per query spread traffic over 1,951 more
+    edges while moving peak-hour delivery from 6.6% to 6.7% — the
+    concentration was real, since the busiest edge carried 6,067 veh/h against
+    a counted 6,313 on the busiest cordon edge. Simulation mode: microscopic
+    with the sublane model was worse than mesoscopic at every hour. The
+    stochastic route choice is retained because it improved count matching
+    from GEH < 5 on 90.5% of locations to 95.24%, not because it addressed
+    throughput.
+22. **Three files duplicated the cordon edge ids, and each broke a build.**
+    `sim/net/junction_map.csv`, `sim/net/tls-patch.nod.xml` and
+    `sim/baseline.add.xml` independently named the same junctions and edges.
+    Rebuilding the network from carriageway width renamed two Shahid Gate
+    nodes into one cluster (netconvert stopped: "Missing position (at node
+    ID='6540538696')"), consumed counted way 52916461 into
+    `52799481#1-AddedOffRampEdge` via `--ramps.guess`, and left the detector
+    definitions naming an edge that no longer existed ("Unknown edge
+    '52916461' in edgeData definition 'cnt_truck'"), the last of which was
+    treated as a run in flight for 17 hours. The signal patch is now matched
+    to the network by cluster membership and fails the build rather than
+    dropping a signal silently (`pipeline/tls_patch.py`); the detector file is
+    generated from the junction map (`pipeline/baseline_add.py`); the one
+    counted-edge remap is evidenced in `sim/net/README.md`. None of these
+    failures were about traffic, and all were invisible until something
+    downstream refused to run.
+23. **A14 (3.0 m per traffic stream) is an assumption, not a measurement.**
+    Lane counts are derived from the OSM `width` tag at 3.0 m per stream, with
+    class medians where width is absent or implausible. A marked Nepali lane
+    is 3.5 m; 3.0 m stands for non-lane-based operation packing streams
+    tighter than markings would allow, and no Kathmandu measurement of
+    effective stream width was found. The value moves capacity directly, and
+    the registered path is a sensitivity sweep at 2.75 m and 3.5 m. Width
+    itself is present on 1,578 of the extract's road ways; the rest take a
+    class median, so the derivation is weakest exactly where OSM coverage is
+    thinnest. ★
 
 ## 9. Conclusion
 
