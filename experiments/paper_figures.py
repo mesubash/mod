@@ -13,6 +13,7 @@ Run: uv run python -m experiments.paper_figures
 
 import argparse
 import collections
+import re
 import csv
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -156,11 +157,14 @@ def corridor(out):
     plt.close(fig)
 
 
-def _sweep(results, scenario, pattern=None):
-    """{share: (mean delta delay %, sem %, mean delta throughput %)} for one
-    scenario, read against that sweep's own baseline."""
+def _sweep(results, scenario, share_re, pattern=None):
+    """{share: (delta delay %, sem %, delta throughput %)} for one scenario.
+
+    share_re must capture the treated share explicitly. Taking "the last number
+    in the run id" instead reads the -15 in pt0.05_dt-15 as the share and plots
+    departure retiming at 1500%.
+    """
     import json
-    import re
     import statistics as st
 
     root = Path(results)
@@ -171,13 +175,15 @@ def _sweep(results, scenario, pattern=None):
         tag = re.sub(r"_seed\d+", "", f.parent.name)
         if pattern and not re.match(pattern, tag):
             continue
-        m = json.load(open(f))
-        runs[tag].append((m["D_net_veh_h"], m["H_cordon_pcu_0811"]))
+        m = re.search(share_re, tag)
+        if not m:
+            continue
+        runs[float(m.group(1))].append(
+            (f, json.load(open(f))))
     out = {}
-    for tag, v in runs.items():
-        share = float(re.search(r"([\d.]+)$", tag).group(1))
-        d = [x for x, _ in v]
-        h = [y for _, y in v]
+    for share, v in runs.items():
+        d = [m["D_net_veh_h"] for _, m in v]
+        h = [m["H_cordon_pcu_0811"] for _, m in v]
         sd = st.stdev(d) if len(d) > 1 else 0.0
         out[share] = (100 * (st.mean(d) - bd) / bd,
                       100 * sd / bd / len(d) ** 0.5,
@@ -185,32 +191,51 @@ def _sweep(results, scenario, pattern=None):
     return dict(sorted(out.items()))
 
 
+LEVERS = [
+    ("Mode shift (motorcycle to bus)", "s3-joint",
+     r"_m([\d.]+)$", r"pt0\.0_dt-15_m"),
+    ("Rerouting onto alternatives", "s0-spatial-control",
+     r"^p_r([\d.]+)$", None),
+    ("Departure retiming", "s2-retime-grid",
+     r"^pt([\d.]+)_dt-15$", None),
+]
+SCHOOL = ("School-hours shift", "s1-school", r"^sch([\d.]+)$", None)
+
+
 def levers(results, out):
-    """The headline: what each intervention does to network delay."""
-    series = [
-        ("Mode shift (motorcycle to bus)",
-         _sweep(results, "s3-joint", r"pt0\.0_dt-15_m")),
-        ("Rerouting onto alternatives",
-         _sweep(results, "s0-spatial-control", r"p_r")),
-        ("Departure retiming",
-         _sweep(results, "s2-retime-grid", r"pt[\d.]+_dt-15$")),
-        ("School-hours shift",
-         _sweep(results, "s1-school", r"sch")),
-    ]
-    fig, ax = plt.subplots(figsize=(6.4, 3.8))
-    for (label, data), (colour, marker, dash) in zip(series, STYLES):
+    """The headline: what each intervention does to network delay.
+
+    The school shift is on its own axis. At +319% it is an order of magnitude
+    outside the others, and sharing an axis compresses them into a band."""
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(7.2, 3.4), gridspec_kw={"width_ratios": [2, 1]})
+
+    for (label, scenario, share_re, pat), (colour, marker, dash) in zip(
+            LEVERS, STYLES):
+        data = _sweep(results, scenario, share_re, pat)
         if not data:
             continue
-        xs = [100 * k for k in data]
-        ys = [v[0] for v in data.values()]
-        es = [v[1] for v in data.values()]
-        ax.errorbar(xs, ys, yerr=es, color=colour, marker=marker,
-                    linestyle=dash, markersize=4, capsize=3, label=label)
-    ax.axhline(0, color=MUTED, lw=0.8)
-    ax.set_xlabel("share of trips treated (%)")
-    ax.set_ylabel("change in network delay (%)")
-    ax.legend(fontsize=8)
-    _clean(ax)
+        ax1.errorbar([100 * k for k in data], [v[0] for v in data.values()],
+                     yerr=[v[1] for v in data.values()], color=colour,
+                     marker=marker, linestyle=dash, markersize=4, capsize=3,
+                     label=label)
+    ax1.axhline(0, color=MUTED, lw=0.8)
+    ax1.set_xlabel("share of trips treated (%)")
+    ax1.set_ylabel("change in network delay (%)")
+    ax1.legend(fontsize=8)
+    _clean(ax1)
+
+    label, scenario, share_re, pat = SCHOOL
+    data = _sweep(results, scenario, share_re, pat)
+    if data:
+        ax2.errorbar([100 * k for k in data], [v[0] for v in data.values()],
+                     yerr=[v[1] for v in data.values()], color=INK,
+                     marker="D", linestyle="-.", markersize=4, capsize=3)
+    ax2.axhline(0, color=MUTED, lw=0.8)
+    ax2.set_xlabel("school trips shifted (%)")
+    ax2.set_title(label, fontsize=9)
+    _clean(ax2)
+
     fig.tight_layout()
     fig.savefig(out / "levers.pdf")
     plt.close(fig)
@@ -222,7 +247,7 @@ def regime(stable, collapsed, out):
     for (label, res), (colour, marker, dash) in zip(
             (("0.55 loading, network carries its demand", stable),
              ("full counted demand, network in collapse", collapsed)), STYLES):
-        data = _sweep(res, "s0-spatial-control", r"p_r")
+        data = _sweep(res, "s0-spatial-control", r"^p_r([\\d.]+)$")
         if not data:
             continue
         ax.errorbar([100 * k for k in data], [v[0] for v in data.values()],
