@@ -191,6 +191,8 @@ def _sweep(results, scenario, share_re, pattern=None):
     return dict(sorted(out.items()))
 
 
+SHARE_PR = r"^p_r([\d.]+)$"
+
 LEVERS = [
     ("Mode shift (motorcycle to bus)", "s3-joint",
      r"_m([\d.]+)$", r"pt0\.0_dt-15_m"),
@@ -247,7 +249,7 @@ def regime(stable, collapsed, out):
     for (label, res), (colour, marker, dash) in zip(
             (("0.55 loading, network carries its demand", stable),
              ("full counted demand, network in collapse", collapsed)), STYLES):
-        data = _sweep(res, "s0-spatial-control", r"^p_r([\\d.]+)$")
+        data = _sweep(res, "s0-spatial-control", SHARE_PR)
         if not data:
             continue
         ax.errorbar([100 * k for k in data], [v[0] for v in data.values()],
