@@ -32,3 +32,6 @@ paper-tex/
 
 # Phone build prompt, same rule as UI-PROMPT.md
 UI-PROMPT-PHONE.md
+
+# Conference paper, same rule as the journal one
+paper-icicset/
