@@ -156,6 +156,89 @@ def corridor(out):
     plt.close(fig)
 
 
+def _sweep(results, scenario, pattern=None):
+    """{share: (mean delta delay %, sem %, mean delta throughput %)} for one
+    scenario, read against that sweep's own baseline."""
+    import json
+    import re
+    import statistics as st
+
+    root = Path(results)
+    base = json.load(open(root / "baseline/baseline/metrics.json"))
+    bd, bh = base["D_net_veh_h"], base["H_cordon_pcu_0811"]
+    runs = collections.defaultdict(list)
+    for f in (root / scenario).glob("*/metrics.json"):
+        tag = re.sub(r"_seed\d+", "", f.parent.name)
+        if pattern and not re.match(pattern, tag):
+            continue
+        m = json.load(open(f))
+        runs[tag].append((m["D_net_veh_h"], m["H_cordon_pcu_0811"]))
+    out = {}
+    for tag, v in runs.items():
+        share = float(re.search(r"([\d.]+)$", tag).group(1))
+        d = [x for x, _ in v]
+        h = [y for _, y in v]
+        sd = st.stdev(d) if len(d) > 1 else 0.0
+        out[share] = (100 * (st.mean(d) - bd) / bd,
+                      100 * sd / bd / len(d) ** 0.5,
+                      100 * (st.mean(h) - bh) / bh)
+    return dict(sorted(out.items()))
+
+
+def levers(results, out):
+    """The headline: what each intervention does to network delay."""
+    series = [
+        ("Mode shift (motorcycle to bus)",
+         _sweep(results, "s3-joint", r"pt0\.0_dt-15_m")),
+        ("Rerouting onto alternatives",
+         _sweep(results, "s0-spatial-control", r"p_r")),
+        ("Departure retiming",
+         _sweep(results, "s2-retime-grid", r"pt[\d.]+_dt-15$")),
+        ("School-hours shift",
+         _sweep(results, "s1-school", r"sch")),
+    ]
+    fig, ax = plt.subplots(figsize=(6.4, 3.8))
+    for (label, data), (colour, marker, dash) in zip(series, STYLES):
+        if not data:
+            continue
+        xs = [100 * k for k in data]
+        ys = [v[0] for v in data.values()]
+        es = [v[1] for v in data.values()]
+        ax.errorbar(xs, ys, yerr=es, color=colour, marker=marker,
+                    linestyle=dash, markersize=4, capsize=3, label=label)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xlabel("share of trips treated (%)")
+    ax.set_ylabel("change in network delay (%)")
+    ax.legend(fontsize=8)
+    _clean(ax)
+    fig.tight_layout()
+    fig.savefig(out / "levers.pdf")
+    plt.close(fig)
+
+
+def regime(stable, collapsed, out):
+    """The same rerouting grid measured at two loadings. The sign flips."""
+    fig, ax = plt.subplots(figsize=(5.4, 3.4))
+    for (label, res), (colour, marker, dash) in zip(
+            (("0.55 loading, network carries its demand", stable),
+             ("full counted demand, network in collapse", collapsed)), STYLES):
+        data = _sweep(res, "s0-spatial-control", r"p_r")
+        if not data:
+            continue
+        ax.errorbar([100 * k for k in data], [v[0] for v in data.values()],
+                    yerr=[v[1] for v in data.values()], color=colour,
+                    marker=marker, linestyle=dash, markersize=4, capsize=3,
+                    label=label)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xlabel("share of trips diverted (%)")
+    ax.set_ylabel("change in network delay (%)")
+    ax.legend(fontsize=8)
+    _clean(ax)
+    fig.tight_layout()
+    fig.savefig(out / "regime.pdf")
+    plt.close(fig)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", type=Path, default=REPO / "results")
@@ -178,6 +261,13 @@ def main():
     before, after = args.results / "diag-stochastic", args.results / "diag-laned"
     if has(before) and has(after):
         lanes(before, after, args.out)
+
+    sweep = args.results / "sweep"
+    if (sweep / "baseline/baseline/metrics.json").exists():
+        levers(sweep, args.out)
+        collapsed = args.results.parent / "archive/pre-lane-width-results/sweep"
+        if (collapsed / "baseline/baseline/metrics.json").exists():
+            regime(sweep, collapsed, args.out)
 
     for f in sorted(args.out.glob("*.pdf")):
         print(f"{f.relative_to(REPO)}  {f.stat().st_size // 1024} kB")
