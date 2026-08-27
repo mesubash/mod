@@ -50,8 +50,13 @@ def profile(out):
     fig, ax = plt.subplots(figsize=(5.0, 2.9))
     ax.bar([f"{h:02d}" for h in hours], [100 * HOURLY_SHARE[h] for h in hours],
            color=PALE, edgecolor=INK, linewidth=0.7)
+    # Two reference lines: what this study previously assumed, and what
+    # national design practice assumes. The measured profile is below both.
+    ax.axhspan(10, 12, color=PALE, alpha=0.45, zorder=0)
+    ax.text(0.02, 12.4, "10-12%: national design practice (NURS 2076)",
+            fontsize=7.5, color=MUTED)
     ax.axhline(20, color=INK, linestyle="--", linewidth=1)
-    ax.text(0.02, 20.6, "share assumed from person-trip generation",
+    ax.text(0.02, 20.6, "20%: share assumed from person-trip generation",
             fontsize=7.5, color=INK)
     ax.set_xlabel("clock hour")
     ax.set_ylabel("share of daily vehicle traffic (%)")
