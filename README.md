@@ -1,43 +1,87 @@
 # MOD
 
-> Exploring How Cities Move
+Travel-demand management on a saturated Kathmandu corridor: a calibrated SUMO
+microsimulation testbed, the data it was built from, and the experiments run
+on it.
 
-MOD is an open research project investigating how travel demand moves through
-urban transport networks and whether deliberate, small-scale interventions can
-improve network-wide mobility.
+MOD is short for *modification* and *change of direction* — the project began
+as a study of spreading traffic in time and ended up measuring which
+interventions actually work on this corridor.
 
-The research begins with a bounded study of a congested corridor in Kathmandu.
-Rather than assuming a predefined solution, MOD will use observation,
-modelling, simulation, and controlled experiments to investigate how changes
-in travel behaviour and demand distribution affect the wider network.
+## What this repository contains
 
-The initial hypothesis focuses on demand redistribution: whether shifting a
-portion of peak travel demand toward viable alternatives can reduce congestion
-and network-wide delay without imposing unacceptable costs on individual
-travelers.
+The corridor runs Tripureshwor to Koteshwor through the Maitighar, Thapathali,
+New Baneshwor, Tinkune and Jadibuti junctions. Four demand-side interventions
+were tested on one calibrated network: departure retiming, mode shift from
+motorcycle to bus, a school-hours shift, and spatial redistribution onto
+alternative routes.
 
-This hypothesis is deliberately provisional. As the research develops, the
-model and intervention may change based on evidence.
+## Layout
 
-The name **MOD** reflects both **modification** and a **change of
-direction/turn** — the core idea of experimenting with how changing
-individual movement decisions can alter the behaviour of the wider network.
+```text
+data/
+  raw/          OpenStreetMap extract of the corridor
+  processed/    digitised JICA 2011 OD matrices, 2019 classified counts,
+                DoR growth factors, measured hourly profile
+pipeline/       demand construction and evaluation
+  cordon.py           corridor demand: growth-scaled OD, cordon cut, time slices
+  count_targets.py    routeSampler targets from the 2019 counts
+  lane_width.py       lane counts derived from carriageway width, not markings
+  tls_patch.py        signal patch matched to junctions by cluster membership
+  baseline_add.py     detector definitions, generated from the junction map
+  disruption.py       closures and weather as SUMO additional files
+  baseline_eval.py    spec section 7 metrics
+  throughput_audit.py delivered flow against counted volume, per hour
+experiments/    scenario definitions and the sweep
+  transforms.py       the four demand transforms
+  run.py              TOML scenario -> demand -> SUMO -> metrics
+  sweep.sh            builds network and demand, runs the grid
+  paper_figures.py    figures, generated from the runs they describe
+  scenarios/          one TOML per scenario
+sim/
+  net/          junction map, signal patch, network build notes
+  *.sumocfg     simulation configurations
+results/
+  sweep/summary.csv   the collected experiment surface
+research/
+  paper/        the study written up, with its full limitations record
+  product/      what the evidence supports building
+  library/      the sources, indexed in library/README.md
+specs/          model specification and assumptions A1-A14
+tests/          checks on the pipeline's output, not just its execution
+```
 
-## Research Direction
+## Reproducing
 
-Observe → Model → Experiment → Measure → Refine.
+Requires [uv](https://docs.astral.sh/uv/) and SUMO 1.27.
 
-The final direction is intentionally open and may involve route choice,
-timing, modes, public transport, network operations, or other interventions
-discovered through research.
+```sh
+uv sync
+./experiments/sweep.sh
+```
 
-MOD is currently a research project, not a finished mobility product or
-production system.
+The script builds the network from the OSM extract, constructs and calibrates
+demand, runs the baseline, then the scenario grid. `PROFILE=full` runs all
+24 seeds per grid point; the default is a trimmed grid.
 
-## Workspace
+Demand matches the 2019 counted volumes at GEH < 5 on 95.2% of the 42 count
+locations.
 
-Start at [research/00-overview.md](research/00-overview.md) — it maps the
-full research workspace: what we know, what we don't, what needs to be
-researched, and which decisions are still open. Raw source material
-(exploration transcripts, the original brief, the August 2026 audit) is
-preserved in [research/archive/](research/archive/).
+## Reading the results
+
+Scenarios run at 0.55 demand loading. The network has no stable congested
+regime: total morning throughput peaks at 50% loading and falls as demand is
+added, and at 60% and above it gridlocks inside the analysis window. Results
+taken past that tipping point reverse the sign of the rerouting effect.
+`pipeline/throughput_audit.py` reports delivered flow against counted volume
+for any run directory.
+
+Absolute delay levels are not field predictions. The study's limitations are
+recorded in full in `research/paper/`.
+
+## Sources
+
+Survey data from JICA (2012, 2019), traffic counts from the Department of
+Roads, road geometry from OpenStreetMap, and capacity and carriageway figures
+from Nepal Urban Road Standard 2076. Every source used is indexed in
+`research/library/README.md`.

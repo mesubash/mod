@@ -38,3 +38,6 @@ paper-icicset/
 
 # Conference paper build outputs
 paper-icicset-output/
+
+# Conference submission bundle
+paper-icicset-submit/
