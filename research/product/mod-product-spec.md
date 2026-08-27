@@ -14,6 +14,12 @@ A routing service for the Kathmandu corridor that answers one question well:
 *given where you are, where you are going, what you are driving, and what is
 broken right now — which way should you go?*
 
+The study behind it ranks four demand-side interventions on one calibrated
+network. Rerouting is the second strongest, behind shifting motorcycle trips
+to bus and ahead of every departure-time instrument, both of which raise delay
+(paper §5). Of the two that work, rerouting is the one a private product can
+deliver: the other needs bus capacity the corridor does not have.
+
 Reference points: Pathao and Yango both route on a road graph and neither
 claims to reduce the city's congestion. They tell a rider where the road goes
 and how long it takes. MOD is that, with three things they do not do.
@@ -34,19 +40,31 @@ and how long it takes. MOD is that, with three things they do not do.
   a trip already underway can be rerouted but cannot be retimed or
   mode-shifted (paper §6.7).
 
-**Not supported, and not to be claimed.**
+- Diverting corridor trips onto alternatives reduces network delay, and the
+  effect grows with the share diverted: −14.4 ± 3.1% at 5%, −25.7 ± 3.1% at
+  10%, −42.6 ± 2.5% at 20%, across 24 treatment-assignment seeds. Cordon
+  throughput rises with it. The network benefits, not only the driver.
 
-- That diverting many drivers reduces network congestion. Alternatives are
-  lower-capacity, and diverting a fifth of corridor traffic onto them cost
-  throughput in every test (paper §6.5, §6.7).
-- Any city-wide congestion-relief claim. The model cannot currently measure
-  the regime that question lives in (paper §5.6): it has no stable
-  congested-but-flowing band, which is exactly where demand management acts.
+**Withdrawn (2026-08-27).** This document previously said the product could
+claim *faster for you* but never *better for the city*, because diverting
+traffic onto lower-capacity alternatives cost throughput in every test. That
+measurement was taken on a network already in congestion collapse, where the
+alternatives are jammed too and no diversion can help. Re-run at a loading the
+network carries, the sign reverses. The constraint is lifted.
 
-**The line.** The product claims *faster for you*. It does not claim *better
-for the city*. Marketing copy, app store text and investor material inherit
-this constraint. If the network claim is ever wanted, it needs a model that
-reproduces the congested regime first.
+**Not supported, and still not to be claimed.**
+
+- That the measured effect transfers to the street. It is one corridor, one
+  loading, mesoscopic, and it assumes the diverted share actually complies.
+  The simulation says the roads can absorb the traffic; it does not say
+  drivers will accept the route.
+- Any specific percentage in public material. −42.6% is a modelled figure at a
+  modelled loading, not a promise.
+
+**The line, revised.** The product may say that spreading traffic across
+alternatives helps the network as well as the driver, and should cite the
+study rather than a number. It may not promise a congestion reduction to any
+particular user or city authority.
 
 ## 3. What competitors do not do
 
@@ -150,10 +168,12 @@ after-trip question / how-it-works. Two changes that follow from this spec:
    disruption banner.
 5. After-trip question: did you already know this route?
 
-Not in the MVP: credits and retiming incentives. The research puts that
-second, and the measured retiming effects were harmful or indistinguishable
-from noise (paper §6.4) because the measured demand profile is a plateau, not
-a spike — there is no peak to spread.
+Not in the MVP: credits and retiming incentives. Retiming raised network delay
+at every share tested, from +7.9 ± 3.1% at 5% to +36.1 ± 5.1% at 25%, because
+the measured demand profile is a plateau rather than a spike. An incentive to
+travel fifteen minutes earlier moves a trip into an hour that is already as
+busy. Building it would be building the intervention the study measured as
+counterproductive.
 
 ## 7. Open, and honest about it
 
