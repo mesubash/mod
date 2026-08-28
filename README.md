@@ -79,6 +79,13 @@ for any run directory.
 Absolute delay levels are not field predictions. The study's limitations are
 recorded in full in `research/paper/`.
 
+## Licence
+
+Code is MIT (`LICENSE`). The datasets under `data/` are not mine to
+relicense: the OpenStreetMap extract is ODbL, and the survey and count data
+are digitised from JICA and Department of Roads publications. Terms and
+provenance for each file are in `DATA.md`.
+
 ## Sources
 
 Survey data from JICA (2012, 2019), traffic counts from the Department of
