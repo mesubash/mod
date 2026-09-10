@@ -10,6 +10,7 @@ results/<scenario>/<run_id>/{edgedata_*.xml, queues.xml, stats.xml, metrics.json
 import argparse
 import itertools
 import json
+import os
 import subprocess
 import tomllib
 from pathlib import Path
@@ -32,7 +33,10 @@ SCENARIO_DIR = REPO / "experiments/scenarios"
 # against: same net (A10 actuated signal proxies) and same options as
 # sim/baseline.sumocfg (A11 sublane resolution, teleport and blocker handling).
 # Keep this block in sync with that config.
-SIM_NET = REPO / "sim/net/corridor-calibrated.net.xml"
+# MOD_SIM_NET overrides the network, for the lanes-from-markings comparison
+# in the paper: the same demand run on the pre-carriageway-width build.
+SIM_NET = Path(os.environ.get("MOD_SIM_NET",
+                              REPO / "sim/net/corridor-calibrated.net.xml"))
 SUMO_OPTS = [
     "--lateral-resolution", "0.8",
     "--time-to-teleport", "600",
