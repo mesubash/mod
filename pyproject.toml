@@ -8,6 +8,7 @@ dependencies = [
     "pandas>=3.0.5",
     "pyarrow>=25.0.1",
     "pytest>=9.1.1",
+    "scipy>=1.18.1",
     "sumolib>=1.27.1",
     "tabulate>=0.10.0",
     "traci>=1.27.1",
