@@ -28,6 +28,9 @@ from pipeline.cordon import HOURLY_SHARE  # noqa: E402
 from pipeline.throughput_audit import audit  # noqa: E402
 
 OUT = REPO / "results/figures/paper"
+# IEEEtran column and full text width, in inches. Figures are drawn at the size
+# they are placed at, so \includegraphics does not shrink the type.
+COL, WIDE = 3.5, 7.16
 INK, MUTED, PALE = "#171717", "#666666", "#a3a3a3"
 STYLES = [(INK, "o", "-"), (MUTED, "s", "--"), (PALE, "^", ":"),
           (INK, "D", "-."), (MUTED, "v", "-"), (PALE, "P", "--")]
@@ -47,7 +50,7 @@ def _hours(rows):
 def profile(out):
     """The measured morning profile against the assumption it replaced."""
     hours = sorted(HOURLY_SHARE)
-    fig, ax = plt.subplots(figsize=(5.0, 2.9))
+    fig, ax = plt.subplots(figsize=(COL, 2.0))
     ax.bar([f"{h:02d}" for h in hours], [100 * HOURLY_SHARE[h] for h in hours],
            color=PALE, edgecolor=INK, linewidth=0.7)
     # Two reference lines: what this study previously assumed, and what
@@ -59,7 +62,7 @@ def profile(out):
     ax.text(0.02, 20.6, "20%: share assumed from person-trip generation",
             fontsize=7.5, color=INK)
     ax.set_xlabel("clock hour")
-    ax.set_ylabel("share of daily vehicle traffic (%)")
+    ax.set_ylabel("share of daily traffic (%)")
     ax.set_ylim(0, 23)
     _clean(ax)
     fig.tight_layout()
@@ -69,7 +72,7 @@ def profile(out):
 
 def loading(runs, out):
     """Delivered flow by hour at each loading, and total delivered by loading."""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.0, 3.0))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(WIDE, 2.5))
     totals = []
     for (label, d), (colour, marker, dash) in zip(runs.items(), STYLES):
         rows = audit(d)
@@ -106,7 +109,7 @@ def _jam_profile(run):
 
 def lanes(before, after, out):
     """What deriving lanes from carriageway width recovered."""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.0, 3.0))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(WIDE, 2.5))
     for (label, d), (colour, marker, dash) in zip(
             (("lanes from markings", before),
              ("lanes from carriageway width", after)), STYLES):
@@ -139,7 +142,7 @@ def corridor(out):
         if net.hasEdge(r["edge_id"]):
             counted[r["intersection"]].append(net.getEdge(r["edge_id"]))
 
-    fig, ax = plt.subplots(figsize=(6.0, 4.2))
+    fig, ax = plt.subplots(figsize=(COL, 2.6))
     for e in net.getEdges():
         xs, ys = zip(*e.getShape())
         major = any(t in (e.getType() or "")
@@ -173,22 +176,38 @@ def _sweep(results, scenario, share_re, pattern=None):
     import statistics as st
 
     root = Path(results)
-    base = json.load(open(root / "baseline/baseline/metrics.json"))
-    bd, bh = base["D_net_veh_h"], base["H_cordon_pcu_0811"]
     runs = collections.defaultdict(list)
-    for f in (root / scenario).glob("*/metrics.json"):
-        tag = re.sub(r"_seed\d+", "", f.parent.name)
+    # summary.csv is the artefact the repository ships; the per-run metrics.json
+    # trees are build products and are gitignored. Globbing them on a clean
+    # clone silently yielded an empty series, which is how an empty figure and a
+    # one-line figure were once generated without an error.
+    summary = root / "summary.csv"
+    if summary.exists():
+        with open(summary, newline="") as fh:
+            rows = list(csv.DictReader(fh))
+        base = next(r for r in rows if r["scenario"] == "baseline")
+        bd, bh = float(base["D_net_veh_h"]), float(base["H_cordon_pcu_0811"])
+        source = ((r["run_id"], float(r["D_net_veh_h"]),
+                   float(r["H_cordon_pcu_0811"]))
+                  for r in rows if r["scenario"] == scenario)
+    else:
+        base = json.load(open(root / "baseline/baseline/metrics.json"))
+        bd, bh = base["D_net_veh_h"], base["H_cordon_pcu_0811"]
+        source = ((f.parent.name, (m := json.load(open(f)))["D_net_veh_h"],
+                   m["H_cordon_pcu_0811"])
+                  for f in (root / scenario).glob("*/metrics.json"))
+    for run_id, dnet, hcordon in source:
+        tag = re.sub(r"_seed\d+", "", run_id)
         if pattern and not re.match(pattern, tag):
             continue
         m = re.search(share_re, tag)
         if not m:
             continue
-        runs[float(m.group(1))].append(
-            (f, json.load(open(f))))
+        runs[float(m.group(1))].append((dnet, hcordon))
     out = {}
     for share, v in runs.items():
-        d = [m["D_net_veh_h"] for _, m in v]
-        h = [m["H_cordon_pcu_0811"] for _, m in v]
+        d = [x for x, _ in v]
+        h = [x for _, x in v]
         sd = st.stdev(d) if len(d) > 1 else 0.0
         out[share] = (100 * (st.mean(d) - bd) / bd,
                       100 * sd / bd / len(d) ** 0.5,
@@ -215,7 +234,7 @@ def levers(results, out):
     The school shift is on its own axis. At +319% it is an order of magnitude
     outside the others, and sharing an axis compresses them into a band."""
     fig, (ax1, ax2) = plt.subplots(
-        1, 2, figsize=(7.2, 3.4), gridspec_kw={"width_ratios": [2, 1]})
+        1, 2, figsize=(WIDE, 2.5), gridspec_kw={"width_ratios": [2, 1]})
 
     for (label, scenario, share_re, pat), (colour, marker, dash) in zip(
             LEVERS, STYLES):
@@ -250,13 +269,14 @@ def levers(results, out):
 
 def regime(stable, collapsed, out):
     """The same rerouting grid measured at two loadings. The sign flips."""
-    fig, ax = plt.subplots(figsize=(5.4, 3.4))
+    fig, ax = plt.subplots(figsize=(COL, 2.6))
     for (label, res), (colour, marker, dash) in zip(
-            (("0.55 loading, network carries its demand", stable),
-             ("full counted demand, network in collapse", collapsed)), STYLES):
+            (("0.55 loading", stable),
+             ("full counted demand", collapsed)), STYLES):
         data = _sweep(res, "s0-spatial-control", SHARE_PR)
         if not data:
-            continue
+            raise SystemExit(f"regime: no runs found under {res}; the figure "
+                             "would draw a single series and look complete")
         ax.errorbar([100 * k for k in data], [v[0] for v in data.values()],
                     yerr=[v[1] for v in data.values()], color=colour,
                     marker=marker, linestyle=dash, markersize=4, capsize=3,
@@ -264,7 +284,7 @@ def regime(stable, collapsed, out):
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xlabel("share of trips diverted (%)")
     ax.set_ylabel("change in network delay (%)")
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=8, loc="lower left")
     _clean(ax)
     fig.tight_layout()
     fig.savefig(out / "regime.pdf")

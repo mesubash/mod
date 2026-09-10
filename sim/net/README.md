@@ -45,8 +45,13 @@ joint controller):
 - New Baneshwor: the 4 corner TLS (pairwise 8-26 m) joined as
   `NewBaneshwor`
 
-Result: 40 TLS (was 36: 5 absorbed into joints, 9 new actuated programs,
-31 pre-existing static programs unchanged). Edge/node counts unchanged
+Result: 39 TLS (was 35: 5 absorbed into joints, 9 new actuated programs,
+30 pre-existing static programs unchanged). Counted from the built
+networks on 2026-09-10 (`grep -c '<tlLogic'`): corridor.net.xml 35, all
+static; corridor-calibrated.net.xml 39, 30 static and 9 actuated. The
+figures previously in this note, 36 and 40, described the pre-A14 build
+and were not rechecked after the network was rebuilt from carriageway
+width. Edge/node counts unchanged
 (27,969 / 11,355); all 87 junction_map.csv edges present. Koteshwor and
 Jadhibuti are left alone (grade-separated in current OSM, see caveats
 below); Tripureshwor's cluster was already a TLS.

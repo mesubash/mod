@@ -67,7 +67,7 @@ def expand(tf_cfg):
 
 
 def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
-             extra_add=None, window=None, scale=1.0):
+             extra_add=None, window=None, scale=1.0, sim_seed=None):
     # Absolute: SUMO resolves the additional file's output paths relative to
     # that file's own directory, so a relative --out doubles the path.
     outdir = ((outbase or REPO / "results" / scenario) / run_id).resolve()
@@ -96,6 +96,12 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
     # a gridlock spiral (paper §5.6, §8 limitation 12).
     if scale != 1.0:
         cmd += ["--scale", str(scale)]
+    # SUMO's own RNG. Left unset by default so every result in the sweep stays
+    # byte-reproducible; set it to replicate a fixed configuration and measure
+    # the model's run-to-run variation, which the treatment seeds cannot show
+    # (they randomise which trips are treated, not the simulation).
+    if sim_seed is not None:
+        cmd += ["--seed", str(sim_seed)]
     if extra_add:
         # probability 0: the demand file decides per vehicle which ones carry a
         # rerouting device (has.rerouting.device), so guidance stays a real
@@ -125,7 +131,7 @@ def simulate(scenario, run_id, trips_path, outbase=None, mode="micro",
     print(f"{scenario}/{run_id}: metrics.json written", flush=True)
 
 
-def run_baseline(outbase, mode, scale=1.0):
+def run_baseline(outbase, mode, scale=1.0, sim_seed=None):
     """Unmodified baseline under the same options as every scenario.
 
     Writes to <outbase>/baseline/ so the result sits at the same depth as every
@@ -133,7 +139,7 @@ def run_baseline(outbase, mode, scale=1.0):
     level shallower is silently missed, which drops every delta column."""
     outbase.mkdir(parents=True, exist_ok=True)
     simulate("baseline", "baseline", BASELINE_TRIPS, outbase, mode,
-             scale=scale)
+             scale=scale, sim_seed=sim_seed)
 
 
 def main():
@@ -152,6 +158,8 @@ def main():
     ap.add_argument("--scale", type=float, default=1.0,
                     help="demand loading passed to SUMO; the network collapses "
                          "above ~44,000 veh/h, so scenarios run at 0.5")
+    ap.add_argument("--sim-seed", type=int,
+                    help="SUMO RNG seed; unset reproduces the sweep exactly")
     ap.add_argument("--skip-completed", action="store_true",
                     help="skip runs whose metrics.json already exists")
     ap.add_argument("--dry-run", action="store_true",
@@ -160,7 +168,7 @@ def main():
 
     if args.scenario == "baseline":
         run_baseline(args.out or REPO / "results/sweep/baseline", args.mode,
-                     args.scale)
+                     args.scale, args.sim_seed)
         return
 
     config = args.config or SCENARIO_DIR / f"{args.scenario}.toml"
@@ -220,7 +228,8 @@ def main():
                   flush=True)
             if not args.dry_run:
                 simulate(cfg["name"], run_id, trips_path, outbase,
-                         args.mode, closure_file, window, args.scale)
+                         args.mode, closure_file, window, args.scale,
+                         args.sim_seed)
 
 
 if __name__ == "__main__":

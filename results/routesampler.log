@@ -1,0 +1,25 @@
+# routeSampler output for sim/demand/sampled.rou.xml.
+# Regenerated 2026-09-10 from a clean tree: uv sync && BUILD_ONLY=1 ./experiments/sweep.sh
+# (netconvert from data/raw/corridor.osm, pipeline.cordon, pipeline.count_targets,
+#  routeSampler --seed 20260818). The baseline it produces reproduces the
+#  committed summary.csv exactly: D_net 7577.0 veh h, H 214818.0 PCU.
+#
+# The previous copy of this file predated the stochastic route choice in
+# pipeline/cordon.py and reported GEH<5 for 90.48%; it was never refreshed.
+#
+/Users/isubash/Developer/mod/data/processed/count_targets.xml: 5 hourly intervals, 38 counted legs, 407,561 vehicle-entries 07:00-12:00
+25200: Wrote 27883 routes (17263 distinct) achieving total count 62916 (98.87%) at 42 locations. GEH<5 for 95.24%
+Warning: underflow locations: count 2, min 324.00 (('670112945',)), max 398.00 (('193289327#0',)), mean 361.00, Q1 324.00, median 398.00, Q3 398.00 (total 722)
+28800: Wrote 32567 routes (19356 distinct) achieving total count 73652 (98.90%) at 42 locations. GEH<5 for 95.24%
+Warning: underflow locations: count 2, min 372.00 (('670112945',)), max 448.00 (('193289327#0',)), mean 410.00, Q1 372.00, median 448.00, Q3 448.00 (total 820)
+32400: Wrote 40412 routes (22676 distinct) achieving total count 91026 (98.86%) at 42 locations. GEH<5 for 95.24%
+Warning: underflow locations: count 2, min 480.00 (('670112945',)), max 567.00 (('193289327#0',)), mean 523.50, Q1 480.00, median 567.00, Q3 567.00 (total 1047)
+36000: Wrote 39791 routes (22308 distinct) achieving total count 89702 (98.88%) at 42 locations. GEH<5 for 95.24%
+Warning: underflow locations: count 2, min 459.00 (('670112945',)), max 558.00 (('193289327#0',)), mean 508.50, Q1 459.00, median 558.00, Q3 558.00 (total 1017)
+39600: Wrote 38021 routes (21631 distinct) achieving total count 85772 (98.98%) at 42 locations. GEH<5 for 95.24%
+Warning: underflow locations: count 2, min 401.00 (('670112945',)), max 486.00 (('193289327#0',)), mean 443.50, Q1 401.00, median 486.00, Q3 486.00 (total 887)
+avg interval input count: count 5, min 63638.00 (25200.0), max 92073.00 (32400.0), mean 81512.20, Q1 74472.00, median 86659.00, Q3 90719.00
+avg interval written vehs: count 5, min 27883.00 (25200.0), max 40412.00 (32400.0), mean 35734.80, Q1 32567.00, median 38021.00, Q3 39791.00
+avg interval underflow: count 5, min 722.00 (25200.0), max 1047.00 (32400.0), mean 898.60, Q1 820.00, median 887.00, Q3 1017.00
+avg interval overflow: count 5, min 0.00 (25200.0), max 0.00 (25200.0), mean 0.00, Q1 0.00, median 0.00, Q3 0.00
+avg interval GEH%: count 5, min 95.24 (25200.0), max 95.24 (25200.0), mean 95.24, Q1 95.24, median 95.24, Q3 95.24
